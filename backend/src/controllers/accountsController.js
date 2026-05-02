@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 // Función para obtener las cuentas de un cliente
 const getCuentasByCliente = async (req, res) => {

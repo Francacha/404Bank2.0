@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 const verificarPerfil = async (req, res) => {
     const clerkId = req.auth?.userId;

@@ -1,32 +1,48 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); // <-- 1. Importamos CORS
+const cors = require('cors');
 const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+const { verifyDbConnection } = require('./src/config/db');
 
-// Importamos el "directorio" de rutas
 const accountsRoutes = require('./src/routes/accountsRoutes');
 const personasRoutes = require('./src/routes/personasRoutes');
 const onboardingRoutes = require('./src/routes/onboardingRoutes');
 
 const app = express();
+const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
+const authMiddleware = bypassClerkAuth
+  ? (req, res, next) => next()
+  : ClerkExpressRequireAuth({ strict: true });
 
-app.use(cors()); // <-- 2. Activamos CORS para que React pueda entrar
-app.use(express.json()); // Permite que el backend entienda JSON
+app.use(cors());
+app.use(express.json());
 
-// <-- 3. Ponemos al guardia de Clerk en las puertas (Rutas protegidas)
-app.use('/api/cuentas', ClerkExpressRequireAuth({ strict: true }), accountsRoutes);
-app.use('/api/personas', ClerkExpressRequireAuth({ strict: true }), personasRoutes);
-app.use('/api/onboarding', ClerkExpressRequireAuth({ strict: true }), onboardingRoutes);
+app.use('/api/cuentas', authMiddleware, accountsRoutes);
+app.use('/api/personas', authMiddleware, personasRoutes);
+app.use('/api/onboarding', authMiddleware, onboardingRoutes);
 
-// <-- 4. Manejador de errores para que devuelva un mensaje limpio si alguien entra sin Token
 app.use((err, req, res, next) => {
   if (err.message === 'Unauthenticated') {
-    return res.status(401).json({ error: '¡Alto ahí! No estás autenticado en 404Bank.' });
+    return res.status(401).json({ error: 'No estas autenticado en 404Bank.' });
   }
   next(err);
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🏦 Servidor 404Bank corriendo en el puerto ${PORT}`);
-});
+
+const startServer = async () => {
+  try {
+    await verifyDbConnection();
+    app.listen(PORT, () => {
+      console.log(`Servidor 404Bank corriendo en el puerto ${PORT}`);
+      if (bypassClerkAuth) {
+        console.log('BYPASS_CLERK_AUTH=true: autenticacion desactivada para pruebas locales.');
+      }
+    });
+  } catch (error) {
+    console.error('No se pudo conectar a PostgreSQL al iniciar el backend:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

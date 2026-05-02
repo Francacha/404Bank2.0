@@ -1,4 +1,4 @@
-const pool = require('../config/db');
+const { pool } = require('../config/db');
 
 // Función para obtener todas las personas de la base de datos
 const getTodasLasPersonas = async (req, res) => {
