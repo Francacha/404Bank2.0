@@ -9,4 +9,8 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
-module.exports = pool; // Exportamos la conexión para que otros la usen
+const verifyDbConnection = async () => {
+    await pool.query('SELECT 1');
+};
+
+module.exports = { pool, verifyDbConnection };

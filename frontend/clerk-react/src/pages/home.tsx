@@ -26,7 +26,7 @@ function Home() {
       >
         <h1 style={{ marginBottom: '12px', color: '#1f3b73' }}>
           Bienvenido a tu Homebanking
-        </h1>
+        </h1>v
         <p style={{ margin: 0, color: '#4b5563' }}>
           La autenticacion funciona correctamente y ya estas dentro del area privada.
         </p>

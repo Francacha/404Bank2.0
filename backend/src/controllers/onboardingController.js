@@ -1,3 +1,5 @@
+//Este controlador es el que verifica si el usuario ya tiene un perfil o no
+//Para luego crearlo, ya sea dentro de clerk y en nuestro sistema
 const { pool } = require('../config/db');
 
 const verificarPerfil = async (req, res) => {
