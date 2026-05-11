@@ -11,7 +11,7 @@ const onboardingRoutes = require('./src/routes/onboardingRoutes');
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
 const authMiddleware = bypassClerkAuth
-  ? (req, res, next) => next()
+  ? (req, res, next) => { req.auth = { userId: 'dev_bypass_user' }; next(); }
   : ClerkExpressRequireAuth({ strict: true });
 
 app.use(cors());

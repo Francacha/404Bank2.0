@@ -31,18 +31,6 @@ CREATE TABLE Permisos (
 	descripcion VARCHAR(255)
 );
 
-CREATE TABLE Tipo_Cuentas (
-	id SERIAL PRIMARY KEY,
-	nombre VARCHAR(255),
-	descripcion VARCHAR(255)
-);
-
-CREATE TABLE Monedas (
-	id SERIAL PRIMARY KEY,
-	nombre VARCHAR(255),
-	simbolo VARCHAR(255),
-	codigo_iso VARCHAR(255)
-);
 
 CREATE TABLE Estado_Transaccion (
 	id_estado SERIAL PRIMARY KEY,
@@ -63,8 +51,6 @@ CREATE TABLE Tipo_Evento (
 -- 3. CREACIÓN DE TABLAS CON DEPENDENCIAS (Cuentas, Transacciones, Seguridad)
 CREATE TABLE Cuentas_Bancarias (
 	id_cuenta SERIAL PRIMARY KEY,
-	id_tipo_cuenta INTEGER REFERENCES Tipo_Cuentas(id),
-	id_moneda INTEGER REFERENCES Monedas(id),
 	cbu VARCHAR(22),
 	alias VARCHAR(255),
 	saldo DECIMAL(15, 2),
@@ -79,7 +65,6 @@ CREATE TABLE Transacciones (
 	id_tipo_transaccion INTEGER REFERENCES Tipo_Transaccion(id),
 	id_estado INTEGER REFERENCES Estado_Transaccion(id_estado),
 	monto DECIMAL(15, 2),
-	id_moneda INTEGER REFERENCES Monedas(id),
 	descripcion_user VARCHAR(30),
 	codigo_operacion VARCHAR(255) UNIQUE,
 	fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP

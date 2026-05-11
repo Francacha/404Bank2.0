@@ -1,0 +1,20 @@
+
+services:
+  db_homebanking:
+    image: postgres:15-alpine
+    container_name: 404bank_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin_bank
+      POSTGRES_PASSWORD: superpassword123 # Cambiá esto por algo seguro
+      POSTGRES_DB: 404bank
+    ports:
+      - "5433:5432"
+    volumes:
+      # Esto es magia pura: le dice a Docker que corra tu script SQL al arrancar
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Esto guarda los datos para que no se borren si apagas el contenedor
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

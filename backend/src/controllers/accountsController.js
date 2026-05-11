@@ -6,11 +6,9 @@ const getCuentasByCliente = async (req, res) => {
 
     try {
         const query = `
-            SELECT tc.nombre AS tipo_cuenta, m.simbolo, cb.cbu, cb.saldo 
+            SELECT cb.cbu, cb.saldo
             FROM Cuentas_Bancarias cb
             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
-            JOIN Tipo_Cuentas tc ON cb.id_tipo_cuenta = tc.id
-            JOIN Monedas m ON cb.id_moneda = m.id
             WHERE tit.id_persona = $1 AND cb.estado = 'Activa';
         `;
         const resultado = await pool.query(query, [id_persona]);
@@ -33,12 +31,10 @@ const getMisCuentas = async (req, res) => {
     try {
         // Buscamos las cuentas haciendo un JOIN con Personas usando el clerk_id
         const query = `
-            SELECT tc.nombre AS tipo_cuenta, m.simbolo, cb.cbu, cb.saldo 
+            SELECT cb.cbu, cb.saldo
             FROM Cuentas_Bancarias cb
             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
             JOIN Personas p ON tit.id_persona = p.id
-            JOIN Tipo_Cuentas tc ON cb.id_tipo_cuenta = tc.id
-            JOIN Monedas m ON cb.id_moneda = m.id
             WHERE p.clerk_id = $1 AND cb.estado = 'Activa';
         `;
         
