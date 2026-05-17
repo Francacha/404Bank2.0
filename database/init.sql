@@ -12,7 +12,11 @@ CREATE TABLE Personas (
 	Direccion VARCHAR(255) UNIQUE,
 	Email VARCHAR(255),
 	Telefono VARCHAR(255),
-	FechaNac DATE
+	FechaNac DATE,
+	ciudad VARCHAR(255),
+	provincia VARCHAR(255),
+	pais VARCHAR(255),
+	codigo_postal VARCHAR(20)
 );
 
 CREATE TABLE Roles (
@@ -124,6 +128,18 @@ CREATE TABLE Sesiones (
 	ip_acceso VARCHAR(45),
 	dispositivo VARCHAR(100),
 	revocada BOOLEAN
+);
+
+-- Tabla para registrar transferencias interbancarias (Banco Central)
+CREATE TABLE Transferencias_Central (
+	id SERIAL PRIMARY KEY,
+	transaccion_central_id VARCHAR(255) UNIQUE NOT NULL,
+	cbu_origen VARCHAR(22) NOT NULL,
+	cbu_destino VARCHAR(22) NOT NULL,
+	importe DECIMAL(15, 2) NOT NULL,
+	estado VARCHAR(20) NOT NULL,
+	tipo VARCHAR(10) NOT NULL CHECK (tipo IN ('saliente', 'entrante')),
+	fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 4. TABLAS INTERMEDIAS (Con Claves Foráneas y Primarias Compuestas)

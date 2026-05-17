@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
+import { useNavigate } from 'react-router-dom';
 
 interface Cuenta {
   cbu: string;
@@ -14,6 +15,7 @@ function Home() {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate()
 
   useEffect(() => {
     const cargarCuentas = async () => {
@@ -53,9 +55,40 @@ function Home() {
           alignItems: 'center',
         }}
       >
-        <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700 }}>
-          404Bank
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700 }}>
+            404Bank
+          </span>
+          <button
+            onClick={() => navigate('/transferir')}
+            style={{
+              backgroundColor: '#ffffff',
+              color: '#1f3b73',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '13px',
+            }}
+          >
+            Transferir
+          </button>
+          <button
+            onClick={() => navigate('/historial')}
+            style={{
+              backgroundColor: 'transparent',
+              color: '#ffffff',
+              border: '1px solid #ffffff',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+            }}
+          >
+            Historial
+          </button>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <span style={{ color: '#cbd5e1', fontSize: '14px' }}>
             {user?.firstName} {user?.lastName}

@@ -7,6 +7,7 @@ const { verifyDbConnection } = require('./src/config/db');
 const accountsRoutes = require('./src/routes/accountsRoutes');
 const personasRoutes = require('./src/routes/personasRoutes');
 const onboardingRoutes = require('./src/routes/onboardingRoutes');
+const transferenciasRoutes = require('./src/routes/transferenciasRoutes');
 
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/cuentas', authMiddleware, accountsRoutes);
 app.use('/api/personas', authMiddleware, personasRoutes);
 app.use('/api/onboarding', authMiddleware, onboardingRoutes);
+app.use('/api/transferencias', authMiddleware, transferenciasRoutes);
 
 app.use((err, req, res, next) => {
   if (err.message === 'Unauthenticated') {
@@ -30,6 +32,8 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
+const { iniciarPolling } = require('./src/services/pollingService');
+
 const startServer = async () => {
   try {
     await verifyDbConnection();
@@ -38,6 +42,7 @@ const startServer = async () => {
       if (bypassClerkAuth) {
         console.log('BYPASS_CLERK_AUTH=true: autenticacion desactivada para pruebas locales.');
       }
+      iniciarPolling();
     });
   } catch (error) {
     console.error('No se pudo conectar a PostgreSQL al iniciar el backend:', error.message);
