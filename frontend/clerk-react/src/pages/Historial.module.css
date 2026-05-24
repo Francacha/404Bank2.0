@@ -1,0 +1,144 @@
+.page {
+  min-height: 100vh;
+  background-color: #f4f7fb;
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  background-color: #1f3b73;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.btnInicio {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btnTransferir {
+  background-color: #ffffff;
+  color: #1f3b73;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.content {
+  padding: 40px 32px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  color: #1f3b73;
+  font-size: 22px;
+  margin-bottom: 32px;
+}
+
+.loadingText {
+  color: #6b7280;
+}
+
+.errorBox {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.emptyText {
+  color: #6b7280;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.cardEntrante {
+  border-left: 4px solid #059669;
+}
+
+.cardSaliente {
+  border-left: 4px solid #1f3b73;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.amount {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.amountEntrante {
+  color: #059669;
+}
+
+.amountSaliente {
+  color: #1f3b73;
+}
+
+.date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.fromTo {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.badgeAprobada {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.badgeRechazada {
+  background-color: #fee2e2;
+  color: #991b1b;
+}

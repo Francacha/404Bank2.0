@@ -1,0 +1,182 @@
+.page {
+  min-height: 100vh;
+  background-color: #f4f7fb;
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  background-color: #1f3b73;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.btnInicio {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btnHistorial {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.content {
+  padding: 40px 32px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.title {
+  color: #1f3b73;
+  font-size: 22px;
+  margin-bottom: 32px;
+}
+
+.searchSection {
+  margin-bottom: 24px;
+}
+
+.searchLabel {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.searchRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.btnBuscar {
+  background-color: #1f3b73;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.btnBuscar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.searchError {
+  color: #991b1b;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.destinatarioCard {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid #1f3b73;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.destinatarioNombre {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.destinatarioCbu {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #9ca3af;
+  font-family: monospace;
+}
+
+.importeSection {
+  margin-bottom: 24px;
+}
+
+.importeLabel {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.importeInput {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.btnTransferir {
+  width: 100%;
+  background-color: #1f3b73;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.btnTransferir:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.successBox {
+  margin-top: 20px;
+  background-color: #d1fae5;
+  color: #065f46;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.errorBox {
+  margin-top: 20px;
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}

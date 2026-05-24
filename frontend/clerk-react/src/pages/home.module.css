@@ -1,0 +1,152 @@
+.page {
+  min-height: 100vh;
+  background-color: #f4f7fb;
+  font-family: Arial, sans-serif;
+}
+
+.navbar {
+  background-color: #1f3b73;
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.btnTransferir {
+  background-color: #ffffff;
+  color: #1f3b73;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.btnHistorial {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userName {
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.btnSignOut {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.content {
+  padding: 40px 32px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  color: #1f3b73;
+  margin-bottom: 4px;
+  font-size: 22px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+.loadingText {
+  color: #6b7280;
+}
+
+.errorBox {
+  background-color: #fee2e2;
+  color: #991b1b;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.emptyText {
+  color: #6b7280;
+}
+
+.accountsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accountCard {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #1f3b73;
+}
+
+.balanceSection {
+  margin-bottom: 16px;
+}
+
+.balanceLabel {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.balanceValue {
+  margin: 4px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.cbuSection {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+}
+
+.cbuLabel {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.cbuValue {
+  font-family: monospace;
+  color: #374151;
+  letter-spacing: 0.05em;
+}

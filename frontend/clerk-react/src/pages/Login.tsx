@@ -1,5 +1,6 @@
 import { ClerkDegraded, ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, useAuth } from "@clerk/react"
 import { Navigate } from "react-router-dom"
+import styles from './Login.module.css'
 
 function Login() {
   const { isLoaded, isSignedIn } = useAuth()
@@ -9,13 +10,13 @@ function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '24px' }}>
+    <div className={styles.container}>
       <ClerkLoading>
         <div>Cargando Clerk...</div>
       </ClerkLoading>
 
       <ClerkFailed>
-        <div style={{ maxWidth: '520px', textAlign: 'center' }}>
+        <div className={styles.clerkFailedBox}>
           <h2>Clerk no pudo iniciar</h2>
           <p>
             Si la pantalla se queda en blanco o recarga sola, el problema suele estar en la

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import styles from './Transferir.module.css';
 
 const API_URL = 'http://localhost:3000';
 
@@ -24,7 +25,7 @@ function Transferir() {
   const [resultado, setResultado] = useState('');
   const [errorTransferencia, setErrorTransferencia] = useState('');
 
-    const buscarDestinatario = async () => {
+  const buscarDestinatario = async () => {
     if (!busqueda.trim()) return;
     setBuscando(true);
     setErrorBusqueda('');
@@ -81,64 +82,64 @@ function Transferir() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f4f7fb', fontFamily: 'Arial, sans-serif' }}>
+    <div className={styles.page}>
       {/* Navbar */}
-      <div style={{ backgroundColor: '#1f3b73', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700 }}>404Bank</span>
-          <button onClick={() => navigate('/')} style={{ backgroundColor: 'transparent', color: '#ffffff', border: '1px solid #ffffff', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>
+      <div className={styles.navbar}>
+        <div className={styles.navLeft}>
+          <span className={styles.brand}>404Bank</span>
+          <button onClick={() => navigate('/home')} className={styles.btnInicio}>
             Inicio
           </button>
-          <button onClick={() => navigate('/historial')} style={{ backgroundColor: 'transparent', color: '#ffffff', border: '1px solid #ffffff', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>
+          <button onClick={() => navigate('/historial')} className={styles.btnHistorial}>
             Historial
           </button>
         </div>
       </div>
 
       {/* Contenido */}
-      <div style={{ padding: '40px 32px', maxWidth: '500px', margin: '0 auto' }}>
-        <h1 style={{ color: '#1f3b73', fontSize: '22px', marginBottom: '32px' }}>Nueva transferencia</h1>
+      <div className={styles.content}>
+        <h1 className={styles.title}>Nueva transferencia</h1>
 
         {/* Buscar destinatario */}
-        <div style={{ marginBottom: '24px' }}>
-          <label style={{ fontSize: '13px', color: '#6b7280', fontWeight: 600 }}>CBU o alias del destinatario</label>
-          <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+        <div className={styles.searchSection}>
+          <label className={styles.searchLabel}>CBU o alias del destinatario</label>
+          <div className={styles.searchRow}>
             <input
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
               placeholder="Ej: 12345678... o mi.alias"
-              style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '14px' }}
+              className={styles.searchInput}
             />
             <button
               onClick={buscarDestinatario}
               disabled={buscando}
-              style={{ backgroundColor: '#1f3b73', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}
+              className={styles.btnBuscar}
             >
               {buscando ? '...' : 'Buscar'}
             </button>
           </div>
-          {errorBusqueda && <p style={{ color: '#991b1b', fontSize: '13px', marginTop: '6px' }}>{errorBusqueda}</p>}
+          {errorBusqueda && <p className={styles.searchError}>{errorBusqueda}</p>}
         </div>
 
         {/* Destinatario encontrado */}
         {destinatario && (
-          <div style={{ backgroundColor: '#ffffff', borderRadius: '10px', padding: '16px 20px', marginBottom: '24px', borderLeft: '4px solid #1f3b73', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-            <p style={{ margin: 0, fontSize: '14px', color: '#374151', fontWeight: 600 }}>{destinatario.nombre} {destinatario.apellido}</p>
-            <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#9ca3af', fontFamily: 'monospace' }}>CBU: {destinatario.cbu}</p>
+          <div className={styles.destinatarioCard}>
+            <p className={styles.destinatarioNombre}>{destinatario.nombre} {destinatario.apellido}</p>
+            <p className={styles.destinatarioCbu}>CBU: {destinatario.cbu}</p>
           </div>
         )}
 
         {/* Importe */}
         {destinatario && (
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontSize: '13px', color: '#6b7280', fontWeight: 600 }}>Importe</label>
+          <div className={styles.importeSection}>
+            <label className={styles.importeLabel}>Importe</label>
             <input
               type="number"
               value={importe}
               onChange={e => setImporte(e.target.value)}
               placeholder="0.00"
               min="0.01"
-              style={{ display: 'block', width: '100%', marginTop: '6px', padding: '10px 12px', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '16px', boxSizing: 'border-box' }}
+              className={styles.importeInput}
             />
           </div>
         )}
@@ -148,23 +149,15 @@ function Transferir() {
           <button
             onClick={realizarTransferencia}
             disabled={enviando || !importe}
-            style={{ width: '100%', backgroundColor: '#1f3b73', color: '#fff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 700, fontSize: '15px' }}
+            className={styles.btnTransferir}
           >
             {enviando ? 'Procesando...' : 'Confirmar transferencia'}
           </button>
         )}
 
         {/* Resultado */}
-        {resultado && (
-          <div style={{ marginTop: '20px', backgroundColor: '#d1fae5', color: '#065f46', padding: '12px 16px', borderRadius: '8px', fontSize: '14px' }}>
-            {resultado}
-          </div>
-        )}
-        {errorTransferencia && (
-          <div style={{ marginTop: '20px', backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', fontSize: '14px' }}>
-            {errorTransferencia}
-          </div>
-        )}
+        {resultado && <div className={styles.successBox}>{resultado}</div>}
+        {errorTransferencia && <div className={styles.errorBox}>{errorTransferencia}</div>}
       </div>
     </div>
   );

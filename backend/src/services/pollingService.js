@@ -2,7 +2,7 @@ const { obtenerTransacciones } = require('./centralBankService');
 const { pool } = require('../config/db');
 
 const MY_BANK_CODE = parseInt(process.env.CENTRAL_BANK_CODE);
-const POLL_INTERVAL_MS = 5 * 60 * 1000; // cada 5 minutos
+const POLL_INTERVAL_MS = 1 * 60 * 1000; // cada 1 minuto
 
 const procesarTransaccionesEntrantes = async () => {
     if (!MY_BANK_CODE || isNaN(MY_BANK_CODE)) {

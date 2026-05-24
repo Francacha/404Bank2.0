@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import styles from './Historial.module.css';
 
 const API_URL = 'http://localhost:3000';
 
@@ -22,7 +23,7 @@ function Historial() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-    useEffect(() => {
+  useEffect(() => {
     const cargarHistorial = async () => {
       try {
         const token = await getToken();
@@ -41,71 +42,53 @@ function Historial() {
     };
     cargarHistorial();
   }, [getToken]);
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f4f7fb', fontFamily: 'Arial, sans-serif' }}>
+    <div className={styles.page}>
       {/* Navbar */}
-      <div style={{ backgroundColor: '#1f3b73', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <span style={{ color: '#ffffff', fontSize: '20px', fontWeight: 700 }}>404Bank</span>
-          <button onClick={() => navigate('/')} style={{ backgroundColor: 'transparent', color: '#ffffff', border: '1px solid #ffffff', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>
+      <div className={styles.navbar}>
+        <div className={styles.navLeft}>
+          <span className={styles.brand}>404Bank</span>
+          <button onClick={() => navigate('/home')} className={styles.btnInicio}>
             Inicio
           </button>
-          <button onClick={() => navigate('/transferir')} style={{ backgroundColor: '#ffffff', color: '#1f3b73', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}>
+          <button onClick={() => navigate('/transferir')} className={styles.btnTransferir}>
             Transferir
           </button>
         </div>
       </div>
 
       {/* Contenido */}
-      <div style={{ padding: '40px 32px', maxWidth: '800px', margin: '0 auto' }}>
-        <h1 style={{ color: '#1f3b73', fontSize: '22px', marginBottom: '32px' }}>Historial de transferencias</h1>
+      <div className={styles.content}>
+        <h1 className={styles.title}>Historial de transferencias</h1>
 
-        {loading && <p style={{ color: '#6b7280' }}>Cargando historial...</p>}
+        {loading && <p className={styles.loadingText}>Cargando historial...</p>}
 
-        {error && (
-          <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', fontSize: '14px' }}>
-            {error}
-          </div>
-        )}
+        {error && <div className={styles.errorBox}>{error}</div>}
 
         {!loading && !error && transferencias.length === 0 && (
-          <p style={{ color: '#6b7280' }}>No tenés transferencias registradas.</p>
+          <p className={styles.emptyText}>No tenés transferencias registradas.</p>
         )}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className={styles.list}>
           {transferencias.map((t) => (
             <div
               key={t.id}
-              style={{
-                backgroundColor: '#ffffff',
-                borderRadius: '10px',
-                padding: '16px 20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                borderLeft: `4px solid ${t.tipo === 'entrante' ? '#059669' : '#1f3b73'}`,
-              }}
+              className={`${styles.card} ${t.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontWeight: 700, fontSize: '16px', color: t.tipo === 'entrante' ? '#059669' : '#1f3b73' }}>
+              <div className={styles.cardTop}>
+                <span className={`${styles.amount} ${t.tipo === 'entrante' ? styles.amountEntrante : styles.amountSaliente}`}>
                   {t.tipo === 'entrante' ? '+ ' : '- '}
                   $ {Number(t.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
-                <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                <span className={styles.date}>
                   {new Date(t.fecha_hora).toLocaleString('es-AR')}
                 </span>
               </div>
-              <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#6b7280' }}>
+              <p className={styles.fromTo}>
                 {t.tipo === 'entrante' ? `De: ${t.cbu_origen}` : `Para: ${t.cbu_destino}`}
               </p>
-              <span style={{
-                display: 'inline-block',
-                marginTop: '6px',
-                fontSize: '11px',
-                fontWeight: 600,
-                padding: '2px 8px',
-                borderRadius: '999px',
-                backgroundColor: t.estado === 'aprobada' ? '#d1fae5' : '#fee2e2',
-                color: t.estado === 'aprobada' ? '#065f46' : '#991b1b',
-              }}>
+              <span className={`${styles.badge} ${t.estado === 'aprobada' ? styles.badgeAprobada : styles.badgeRechazada}`}>
                 {t.estado}
               </span>
             </div>

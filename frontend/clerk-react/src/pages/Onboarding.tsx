@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import styles from './Onboarding.module.css';
 
 const API_URL = 'http://localhost:3000';
 
@@ -57,152 +58,77 @@ function Onboarding() {
     }
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '6px',
-    border: '1px solid #d1d5db',
-    fontSize: '14px',
-    boxSizing: 'border-box',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block',
-    marginBottom: '4px',
-    fontSize: '13px',
-    fontWeight: 600,
-    color: '#374151',
-  };
-
-  const groupStyle: React.CSSProperties = {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '16px',
-  };
-
-  const sectionTitleStyle: React.CSSProperties = {
-    fontSize: '15px',
-    fontWeight: 700,
-    color: '#1f3b73',
-    marginBottom: '12px',
-    marginTop: '24px',
-    borderBottom: '1px solid #e5e7eb',
-    paddingBottom: '6px',
-  };
-
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#f4f7fb',
-        fontFamily: 'Arial, sans-serif',
-        padding: '40px 24px',
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          padding: '36px',
-          borderRadius: '12px',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-          maxWidth: '680px',
-          margin: '0 auto',
-        }}
-      >
-        <h1 style={{ color: '#1f3b73', marginBottom: '4px', fontSize: '22px' }}>
-          Completá tu perfil
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '8px' }}>
+    <div className={styles.page}>
+      <div className={styles.card}>
+        <h1 className={styles.title}>Completá tu perfil</h1>
+        <p className={styles.subtitle}>
           Necesitamos algunos datos para abrir tu cuenta en 404Bank.
         </p>
 
-        {error && (
-          <div
-            style={{
-              backgroundColor: '#fee2e2',
-              color: '#991b1b',
-              padding: '10px 14px',
-              borderRadius: '6px',
-              marginBottom: '16px',
-              fontSize: '14px',
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className={styles.errorBox}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <p style={sectionTitleStyle}>Datos personales</p>
-          <div style={groupStyle}>
+          <p className={styles.sectionTitle}>Datos personales</p>
+          <div className={styles.group}>
             <div>
-              <label style={labelStyle}>Nombre *</label>
-              <input style={inputStyle} name="nombre" value={form.nombre} onChange={handleChange} required />
+              <label className={styles.label}>Nombre *</label>
+              <input className={styles.input} name="nombre" value={form.nombre} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>Apellido *</label>
-              <input style={inputStyle} name="apellido" value={form.apellido} onChange={handleChange} required />
+              <label className={styles.label}>Apellido *</label>
+              <input className={styles.input} name="apellido" value={form.apellido} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>DNI *</label>
-              <input style={inputStyle} name="dni" value={form.dni} onChange={handleChange} required />
+              <label className={styles.label}>DNI *</label>
+              <input className={styles.input} name="dni" value={form.dni} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>Fecha de nacimiento</label>
-              <input style={inputStyle} type="date" name="fechaNac" value={form.fechaNac} onChange={handleChange} />
-            </div>
-          </div>
-
-          <p style={sectionTitleStyle}>Contacto</p>
-          <div style={groupStyle}>
-            <div>
-              <label style={labelStyle}>Email *</label>
-              <input style={inputStyle} type="email" name="email" value={form.email} onChange={handleChange} required />
-            </div>
-            <div>
-              <label style={labelStyle}>Teléfono</label>
-              <input style={inputStyle} name="telefono" value={form.telefono} onChange={handleChange} />
+              <label className={styles.label}>Fecha de nacimiento</label>
+              <input className={styles.input} type="date" name="fechaNac" value={form.fechaNac} onChange={handleChange} />
             </div>
           </div>
 
-          <p style={sectionTitleStyle}>Domicilio</p>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={labelStyle}>Dirección</label>
-            <input style={inputStyle} name="direccion" value={form.direccion} onChange={handleChange} />
+          <p className={styles.sectionTitle}>Contacto</p>
+          <div className={styles.group}>
+            <div>
+              <label className={styles.label}>Email *</label>
+              <input className={styles.input} type="email" name="email" value={form.email} onChange={handleChange} required />
+            </div>
+            <div>
+              <label className={styles.label}>Teléfono</label>
+              <input className={styles.input} name="telefono" value={form.telefono} onChange={handleChange} />
+            </div>
           </div>
-          <div style={groupStyle}>
+
+          <p className={styles.sectionTitle}>Domicilio</p>
+          <div className={styles.directionField}>
+            <label className={styles.label}>Dirección</label>
+            <input className={styles.input} name="direccion" value={form.direccion} onChange={handleChange} />
+          </div>
+          <div className={styles.group}>
             <div>
-              <label style={labelStyle}>Ciudad *</label>
-              <input style={inputStyle} name="ciudad" value={form.ciudad} onChange={handleChange} required />
+              <label className={styles.label}>Ciudad *</label>
+              <input className={styles.input} name="ciudad" value={form.ciudad} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>Provincia *</label>
-              <input style={inputStyle} name="provincia" value={form.provincia} onChange={handleChange} required />
+              <label className={styles.label}>Provincia *</label>
+              <input className={styles.input} name="provincia" value={form.provincia} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>País *</label>
-              <input style={inputStyle} name="pais" value={form.pais} onChange={handleChange} required />
+              <label className={styles.label}>País *</label>
+              <input className={styles.input} name="pais" value={form.pais} onChange={handleChange} required />
             </div>
             <div>
-              <label style={labelStyle}>Código postal</label>
-              <input style={inputStyle} name="codigoPostal" value={form.codigoPostal} onChange={handleChange} />
+              <label className={styles.label}>Código postal</label>
+              <input className={styles.input} name="codigoPostal" value={form.codigoPostal} onChange={handleChange} />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            style={{
-              marginTop: '28px',
-              width: '100%',
-              padding: '12px',
-              backgroundColor: loading ? '#9ca3af' : '#1f3b73',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
+            className={`${styles.submitBtn} ${loading ? styles.submitBtnLoading : ''}`}
           >
             {loading ? 'Guardando...' : 'Crear mi cuenta'}
           </button>
