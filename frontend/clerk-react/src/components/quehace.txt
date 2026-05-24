@@ -1,0 +1,4 @@
+ROLEGUARD: // Espera a que Clerk termine de cargar (isLoaded)
+Lee user.publicMetadata.role
+Si el rol no coincide → manda al login (un cliente que intente entrar a /admin a mano es redirigido)
+Si el rol coincide → muestra el contenido //

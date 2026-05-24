@@ -1,0 +1,4 @@
+REQUIEREROLE : // Es un middleware que recibe el/los roles permitidos
+Busca al usuario en Clerk por su ID y lee su publicMetadata.role
+Si el rol no coincide → responde 403 Forbidden
+Si coincide → deja pasar al siguiente middleware/controller y además adjunta el rol en req.userRole //

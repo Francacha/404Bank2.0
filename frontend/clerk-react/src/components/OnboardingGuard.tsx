@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/react';
+import { useAuth, useUser } from '@clerk/react';
 import { Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 
@@ -9,14 +9,17 @@ type Props = {
   children: ReactNode;
 };
 
-// Verifica si el usuario ya completó el onboarding.
-// Si no lo hizo → lo redirige a /onboarding.
-// Si ya lo hizo → muestra la página normalmente.
 function OnboardingGuard({ children }: Props) {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const [tienePerfil, setTienePerfil] = useState<boolean | null>(null);
 
+  const role = user?.publicMetadata?.role as string | undefined;
+
   useEffect(() => {
+    // Si es admin no necesita verificar perfil
+    if (role === 'admin') return;
+
     const verificar = async () => {
       try {
         const token = await getToken();
@@ -30,7 +33,12 @@ function OnboardingGuard({ children }: Props) {
       }
     };
     verificar();
-  }, [getToken]);
+  }, [getToken, role]);
+
+  // Admin va directo a su panel, nunca ve páginas de cliente
+  if (role === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   if (tienePerfil === null) {
     return (

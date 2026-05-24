@@ -1,2 +1,11 @@
 INDICA LAS RUTAS Y A QUE CONTROLADOR DEBE IR.
 BASICAMENTE TE DICE CUAL ES TU CUENTA Y LOS DATOS QUE TENES EN ELLA.
+
+
+ADMINROUTES : // router.use(requireRole('admin')) — aplica el guard de rol a todas las rutas de este archivo de una sola vez, sin tener que repetirlo en cada línea
+Define 4 endpoints:
+Método	URL	Acción
+GET	/api/admin/usuarios	Lista todos los clientes
+GET	/api/admin/transferencias	Lista todas las transferencias
+PATCH	/api/admin/cuentas/:id/bloquear	Bloquea una cuenta
+PATCH	/api/admin/cuentas/:id/activar	Activa una cuenta  //

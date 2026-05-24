@@ -8,6 +8,7 @@ const accountsRoutes = require('./src/routes/accountsRoutes');
 const personasRoutes = require('./src/routes/personasRoutes');
 const onboardingRoutes = require('./src/routes/onboardingRoutes');
 const transferenciasRoutes = require('./src/routes/transferenciasRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
@@ -22,6 +23,7 @@ app.use('/api/cuentas', authMiddleware, accountsRoutes);
 app.use('/api/personas', authMiddleware, personasRoutes);
 app.use('/api/onboarding', authMiddleware, onboardingRoutes);
 app.use('/api/transferencias', authMiddleware, transferenciasRoutes);
+app.use('/api/admin', authMiddleware, adminRoutes);
 
 app.use((err, req, res, next) => {
   if (err.message === 'Unauthenticated') {

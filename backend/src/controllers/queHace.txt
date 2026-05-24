@@ -1,2 +1,10 @@
 RECIBE LAS ORDENES Y BUSCA EN LA BASE DE DATOS.
 SE ALOJA LA LOGICA DE LAS CONSULTAS SQL (SELECT-INSET-DELETE)
+
+
+ADMINCONTROLLERS : // getUsuarios	Trae todos los clientes con sus datos y su cuenta bancaria
+getTodasTransferencias	Trae las últimas 100 transferencias del sistema completo
+bloquearCuenta	Cambia el estado de una cuenta a 'Bloqueada'
+activarCuenta	Cambia el estado de una cuenta a 'Activa' //
+
+
