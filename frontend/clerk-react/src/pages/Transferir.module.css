@@ -44,6 +44,25 @@
   font-size: 13px;
 }
 
+.navRight {
+  display: flex;
+  align-items: center;
+}
+
+.btnVolverPanel {
+  background-color: #f59e0b;
+  color: #1f2937;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.btnVolverPanel:hover {
+  background-color: #d97706;
+}
+
 .content {
   padding: 40px 32px;
   max-width: 500px;

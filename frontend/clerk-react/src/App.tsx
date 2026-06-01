@@ -10,10 +10,14 @@ import Transferir from './pages/Transferir';
 import Historial from './pages/Historial';
 import RoleGuard from './components/RoleGuard';
 import Admin from './pages/Admin';
+import Empleado from './pages/Empleado';
+import Gerente from './pages/Gerente';
+import { ViewModeProvider } from './context/ViewModeContext';
+
 
 function App() {
   return (
-    <>
+    <ViewModeProvider>
       <Routes>
         <Route path="/login/*" element={<Login />} />
         <Route path="/register/*" element={<Register />} />
@@ -22,10 +26,12 @@ function App() {
         <Route path="/transferir" element={<PrivateRoute><OnboardingGuard><Transferir /></OnboardingGuard></PrivateRoute>} />
         <Route path="/historial" element={<PrivateRoute><OnboardingGuard><Historial /></OnboardingGuard></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><RoleGuard role="admin"><Admin /></RoleGuard></PrivateRoute>} />
+        <Route path="/empleado" element={<PrivateRoute><RoleGuard role="empleado"><Empleado /></RoleGuard></PrivateRoute>} />
+        <Route path="/gerente" element={<PrivateRoute><RoleGuard role="gerente"><Gerente /></RoleGuard></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </>
+    </ViewModeProvider>
   )
 }
 

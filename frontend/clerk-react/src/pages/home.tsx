@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import { useViewMode } from '../context/ViewModeContext';
 import styles from './home.module.css';
 
 interface Cuenta {
@@ -17,6 +18,11 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setViewMode } = useViewMode();
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const esLaboral = role === 'empleado' || role === 'gerente';
+  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
 
   useEffect(() => {
     const cargarCuentas = async () => {
@@ -55,6 +61,14 @@ function Home() {
           <span className={styles.userName}>
             {user?.firstName} {user?.lastName}
           </span>
+          {esLaboral && (
+            <button
+              className={styles.btnVolverPanel}
+              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
+            >
+              Volver al panel
+            </button>
+          )}
           <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
             <button className={styles.btnSignOut}>Cerrar sesión</button>
           </SignOutButton>

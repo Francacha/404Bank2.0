@@ -6,6 +6,7 @@ const getUsuarios = async (req, res) => {
     const result = await pool.query(`
       SELECT
         p.id,
+        p.clerk_id,
         p.nombre,
         p.apellido,
         p.dni,
@@ -82,5 +83,93 @@ const activarCuenta = async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+const { clerkClient } = require('@clerk/clerk-sdk-node');
 
-module.exports = { getUsuarios, getTodasTransferencias, bloquearCuenta, activarCuenta };
+// Obtener todos los usuarios con rol 'empleado' o 'gerente'
+const getUsuariosConRol = async (req, res) => {
+  try {
+    const clerkUsuarios = await clerkClient.users.getUserList({ limit: 100 });
+
+    const conRol = clerkUsuarios.filter(u =>
+      ['empleado', 'gerente'].includes(u.publicMetadata?.role)
+    );
+
+    if (conRol.length === 0) return res.json({ usuarios: [] });
+
+    const emails = conRol
+      .map(u => u.emailAddresses[0]?.emailAddress)
+      .filter(Boolean);
+
+    const personasResult = await pool.query(
+      `SELECT email, nombre, apellido FROM Personas WHERE email = ANY($1)`,
+      [emails]
+    );
+    const personaMap = {};
+    personasResult.rows.forEach(p => { personaMap[p.email] = p; });
+
+    const resultado = conRol.map(u => {
+      const email = u.emailAddresses[0]?.emailAddress || '';
+      const persona = personaMap[email];
+      return {
+        clerkId: u.id,
+        email,
+        nombre: persona?.nombre || u.firstName || '',
+        apellido: persona?.apellido || u.lastName || '',
+        role: u.publicMetadata?.role,
+      };
+    });
+
+    res.json({ usuarios: resultado });
+  } catch (error) {
+    console.error('Error obteniendo usuarios con rol:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Asignar rol 'empleado' o 'gerente' a un usuario por clerkId
+const asignarRol = async (req, res) => {
+  const { clerkId, role } = req.body;
+
+  if (!clerkId || !['empleado', 'gerente'].includes(role)) {
+    return res.status(400).json({ error: 'clerkId y rol válido son requeridos (empleado o gerente)' });
+  }
+
+  try {
+    await clerkClient.users.updateUser(clerkId, {
+      publicMetadata: { role },
+    });
+
+    res.json({ mensaje: `Rol '${role}' asignado correctamente` });
+  } catch (error) {
+    console.error('Error asignando rol:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// Revocar rol de un usuario (dejarlo sin rol = cliente)
+const revocarRol = async (req, res) => {
+  const { clerkId } = req.params;
+
+  try {
+    await clerkClient.users.updateUser(clerkId, {
+      publicMetadata: { role: null },
+    });
+
+    res.json({ mensaje: 'Rol revocado correctamente. El usuario vuelve a ser cliente.' });
+  } catch (error) {
+    console.error('Error revocando rol:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+
+module.exports = {
+  getUsuarios,
+  getTodasTransferencias,
+  bloquearCuenta,
+  activarCuenta,
+  getUsuariosConRol,
+  asignarRol,
+  revocarRol,
+};
+

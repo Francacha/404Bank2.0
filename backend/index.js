@@ -9,6 +9,10 @@ const personasRoutes = require('./src/routes/personasRoutes');
 const onboardingRoutes = require('./src/routes/onboardingRoutes');
 const transferenciasRoutes = require('./src/routes/transferenciasRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
+const empleadoRoutes = require('./src/routes/empleadoRoutes');
+const gerenteRoutes = require('./src/routes/gerenteRoutes');
+
+
 
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
@@ -24,6 +28,10 @@ app.use('/api/personas', authMiddleware, personasRoutes);
 app.use('/api/onboarding', authMiddleware, onboardingRoutes);
 app.use('/api/transferencias', authMiddleware, transferenciasRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
+app.use('/api/empleado', authMiddleware, empleadoRoutes);
+app.use('/api/gerente', authMiddleware, gerenteRoutes);
+
+
 
 app.use((err, req, res, next) => {
   if (err.message === 'Unauthenticated') {

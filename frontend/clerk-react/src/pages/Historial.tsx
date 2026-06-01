@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/react';
+import { useAuth, useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import { useViewMode } from '../context/ViewModeContext';
 import styles from './Historial.module.css';
 
 const API_URL = 'http://localhost:3000';
@@ -18,7 +19,13 @@ interface Transferencia {
 
 function Historial() {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
+  const { setViewMode } = useViewMode();
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const esLaboral = role === 'empleado' || role === 'gerente';
+  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
   const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -56,6 +63,16 @@ function Historial() {
             Transferir
           </button>
         </div>
+        {esLaboral && (
+          <div className={styles.navRight}>
+            <button
+              className={styles.btnVolverPanel}
+              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
+            >
+              Volver al panel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Contenido */}

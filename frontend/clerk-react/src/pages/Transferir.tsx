@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useAuth } from '@clerk/react';
+import { useAuth, useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import { useViewMode } from '../context/ViewModeContext';
 import styles from './Transferir.module.css';
 
 const API_URL = 'http://localhost:3000';
@@ -13,7 +14,13 @@ interface Destinatario {
 
 function Transferir() {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
+  const { setViewMode } = useViewMode();
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const esLaboral = role === 'empleado' || role === 'gerente';
+  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
 
   const [busqueda, setBusqueda] = useState('');
   const [destinatario, setDestinatario] = useState<Destinatario | null>(null);
@@ -94,6 +101,16 @@ function Transferir() {
             Historial
           </button>
         </div>
+        {esLaboral && (
+          <div className={styles.navRight}>
+            <button
+              className={styles.btnVolverPanel}
+              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
+            >
+              Volver al panel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Contenido */}

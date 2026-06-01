@@ -56,20 +56,44 @@ const realizarTransferencia = async (req, res) => {
         return res.status(502).json({ error: 'Error al comunicarse con el Banco Central' });
     }
 
+    // Verificar si el destino es una cuenta de nuestro banco
+    const cuentaDestinoResult = await pool.query(
+        `SELECT id_cuenta FROM Cuentas_Bancarias WHERE cbu = $1 AND estado = 'Activa'`,
+        [cbuDestino]
+    );
+    const esTransferenciaInterna = cuentaDestinoResult.rows.length > 0;
+
     // Descontar saldo local y registrar la transferencia
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
 
+        // Debitar origen
         await client.query(
             'UPDATE Cuentas_Bancarias SET saldo = saldo - $1 WHERE id_cuenta = $2',
             [Number(importe), id_cuenta]
         );
 
+        // Registrar salida desde el origen
         await client.query(`
             INSERT INTO Transferencias_Central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo)
             VALUES ($1, $2, $3, $4, 'aprobada', 'saliente')
         `, [resultado.transaccionId, cbuOrigen, cbuDestino, Number(importe)]);
+
+        // Si el destino es de nuestro banco, acreditar directamente
+        if (esTransferenciaInterna) {
+            await client.query(
+                'UPDATE Cuentas_Bancarias SET saldo = saldo + $1 WHERE cbu = $2',
+                [Number(importe), cbuDestino]
+            );
+
+            await client.query(`
+                INSERT INTO Transferencias_Central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo)
+                VALUES ($1, $2, $3, $4, 'aprobada', 'entrante')
+            `, [resultado.transaccionId + '_in', cbuOrigen, cbuDestino, Number(importe)]);
+
+            console.log(`[Transferencia interna] $${importe} de ${cbuOrigen} → ${cbuDestino} acreditado localmente`);
+        }
 
         await client.query('COMMIT');
     } catch (err) {
@@ -113,7 +137,8 @@ const obtenerMisTransferencias = async (req, res) => {
         const result = await pool.query(`
             SELECT *
             FROM Transferencias_Central
-            WHERE cbu_origen = $1 OR cbu_destino = $1
+            WHERE (cbu_origen = $1 AND tipo = 'saliente')
+               OR (cbu_destino = $1 AND tipo = 'entrante')
             ORDER BY fecha_hora DESC
             LIMIT 50
         `, [cbu]);

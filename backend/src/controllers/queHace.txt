@@ -8,3 +8,10 @@ bloquearCuenta	Cambia el estado de una cuenta a 'Bloqueada'
 activarCuenta	Cambia el estado de una cuenta a 'Activa' //
 
 
+EMPLEADOCONTROLLER: // buscarCliente	GET /api/empleado/buscar?dni= o ?cbu=	Busca un cliente y su cuenta
+getMovimientosPorCbu	GET /api/empleado/movimientos/:cbu	Movimientos de una cuenta
+bloquearCuenta	PATCH /api/empleado/cuentas/:id/bloquear	Bloquea la cuenta
+activarCuenta	PATCH /api/empleado/cuentas/:id/activar	Activa la cuenta //
+
+
+

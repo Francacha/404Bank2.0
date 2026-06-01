@@ -101,6 +101,44 @@
   font-size: 14px;
 }
 
+/* Buscador */
+.searchBarRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 14px;
+}
+.searchInput::placeholder { color: #64748b; }
+.searchInput:focus { outline: none; border-color: #6366f1; }
+
+.btnLimpiar {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.btnLimpiar:hover { background: #1e293b; color: #f1f5f9; }
+
+.searchNote {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 10px;
+}
+
 /* Tabla */
 .tableWrapper {
   overflow-x: auto;
@@ -204,3 +242,65 @@
   padding: 2px 8px;
   border-radius: 999px;
 }
+/* Pestaña Roles */
+.rolesSection { display: flex; flex-direction: column; gap: 24px; }
+.rolesForm { background: #1e293b; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.rolesTitle { font-size: 18px; font-weight: 600; color: #f1f5f9; margin: 0; }
+.rolesInputRow { display: flex; gap: 10px; flex-wrap: wrap; }
+.rolesInput { flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 14px; }
+.rolesSelect { padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 14px; }
+.btnAsignar { padding: 8px 18px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.btnAsignar:hover { background: #4f46e5; }
+.rolesSuccess { color: #4ade80; font-size: 14px; margin: 0; }
+.rolesError { color: #f87171; font-size: 14px; margin: 0; }
+.badgeGerente { background: #7c3aed; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badgeEmpleado { background: #0891b2; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+/* Picker de usuario en Roles */
+.pickerContainer { display: flex; flex-direction: column; gap: 4px; }
+.pickerList {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #0f172a;
+}
+.pickerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #1e293b;
+  transition: background 0.12s;
+}
+.pickerItem:last-child { border-bottom: none; }
+.pickerItem:hover { background: #1e293b; }
+.pickerItemNombre { font-size: 14px; color: #f1f5f9; font-weight: 500; }
+.pickerItemEmail { font-size: 12px; color: #64748b; }
+.pickerEmpty { color: #64748b; font-size: 13px; padding: 12px 14px; margin: 0; }
+
+.pickerSelected {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #0f172a;
+  border: 1px solid #6366f1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+}
+.pickerSelectedNombre { font-size: 14px; color: #f1f5f9; font-weight: 600; flex: 1; }
+.pickerSelectedEmail { font-size: 12px; color: #94a3b8; }
+.btnLimpiarPicker {
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #475569;
+  color: #94a3b8;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btnLimpiarPicker:hover { background: #1e293b; color: #f1f5f9; }
+
