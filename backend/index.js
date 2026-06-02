@@ -11,6 +11,9 @@ const transferenciasRoutes = require('./src/routes/transferenciasRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 const empleadoRoutes = require('./src/routes/empleadoRoutes');
 const gerenteRoutes = require('./src/routes/gerenteRoutes');
+const prestamosRoutes = require('./src/routes/prestamosRoutes');
+const tarjetasRoutes = require('./src/routes/tarjetasRoutes');
+
 
 
 
@@ -30,6 +33,9 @@ app.use('/api/transferencias', authMiddleware, transferenciasRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
 app.use('/api/empleado', authMiddleware, empleadoRoutes);
 app.use('/api/gerente', authMiddleware, gerenteRoutes);
+app.use('/api/prestamos', authMiddleware, prestamosRoutes);
+app.use('/api/tarjetas', authMiddleware, tarjetasRoutes);
+
 
 
 

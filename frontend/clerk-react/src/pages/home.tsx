@@ -51,11 +51,18 @@ function Home() {
         <div className={styles.navLeft}>
           <span className={styles.brand}>404Bank</span>
           <button onClick={() => navigate('/transferir')} className={styles.btnTransferir}>
-            Transferir
-          </button>
-          <button onClick={() => navigate('/historial')} className={styles.btnHistorial}>
-            Historial
-          </button>
+  Transferir
+</button>
+<button onClick={() => navigate('/historial')} className={styles.btnHistorial}>
+  Historial
+</button>
+<button onClick={() => navigate('/prestamos')} className={styles.btnHistorial}>
+  Préstamos
+</button>
+<button onClick={() => navigate('/tarjetas')} className={styles.btnHistorial}>
+  Tarjetas
+</button>
+
         </div>
         <div className={styles.navRight}>
           <span className={styles.userName}>

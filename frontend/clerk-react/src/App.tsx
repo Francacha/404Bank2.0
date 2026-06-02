@@ -12,7 +12,10 @@ import RoleGuard from './components/RoleGuard';
 import Admin from './pages/Admin';
 import Empleado from './pages/Empleado';
 import Gerente from './pages/Gerente';
+import Prestamos from './pages/Prestamos';
+import Tarjetas from './pages/Tarjetas';
 import { ViewModeProvider } from './context/ViewModeContext';
+
 
 
 function App() {
@@ -25,6 +28,8 @@ function App() {
         <Route path="/home" element={<PrivateRoute><OnboardingGuard><Home /></OnboardingGuard></PrivateRoute>} />
         <Route path="/transferir" element={<PrivateRoute><OnboardingGuard><Transferir /></OnboardingGuard></PrivateRoute>} />
         <Route path="/historial" element={<PrivateRoute><OnboardingGuard><Historial /></OnboardingGuard></PrivateRoute>} />
+        <Route path="/prestamos" element={<PrivateRoute><OnboardingGuard><Prestamos /></OnboardingGuard></PrivateRoute>} />
+<Route path="/tarjetas" element={<PrivateRoute><OnboardingGuard><Tarjetas /></OnboardingGuard></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><RoleGuard role="admin"><Admin /></RoleGuard></PrivateRoute>} />
         <Route path="/empleado" element={<PrivateRoute><RoleGuard role="empleado"><Empleado /></RoleGuard></PrivateRoute>} />
         <Route path="/gerente" element={<PrivateRoute><RoleGuard role="gerente"><Gerente /></RoleGuard></PrivateRoute>} />

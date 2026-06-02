@@ -6,6 +6,8 @@ import styles from './Gerente.module.css';
 
 const API_URL = 'http://localhost:3000';
 
+type Tab = 'empleados' | 'clientes' | 'solicitudes';
+
 interface Empleado {
   clerkId: string;
   email: string;
@@ -38,7 +40,27 @@ interface Movimiento {
   fecha_hora: string;
 }
 
-type Tab = 'empleados' | 'clientes';
+interface SolicitudPrestamo {
+  id: number;
+  monto: number;
+  estado: string;
+  fecha_solicitud: string;
+  nombre: string;
+  apellido: string;
+  dni: string;
+  cbu: string;
+}
+
+interface SolicitudTarjeta {
+  id: number;
+  tipo: string;
+  estado: string;
+  fecha_solicitud: string;
+  nombre: string;
+  apellido: string;
+  dni: string;
+  cbu: string;
+}
 
 function Gerente() {
   const { getToken } = useAuth();
@@ -61,7 +83,6 @@ function Gerente() {
   const [mostrandoTodos, setMostrandoTodos] = useState(false);
   const [buscado, setBuscado] = useState(false);
   const [errorBusqueda, setErrorBusqueda] = useState('');
-
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [mostrarMovimientos, setMostrarMovimientos] = useState(false);
@@ -69,15 +90,24 @@ function Gerente() {
   const [errorMovimientos, setErrorMovimientos] = useState('');
   const [errorAccion, setErrorAccion] = useState('');
 
-  const fetchConToken = useCallback(async (url: string) => {
+  // --- Solicitudes ---
+  const [prestamos, setPrestamos] = useState<SolicitudPrestamo[]>([]);
+  const [tarjetas, setTarjetas] = useState<SolicitudTarjeta[]>([]);
+  const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
+  const [mensajeSolicitud, setMensajeSolicitud] = useState('');
+
+  const authHeader = useCallback(async () => {
     const token = await getToken();
-    const res = await fetch(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, [getToken]);
+
+  const fetchConToken = useCallback(async (url: string) => {
+    const headers = await authHeader();
+    const res = await fetch(url, { headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Error al cargar datos');
     return data;
-  }, [getToken]);
+  }, [authHeader]);
 
   const cargarEmpleados = useCallback(async () => {
     setLoadingEmpleados(true);
@@ -93,17 +123,40 @@ function Gerente() {
     }
   }, [fetchConToken]);
 
+  const cargarSolicitudes = useCallback(async () => {
+    setLoadingSolicitudes(true);
+    try {
+      const headers = await authHeader();
+      const [resPrestamos, resTarjetas] = await Promise.all([
+        fetch(`${API_URL}/api/prestamos/pre-aprobados`, { headers }),
+        fetch(`${API_URL}/api/tarjetas/pre-aprobadas`, { headers }),
+      ]);
+      const dataPrestamos = await resPrestamos.json();
+      const dataTarjetas = await resTarjetas.json();
+      setPrestamos(dataPrestamos.prestamos || []);
+      setTarjetas(dataTarjetas.tarjetas || []);
+    } catch {
+      // silencioso
+    } finally {
+      setLoadingSolicitudes(false);
+    }
+  }, [authHeader]);
+
   useEffect(() => {
     cargarEmpleados();
   }, [cargarEmpleados]);
 
+  useEffect(() => {
+    if (tab === 'solicitudes') cargarSolicitudes();
+  }, [tab, cargarSolicitudes]);
+
   const handleRevocarEmpleado = async (clerkId: string) => {
     setMensajeRevocar('');
     try {
-      const token = await getToken();
+      const headers = await authHeader();
       const res = await fetch(`${API_URL}/api/gerente/empleados/${clerkId}/revocar`, {
         method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al revocar empleado');
@@ -115,6 +168,40 @@ function Gerente() {
     }
   };
 
+  const accionPrestamo = async (id: number, accion: 'aprobar' | 'rechazar') => {
+    setMensajeSolicitud('');
+    try {
+      const headers = await authHeader();
+      const res = await fetch(`${API_URL}/api/prestamos/${id}/${accion}`, {
+        method: 'PUT',
+        headers,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMensajeSolicitud(accion === 'aprobar' ? 'Préstamo aprobado. El saldo fue acreditado.' : 'Préstamo rechazado.');
+      cargarSolicitudes();
+    } catch (err: unknown) {
+      if (err instanceof Error) setMensajeSolicitud(err.message);
+    }
+  };
+
+  const accionTarjeta = async (id: number, accion: 'aprobar' | 'rechazar') => {
+    setMensajeSolicitud('');
+    try {
+      const headers = await authHeader();
+      const res = await fetch(`${API_URL}/api/tarjetas/${id}/${accion}`, {
+        method: 'PUT',
+        headers,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMensajeSolicitud(accion === 'aprobar' ? 'Tarjeta aprobada y activada.' : 'Tarjeta rechazada.');
+      cargarSolicitudes();
+    } catch (err: unknown) {
+      if (err instanceof Error) setMensajeSolicitud(err.message);
+    }
+  };
+
   const buscarCliente = async (q?: string) => {
     const termino = q !== undefined ? q : busquedaCliente;
     setBuscando(true);
@@ -123,13 +210,10 @@ function Gerente() {
     setMovimientos([]);
     setMostrarMovimientos(false);
     setErrorAccion('');
-
     try {
-      const token = await getToken();
+      const headers = await authHeader();
       const params = termino.trim() ? `?q=${encodeURIComponent(termino.trim())}` : '';
-      const res = await fetch(`${API_URL}/api/gerente/clientes/buscar${params}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const res = await fetch(`${API_URL}/api/gerente/clientes/buscar${params}`, { headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al buscar');
       setResultados(data.usuarios);
@@ -143,10 +227,7 @@ function Gerente() {
     }
   };
 
-  const verTodosClientes = () => {
-    setBusquedaCliente('');
-    buscarCliente('');
-  };
+  const verTodosClientes = () => { setBusquedaCliente(''); buscarCliente(''); };
 
   const seleccionarCliente = (c: Cliente) => {
     setClienteSeleccionado(c);
@@ -161,10 +242,8 @@ function Gerente() {
     setErrorMovimientos('');
     setMostrarMovimientos(true);
     try {
-      const token = await getToken();
-      const res = await fetch(`${API_URL}/api/gerente/clientes/movimientos/${clienteSeleccionado.cbu}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const headers = await authHeader();
+      const res = await fetch(`${API_URL}/api/gerente/clientes/movimientos/${clienteSeleccionado.cbu}`, { headers });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al cargar movimientos');
       setMovimientos(data.movimientos);
@@ -180,10 +259,10 @@ function Gerente() {
     if (!clienteSeleccionado) return;
     setErrorAccion('');
     try {
-      const token = await getToken();
+      const headers = await authHeader();
       const res = await fetch(`${API_URL}/api/gerente/clientes/${clienteSeleccionado.id_cuenta}/${accion}`, {
         method: 'PATCH',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al actualizar la cuenta');
@@ -200,20 +279,14 @@ function Gerente() {
 
   return (
     <div className={styles.page}>
-      {/* Navbar */}
       <div className={styles.navbar}>
         <div className={styles.navLeft}>
           <span className={styles.brand}>404Bank</span>
           <span className={styles.gerenteBadge}>Gerente</span>
         </div>
         <div className={styles.navRight}>
-          <span className={styles.userName}>
-            {user?.firstName} {user?.lastName}
-          </span>
-          <button
-            className={styles.btnMiCuenta}
-            onClick={() => { setViewMode('client'); navigate('/home'); }}
-          >
+          <span className={styles.userName}>{user?.firstName} {user?.lastName}</span>
+          <button className={styles.btnMiCuenta} onClick={() => { setViewMode('client'); navigate('/home'); }}>
             Mi cuenta
           </button>
           <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
@@ -224,21 +297,17 @@ function Gerente() {
 
       {/* Tabs */}
       <div className={styles.tabsBar}>
-        <button
-          className={`${styles.tabBtn} ${tab === 'empleados' ? styles.tabBtnActive : ''}`}
-          onClick={() => setTab('empleados')}
-        >
+        <button className={`${styles.tabBtn} ${tab === 'empleados' ? styles.tabBtnActive : ''}`} onClick={() => setTab('empleados')}>
           Empleados
         </button>
-        <button
-          className={`${styles.tabBtn} ${tab === 'clientes' ? styles.tabBtnActive : ''}`}
-          onClick={() => setTab('clientes')}
-        >
+        <button className={`${styles.tabBtn} ${tab === 'clientes' ? styles.tabBtnActive : ''}`} onClick={() => setTab('clientes')}>
           Clientes
+        </button>
+        <button className={`${styles.tabBtn} ${tab === 'solicitudes' ? styles.tabBtnActive : ''}`} onClick={() => setTab('solicitudes')}>
+          Solicitudes
         </button>
       </div>
 
-      {/* Contenido */}
       <div className={styles.content}>
 
         {/* Tab: Empleados */}
@@ -246,7 +315,6 @@ function Gerente() {
           <>
             <h1 className={styles.title}>Gestión de empleados</h1>
             <p className={styles.subtitle}>Asignación y revocación de empleados del sistema.</p>
-
             <h2 className={styles.listTitle}>Empleados activos</h2>
             {mensajeRevocar && <p className={styles.successMsg}>{mensajeRevocar}</p>}
             {loadingEmpleados && <p className={styles.loadingText}>Cargando empleados...</p>}
@@ -258,11 +326,7 @@ function Gerente() {
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
                   <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Email</th>
-                      <th>Acción</th>
-                    </tr>
+                    <tr><th>Nombre</th><th>Email</th><th>Acción</th></tr>
                   </thead>
                   <tbody>
                     {empleados.map(e => (
@@ -270,10 +334,7 @@ function Gerente() {
                         <td>{e.apellido ? `${e.apellido}, ${e.nombre}` : e.nombre || '—'}</td>
                         <td>{e.email}</td>
                         <td>
-                          <button
-                            className={styles.btnRevocar}
-                            onClick={() => handleRevocarEmpleado(e.clerkId)}
-                          >
+                          <button className={styles.btnRevocar} onClick={() => handleRevocarEmpleado(e.clerkId)}>
                             Revocar
                           </button>
                         </td>
@@ -291,8 +352,6 @@ function Gerente() {
           <>
             <h1 className={styles.title}>Gestión de clientes</h1>
             <p className={styles.subtitle}>Buscá un cliente por nombre, apellido, DNI o CBU.</p>
-
-            {/* Buscador */}
             <div className={styles.searchBox}>
               <div className={styles.searchRow}>
                 <input
@@ -311,8 +370,6 @@ function Gerente() {
               </div>
               {errorBusqueda && <p className={styles.errorMsg}>{errorBusqueda}</p>}
             </div>
-
-            {/* Resultados */}
             {buscado && (
               <div className={styles.resultadosSection}>
                 {mostrandoTodos && busquedaCliente.trim() && (
@@ -321,19 +378,13 @@ function Gerente() {
                 {!mostrandoTodos && (
                   <p className={styles.searchNote}>{resultados.length} resultado{resultados.length !== 1 ? 's' : ''} encontrado{resultados.length !== 1 ? 's' : ''}.</p>
                 )}
-
                 {resultados.length === 0 ? (
                   <p className={styles.emptyText}>No hay clientes registrados.</p>
                 ) : (
                   <div className={styles.tableWrapper}>
                     <table className={styles.tableResultados}>
                       <thead>
-                        <tr>
-                          <th>Nombre</th>
-                          <th>DNI</th>
-                          <th>CBU</th>
-                          <th>Estado</th>
-                        </tr>
+                        <tr><th>Nombre</th><th>DNI</th><th>CBU</th><th>Estado</th></tr>
                       </thead>
                       <tbody>
                         {resultados.map(c => (
@@ -358,15 +409,12 @@ function Gerente() {
                 )}
               </div>
             )}
-
-            {/* Detalle del cliente seleccionado */}
             {clienteSeleccionado && (
               <>
                 <div className={styles.clienteCard}>
                   <p className={styles.clienteNombre}>{clienteSeleccionado.apellido}, {clienteSeleccionado.nombre}</p>
                   <p className={styles.clienteDetalle}>{clienteSeleccionado.email}</p>
                   <p className={styles.clienteDetalle}>{clienteSeleccionado.ciudad}, {clienteSeleccionado.provincia}</p>
-
                   <div className={styles.cuentaRow}>
                     <div>
                       <p className={styles.cuentaLabel}>CBU</p>
@@ -385,26 +433,16 @@ function Gerente() {
                       </span>
                     </div>
                   </div>
-
                   {errorAccion && <p className={styles.errorMsg}>{errorAccion}</p>}
-
                   <div className={styles.accionesRow}>
                     {clienteSeleccionado.estado === 'Activa' ? (
-                      <button className={styles.btnBloquear} onClick={() => cambiarEstado('bloquear')}>
-                        Bloquear cuenta
-                      </button>
+                      <button className={styles.btnBloquear} onClick={() => cambiarEstado('bloquear')}>Bloquear cuenta</button>
                     ) : (
-                      <button className={styles.btnActivar} onClick={() => cambiarEstado('activar')}>
-                        Activar cuenta
-                      </button>
+                      <button className={styles.btnActivar} onClick={() => cambiarEstado('activar')}>Activar cuenta</button>
                     )}
-                    <button className={styles.btnMovimientos} onClick={verMovimientos}>
-                      Ver movimientos
-                    </button>
+                    <button className={styles.btnMovimientos} onClick={verMovimientos}>Ver movimientos</button>
                   </div>
                 </div>
-
-                {/* Movimientos */}
                 {mostrarMovimientos && (
                   <div className={styles.movimientosSection}>
                     <h2 className={styles.movimientosTitle}>Movimientos de la cuenta</h2>
@@ -415,18 +453,13 @@ function Gerente() {
                     )}
                     <div className={styles.movimientosList}>
                       {movimientos.map(m => (
-                        <div
-                          key={m.id}
-                          className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}
-                        >
+                        <div key={m.id} className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}>
                           <div className={styles.movimientoTop}>
                             <span className={`${styles.importe} ${m.tipo === 'entrante' ? styles.importeEntrante : styles.importeSaliente}`}>
                               {m.tipo === 'entrante' ? '+ ' : '- '}
                               $ {Number(m.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className={styles.fecha}>
-                              {new Date(m.fecha_hora).toLocaleString('es-AR')}
-                            </span>
+                            <span className={styles.fecha}>{new Date(m.fecha_hora).toLocaleString('es-AR')}</span>
                           </div>
                           <p className={styles.cbuInfo}>
                             {m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`}
@@ -440,6 +473,87 @@ function Gerente() {
                   </div>
                 )}
               </>
+            )}
+          </>
+        )}
+
+        {/* Tab: Solicitudes */}
+        {tab === 'solicitudes' && (
+          <>
+            <h1 className={styles.title}>Solicitudes pre-aprobadas</h1>
+            <p className={styles.subtitle}>Aprobación final de préstamos y tarjetas.</p>
+
+            {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
+            {loadingSolicitudes && <p className={styles.loadingText}>Cargando...</p>}
+
+            {/* Préstamos */}
+            <h2 className={styles.listTitle}>Préstamos</h2>
+            {!loadingSolicitudes && prestamos.length === 0 && (
+              <p className={styles.emptyText}>No hay préstamos pre-aprobados pendientes.</p>
+            )}
+            {prestamos.length > 0 && (
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
+                  </thead>
+                  <tbody>
+                    {prestamos.map(p => (
+                      <tr key={p.id}>
+                        <td>{p.apellido}, {p.nombre}</td>
+                        <td>{p.dni}</td>
+                        <td>$ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                        <td>{new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}</td>
+                        <td>
+                          <div className={styles.accionesRow}>
+                            <button className={styles.btnActivar} onClick={() => accionPrestamo(p.id, 'aprobar')}>
+                              Aprobar
+                            </button>
+                            <button className={styles.btnRevocar} onClick={() => accionPrestamo(p.id, 'rechazar')}>
+                              Rechazar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* Tarjetas */}
+            <h2 className={styles.listTitle} style={{ marginTop: '32px' }}>Tarjetas</h2>
+            {!loadingSolicitudes && tarjetas.length === 0 && (
+              <p className={styles.emptyText}>No hay tarjetas pre-aprobadas pendientes.</p>
+            )}
+            {tarjetas.length > 0 && (
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr><th>Cliente</th><th>DNI</th><th>Tipo</th><th>Fecha</th><th>Acciones</th></tr>
+                  </thead>
+                  <tbody>
+                    {tarjetas.map(t => (
+                      <tr key={t.id}>
+                        <td>{t.apellido}, {t.nombre}</td>
+                        <td>{t.dni}</td>
+                        <td style={{ textTransform: 'capitalize' }}>{t.tipo}</td>
+                        <td>{new Date(t.fecha_solicitud).toLocaleDateString('es-AR')}</td>
+                        <td>
+                          <div className={styles.accionesRow}>
+                            <button className={styles.btnActivar} onClick={() => accionTarjeta(t.id, 'aprobar')}>
+                              Aprobar
+                            </button>
+                            <button className={styles.btnRevocar} onClick={() => accionTarjeta(t.id, 'rechazar')}>
+                              Rechazar
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </>
         )}

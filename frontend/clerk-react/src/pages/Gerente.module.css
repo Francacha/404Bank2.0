@@ -317,3 +317,19 @@
   background: #7f1d1d; color: #fca5a5;
   padding: 2px 8px; border-radius: 10px; font-size: 11px;
 }
+.listTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f3b73;
+  margin: 0 0 12px 0;
+}
+
+.successMsg {
+  color: #065f46;
+  background: #d1fae5;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
