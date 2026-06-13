@@ -1,3 +1,8 @@
+// Fuerza que el DNS resuelva IPv4 antes que IPv6.
+// Sin esto, Supabase resuelve a una IP v6 que las redes locales no alcanzan.
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

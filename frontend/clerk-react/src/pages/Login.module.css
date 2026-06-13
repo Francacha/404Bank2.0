@@ -1,11 +1,270 @@
+/* =========================================================
+   LOGIN — Layout de dos columnas inspirado en banca corporativa
+   (Panel izquierdo oscuro + Panel derecho blanco con Clerk)
+   ========================================================= */
+
+/* Ocupa toda la pantalla ignorando el max-width del #root */
 .container {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-.clerkFailedBox {
-  max-width: 520px;
+/* ---- PANEL IZQUIERDO ---- */
+.leftPanel {
+  flex: 0 0 55%;
+  background: linear-gradient(145deg, #2d0510 0%, #7d122b 50%, #3d0716 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 70px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Círculo decorativo superior derecho */
+.leftPanel::before {
+  content: '';
+  position: absolute;
+  top: -140px;
+  right: -100px;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+/* Círculo decorativo inferior izquierdo */
+.leftPanel::after {
+  content: '';
+  position: absolute;
+  bottom: -180px;
+  left: -120px;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+}
+
+/* Logo / marca */
+.brandLogo {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* "404B" — bordeaux claro para contrastar sobre el fondo oscuro */
+.brand404B {
+  color: #ff8fa3;
+}
+
+/* "ank" — gris plata del logo */
+.brandAnk {
+  color: #BABABA;
+}
+
+/* Contenedor del personaje + globo */
+.banWrapper {
+  position: absolute;
+  bottom: 0;
+  right: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+/* Globo de diálogo */
+.banBubble {
+  background: #ffffff;
+  color: #4F0919;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  max-width: 200px;
   text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Triangulito apuntando hacia abajo (hacia Ban) */
+.banBubble::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 8px 7px 0;
+  border-style: solid;
+  border-color: #ffffff transparent transparent;
+}
+
+/* Imagen del personaje */
+.banImg {
+  width: 220px;
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+/* Título principal grande */
+.leftTitle {
+  font-size: 46px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.5px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtítulo */
+.leftSubtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.6;
+  max-width: 360px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Línea decorativa bajo el título */
+.leftDivider {
+  width: 50px;
+  height: 3px;
+  background: #BABABA;
+  border-radius: 2px;
+  margin: 24px 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- PANEL DERECHO ---- */
+.rightPanel {
+  flex: 1;
+  background: #f4f6fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  overflow-y: auto;
+}
+
+/* Bloque de bienvenida sobre el formulario de Clerk */
+.rightWelcome {
+  text-align: center;
+  margin-bottom: 28px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.rightTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+.rightSubtitle {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* Logo en el panel izquierdo, reemplaza el texto de marca */
+.logoImg {
+  width: 620px;
+  height: auto;
+  margin: 0 auto 12px;
+  display: block;
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.4));
+}
+
+/* Wrapper del componente Clerk para que ocupe bien el espacio */
+.clerkWrapper {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Caja de error de Clerk */
+.clerkFailedBox {
+  max-width: 420px;
+  text-align: center;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.clerkFailedBox h2 {
+  color: #111827;
+  font-size: 20px;
+  margin: 0 0 12px;
+}
+
+.clerkFailedBox p {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 900px) {
+  .leftPanel {
+    flex: 0 0 45%;
+    padding: 40px;
+  }
+
+  .leftTitle {
+    font-size: 34px;
+  }
+
+  .brandLogo {
+    margin-bottom: 60px;
+  }
+}
+
+@media (max-width: 680px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .leftPanel {
+    flex: 0 0 auto;
+    padding: 32px 24px 28px;
+    justify-content: flex-start;
+  }
+
+  .brandLogo {
+    margin-bottom: 20px;
+  }
+
+  .leftTitle {
+    font-size: 26px;
+  }
+
+  .leftSubtitle {
+    display: none;
+  }
+
+  .leftDivider {
+    margin: 12px 0 0;
+  }
+
+  .rightPanel {
+    padding: 32px 20px;
+  }
 }
