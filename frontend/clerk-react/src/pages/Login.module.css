@@ -119,7 +119,7 @@
 
 /* Título principal grande */
 .leftTitle {
-  font-size: 46px;
+  font-size: 36px;
   font-weight: 700;
   color: #ffffff;
   line-height: 1.15;
@@ -159,7 +159,24 @@
   align-items: center;
   justify-content: center;
   padding: 60px 40px;
-  overflow-y: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Marca de agua "404" en bajo relieve */
+.rightPanel::before {
+  content: '404';
+  position: absolute;
+  bottom: -40px;
+  right: -20px;
+  font-size: 300px;
+  font-weight: 900;
+  color: #eef0f4;
+  letter-spacing: -15px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Bloque de bienvenida sobre el formulario de Clerk */
@@ -168,11 +185,13 @@
   margin-bottom: 28px;
   width: 100%;
   max-width: 420px;
+  position: relative;
+  z-index: 1;
 }
 
 .rightTitle {
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 800;
   color: #111827;
   margin: 0 0 8px 0;
   letter-spacing: -0.3px;
@@ -180,7 +199,7 @@
 
 .rightSubtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: #9ca3af;
   line-height: 1.5;
 }
 
@@ -190,13 +209,15 @@
   height: auto;
   margin: 0 auto 12px;
   display: block;
-  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.4));
+  filter: none;
 }
 
 /* Wrapper del componente Clerk para que ocupe bien el espacio */
 .clerkWrapper {
   width: 100%;
   max-width: 420px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Caja de error de Clerk */

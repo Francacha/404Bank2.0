@@ -6,12 +6,6 @@ import logoF from '../assets/404log.png'
 import banImg from '../assets/Ban.png'
 import banSImg from '../assets/banS.png'
 
-/*
- * Login — Layout visual de dos columnas inspirado en banca corporativa.
- * Panel izquierdo: marca + título decorativo (sin lógica).
- * Panel derecho: componente Clerk <SignIn> con colores adaptados.
- * La lógica de autenticación (routing, redirect, guards) no fue modificada.
- */
 function Login() {
   const { isLoaded, isSignedIn } = useAuth()
   const [banHabla, setBanHabla] = useState(false)
@@ -36,7 +30,7 @@ function Login() {
         <div className={styles.banWrapper}>
           {banHabla && (
             <div className={styles.banBubble}>
-              ¡Hola! Soy Ban, tu asistente virtual.<br />Bienvenido a 404Bank 👋
+              ¡Hola! Soy Ban, tu asistente virtual.<br />¿En qué te ayudo hoy? 👋
             </div>
           )}
           <img
@@ -97,23 +91,28 @@ function Login() {
                 },
                 elements: {
                   card: {
-                    boxShadow: '0 4px 28px rgba(0, 0, 0, 0.10)',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
                     borderRadius: '14px',
                     border: 'none',
                   },
                   headerTitle: { display: 'none' },
                   headerSubtitle: { display: 'none' },
                   formButtonPrimary: {
-                    backgroundColor: '#4F0919',
+                    backgroundColor: '#ffffff',
+                    color: '#4F0919',
                     borderRadius: '8px',
                     fontSize: '15px',
-                    fontWeight: '600',
+                    fontWeight: '700',
                     letterSpacing: '0.2px',
+                    boxShadow: '0 4px 14px rgba(255,255,255,0.15)',
                   },
-                  footerActionLink: { color: '#4F0919' },
+                  footerActionLink: { color: '#ffffff' },
                   formFieldInput: {
+                    backgroundColor: '#f9fafb',
+                    color: '#111827',
                     borderRadius: '8px',
                     fontSize: '15px',
+                    padding: '10px 14px',
                   },
                 },
               }}

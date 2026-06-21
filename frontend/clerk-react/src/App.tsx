@@ -1,5 +1,6 @@
 import './App.css';
 import Login from './pages/Login';
+import Landing from './pages/Landing';
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Register from './pages/Registro';
 import PrivateRoute from './components/ProtectRouter'
@@ -33,7 +34,7 @@ function App() {
         <Route path="/admin" element={<PrivateRoute><RoleGuard role="admin"><Admin /></RoleGuard></PrivateRoute>} />
         <Route path="/empleado" element={<PrivateRoute><RoleGuard role="empleado"><Empleado /></RoleGuard></PrivateRoute>} />
         <Route path="/gerente" element={<PrivateRoute><RoleGuard role="gerente"><Gerente /></RoleGuard></PrivateRoute>} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Landing />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </ViewModeProvider>
