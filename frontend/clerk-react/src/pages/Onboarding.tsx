@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Onboarding.module.css';
+import logo404Bank from '../assets/404log.png';
 
 const API_URL = 'http://localhost:3000';
 
@@ -61,6 +62,7 @@ function Onboarding() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
+        <img className={styles.logo} src={logo404Bank} alt="404Bank" />
         <h1 className={styles.title}>Completá tu perfil</h1>
         <p className={styles.subtitle}>
           Necesitamos algunos datos para abrir tu cuenta en 404Bank.
