@@ -9,6 +9,15 @@ interface Cuenta {
   saldo: number;
 }
 
+interface Tarjeta {
+  id: number;
+  tipo: string;
+  numero: string | null;
+  cvv: string | null;
+  fecha_vencimiento: string | null;
+  estado: string;
+}
+
 const API_URL = 'http://localhost:3000';
 
 function Home() {
@@ -17,6 +26,8 @@ function Home() {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
+  const [tarjetaIdx, setTarjetaIdx] = useState(0);
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
 
@@ -47,6 +58,38 @@ function Home() {
     cargarCuentas();
   }, [getToken]);
 
+  useEffect(() => {
+    if (!user || user.firstName) return;
+    const syncNombre = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/onboarding/perfil`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.nombre) {
+          await user.update({ firstName: data.nombre, lastName: data.apellido ?? '' });
+        }
+      } catch {}
+    };
+    syncNombre();
+  }, [user, getToken]);
+
+  useEffect(() => {
+    const cargarTarjetas = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/tarjetas/mis-tarjetas`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        if (res.ok) setTarjetas(data.tarjetas.filter((t: Tarjeta) => t.estado === 'activa'));
+      } catch {}
+    };
+    cargarTarjetas();
+  }, [getToken]);
+
   return (
     <div className={styles.dashboardContainer}>
       <aside className={styles.sidebar}>
@@ -56,30 +99,51 @@ function Home() {
         </div>
 
         <nav className={styles.sidebarNav}>
-          <button className={`${styles.navItem} ${styles.navItemActive}`}>
-            <span className={styles.navIconHome} aria-hidden="true"></span>
-            <span>DASHBOARD</span>
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/')}>
-            <span className={styles.navIconWallet} aria-hidden="true"></span>
-            <span>CUENTAS</span>
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/transferir')}>
-            <span className={styles.navIconTransfer} aria-hidden="true"></span>
-            <span>TRANSFERIR</span>
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/historial')}>
-            <span className={styles.navIconHistory} aria-hidden="true"></span>
-            <span>HISTORIAL</span>
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/prestamos')}>
-            <span className={styles.navIconLoan} aria-hidden="true"></span>
-            <span>PRESTAMOS</span>
-          </button>
-          <button className={styles.navItem} onClick={() => navigate('/tarjetas')}>
-            <span className={styles.navIconCard} aria-hidden="true"></span>
-            <span>TARJETAS</span>
-          </button>
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Productos</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/')}>Cuentas</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
+            <button className={styles.navSubItem}>Inversiones</button>
+            <button className={styles.navSubItem}>Comercio Exterior</button>
+            <button className={styles.navSubItem}>Seguros</button>
+            <button className={styles.navSubItem}>Caja de seguridad</button>
+            <button className={styles.navSubItem}>Transporte</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Transacciones</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
+            <button className={styles.navSubItem}>Pago de Servicios</button>
+            <button className={styles.navSubItem}>Echeq</button>
+            <button className={styles.navSubItem}>Recargas</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Seguridad</span>
+            <button className={styles.navSubItem}>Gestión de Token</button>
+            <button className={styles.navSubItem}>Seguridad Biométrica</button>
+            <button className={styles.navSubItem}>Cambio de Contraseña</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Atención al cliente</span>
+            <button className={styles.navSubItem}>Chat</button>
+            <button className={styles.navSubItem}>Turnos</button>
+            <button className={styles.navSubItem}>Cajeros y sucursales</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Documentos</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
+            <button className={styles.navSubItem}>Comprobantes</button>
+            <button className={styles.navSubItem}>Informes ARCA</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Beneficios</span>
+            <button className={styles.navSubItem}>Promociones</button>
+          </div>
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -91,29 +155,18 @@ function Home() {
               Volver al panel
             </button>
           )}
-          <button className={styles.footerItem} type="button">
-            <span className={styles.footerIconSettings} aria-hidden="true"></span>
-            <span>Settings</span>
-          </button>
-          <div className={styles.userSection}>
+<button className={styles.userSection} onClick={() => navigate('/perfil')}>
             <div className={styles.userAvatarSidebar}>{initials || 'U'}</div>
             <span className={styles.userNameSidebar}>{displayName}</span>
-          </div>
+          </button>
         </div>
       </aside>
 
       <main className={styles.mainContent}>
         <header className={styles.topBar}>
-          <h1 className={styles.topBarTitle}>RESUMEN</h1>
+          <h1 className={styles.topBarTitle}></h1>
           <div className={styles.topBarActions}>
-            <button className={styles.iconButton} type="button" aria-label="Ajustes">
-              <span className={styles.topIconSettings} aria-hidden="true"></span>
-            </button>
-            <button className={styles.notificationButton} type="button" aria-label="Notificaciones">
-              <span className={styles.topIconBell} aria-hidden="true"></span>
-              <span className={styles.notificationBadge}>{initials.charAt(0) || 'U'}</span>
-            </button>
-            <span className={styles.topUserName}>{displayName}</span>
+<span className={styles.topUserName}>{displayName}</span>
             <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
               <button className={styles.btnSignOut}>Cerrar sesion</button>
             </SignOutButton>
@@ -124,10 +177,6 @@ function Home() {
           <section className={styles.leftColumn}>
             <div className={styles.sectionHeader}>
               <h2>Resumen General</h2>
-              <div className={styles.heroLogo} aria-label="404Bank">
-                <span className={styles.hero404}>404</span>
-                <span className={styles.heroBank}>Bank</span>
-              </div>
             </div>
 
             <div className={styles.summaryRow}>
@@ -167,129 +216,104 @@ function Home() {
                 </div>
 
                 <div className={styles.cardFooterLeft}>
-                  <button className={styles.btnTransferNow} onClick={() => navigate('/transferir')}>
-                    Transfer Now
-                  </button>
                 </div>
               </article>
 
-              <article className={styles.chartCard}>
-                <div className={styles.chartLine} aria-hidden="true">
-                  <span></span>
-                </div>
-                <div className={styles.chartStats}>
-                  <div>
-                    <span>Transacciones</span>
-                    <strong>28 000,00</strong>
-                  </div>
-                  <div>
-                    <span>Lider de cuentas</span>
-                    <strong>45 370,00</strong>
-                  </div>
-                </div>
-              </article>
             </div>
 
-            <article className={`${styles.card} ${styles.historyCard}`}>
-              <div className={styles.historyHeader}>
-                <h3 className={styles.cardTitle}>Transaction History</h3>
-                <button className={styles.btnOutline} onClick={() => navigate('/historial')}>
-                  View All
-                </button>
+            <article className={`${styles.card} ${styles.tarjetaSection}`}>
+              <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>Mis Tarjetas</h3>
               </div>
-              <div className={styles.cardBody}>
-                <table className={styles.historyTable}>
-                  <thead>
-                    <tr>
-                      <th>Categoria</th>
-                      <th>Categoria</th>
-                      <th className={styles.textRight}>Balado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div className={styles.categoryIconCart}></div>
-                        <div>
-                          <strong>Categorias</strong>
-                          <span className={styles.subText}>Categoria</span>
+
+              <div className={styles.tarjetaBody}>
+                {tarjetas.length === 0 ? (
+                  <div className={styles.tarjetaEmpty}>
+                    <span className={styles.tarjetaEmptyIcon} aria-hidden="true"></span>
+                    <p className={styles.tarjetaEmptyText}>No posee tarjeta. ¿Desea solicitar una?</p>
+                    <button className={styles.btnSolicitarTarjeta} onClick={() => navigate('/tarjetas')}>
+                      Solicitar tarjeta
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.tarjetaCarousel}>
+                    <div className={styles.tarjetaCarouselRow}>
+                      {tarjetas.length > 1 && (
+                        <button
+                          className={styles.arrowBtn}
+                          onClick={() => setTarjetaIdx(i => (i - 1 + tarjetas.length) % tarjetas.length)}
+                          aria-label="Anterior"
+                        >‹</button>
+                      )}
+
+                      <div className={`${styles.tarjetaCard} ${tarjetas[tarjetaIdx].tipo === 'credito' ? styles.tarjetaCredito : styles.tarjetaDebito}`}>
+                        <div className={styles.tarjetaTopRow}>
+                          <div className={styles.chip}></div>
+                          <div className={styles.tarjetaTopRight}>
+                            <span className={styles.tarjetaBankLogo}>
+                              <span className={styles.tarjetaLogo404}>404</span>
+                              <span className={styles.tarjetaLogoBank}>Bank</span>
+                            </span>
+                            <span className={styles.tarjetaTipoBadge}>
+                              {tarjetas[tarjetaIdx].tipo === 'credito' ? 'CRÉDITO' : 'DÉBITO'}
+                            </span>
+                          </div>
                         </div>
-                      </td>
-                      <td>102 900,00</td>
-                      <td className={`${styles.textRight} ${styles.textPositive}`}>2 500 EUR</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div className={styles.categoryIconCard}></div>
-                        <div>
-                          <strong>Forneccione</strong>
-                          <span className={styles.subText}>Categoria</span>
+
+                        <p className={styles.tarjetaNumero}>
+                          **** **** **** {tarjetas[tarjetaIdx].numero?.slice(-4) ?? '----'}
+                        </p>
+
+                        <div className={styles.tarjetaBottomRow}>
+                          <div className={styles.tarjetaDato}>
+                            <span className={styles.tarjetaLabel}>TITULAR</span>
+                            <span className={styles.tarjetaValor}>{displayName.toUpperCase()}</span>
+                          </div>
+                          <div className={styles.tarjetaDato}>
+                            <span className={styles.tarjetaLabel}>VENCE</span>
+                            <span className={styles.tarjetaValor}>
+                              {tarjetas[tarjetaIdx].fecha_vencimiento
+                                ? new Date(tarjetas[tarjetaIdx].fecha_vencimiento!).toLocaleDateString('es-AR', { month: '2-digit', year: '2-digit' })
+                                : '--/--'}
+                            </span>
+                          </div>
+                          <span className={styles.visaLogo}>VISA</span>
                         </div>
-                      </td>
-                      <td>78 300,00</td>
-                      <td className={`${styles.textRight} ${styles.textNegative}`}>-4 550 EUR</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div className={styles.categoryIconLink}></div>
-                        <div>
-                          <strong>Tarjetas</strong>
-                          <span className={styles.subText}>Categoria</span>
+
+                        <div className={styles.tarjetaCircles}>
+                          <span></span>
+                          <span></span>
                         </div>
-                      </td>
-                      <td>36 100,00</td>
-                      <td className={`${styles.textRight} ${styles.textNegative}`}>-500 EUR</td>
-                    </tr>
-                  </tbody>
-                </table>
+                      </div>
+
+                      {tarjetas.length > 1 && (
+                        <button
+                          className={styles.arrowBtn}
+                          onClick={() => setTarjetaIdx(i => (i + 1) % tarjetas.length)}
+                          aria-label="Siguiente"
+                        >›</button>
+                      )}
+                    </div>
+
+                    {tarjetas.length > 1 && (
+                      <div className={styles.tarjetaDots}>
+                        {tarjetas.map((_, i) => (
+                          <button
+                            key={i}
+                            className={i === tarjetaIdx ? styles.dotActive : styles.dot}
+                            onClick={() => setTarjetaIdx(i)}
+                            aria-label={`Tarjeta ${i + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </article>
+
           </section>
 
-          <aside className={styles.rightColumn}>
-            <div className={styles.creditCardVisual}>
-              <div className={styles.ccStripe}></div>
-              <div className={styles.ccWave}></div>
-              <p className={styles.ccNumber}>1234 4SS6 6789</p>
-              <div className={styles.ccDots}>..........</div>
-              <div className={styles.ccCircles}>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-
-            <article className={`${styles.card} ${styles.quickCard}`}>
-              <div className={styles.quickHeader}>
-                <h3 className={styles.cardTitle}>Quick Transfer</h3>
-                <span aria-hidden="true">...</span>
-              </div>
-              <div className={styles.quickBody}>
-                <div className={styles.messageRow}>
-                  <div className={styles.messageIconBell}>
-                    <span>3</span>
-                  </div>
-                  <div>
-                    <strong>Mensajes</strong>
-                    <p>Mensajes comheras en de nuestra aim palettia.</p>
-                  </div>
-                  <span className={styles.messageBadge}>10</span>
-                </div>
-                <div className={styles.messageRow}>
-                  <div className={styles.messageIconMail}></div>
-                  <div>
-                    <strong>Notificacion notificados</strong>
-                    <p>Condinuran matos de cuentas al a asquita.</p>
-                  </div>
-                  <span className={styles.messageBadgeSmall}></span>
-                </div>
-              </div>
-              <div className={styles.cardFooterRight}>
-                <button className={styles.btnTransferNow} onClick={() => navigate('/transferir')}>
-                  Transfer Now
-                </button>
-              </div>
-            </article>
-          </aside>
         </div>
       </main>
     </div>

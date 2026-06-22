@@ -99,4 +99,20 @@ const completarPerfil = async (req, res) => {
     }
 };
 
-module.exports = { verificarPerfil, completarPerfil };
+const obtenerPerfil = async (req, res) => {
+    const clerkId = req.auth?.userId;
+    if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
+    try {
+        const result = await pool.query(
+            'SELECT nombre, apellido FROM Personas WHERE clerk_id = $1',
+            [clerkId]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Perfil no encontrado' });
+        res.json({ nombre: result.rows[0].nombre, apellido: result.rows[0].apellido });
+    } catch (error) {
+        console.error('Error obteniendo perfil:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+module.exports = { verificarPerfil, completarPerfil, obtenerPerfil };

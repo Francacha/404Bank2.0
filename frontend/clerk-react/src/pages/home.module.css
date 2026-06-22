@@ -63,16 +63,71 @@
 
 .brand404,
 .brandBank {
-  font-size: 32px;
+  font-size: 52px;
   line-height: 1;
 }
 
 .sidebarNav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 26px 0 18px;
+  gap: 0;
+  padding: 16px 0 0;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebarNav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navGroup:last-child {
+  border-bottom: 0;
+}
+
+.navGroupTitle {
+  padding: 12px 22px 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.navSubItem {
+  width: 100%;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px 0 28px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navSubItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 
 .navItem,
@@ -263,8 +318,18 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 0 22px;
+  padding: 10px 22px;
   color: #fff;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+}
+
+.userSection:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .userAvatarSidebar {
@@ -389,7 +454,7 @@
 
 .contentGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 322px;
+  grid-template-columns: 1fr;
   gap: 28px;
   padding: 28px 38px 36px;
 }
@@ -430,7 +495,7 @@
 
 .summaryRow {
   display: grid;
-  grid-template-columns: minmax(340px, 1.15fr) minmax(280px, 0.95fr);
+  grid-template-columns: 1fr;
   gap: 22px;
   align-items: stretch;
 }
@@ -446,7 +511,8 @@
 }
 
 .cardHeader {
-  padding: 18px 26px 0;
+  padding: 22px 26px 18px;
+  border-bottom: 1px solid var(--line);
 }
 
 .cardTitle {
@@ -462,26 +528,43 @@
 }
 
 .accountCard {
-  min-height: 250px;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 26px;
+  gap: 24px;
 }
 
 .featuredAccount {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
 }
 
 .accountLabel {
-  color: #211419;
-  font-size: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .accountBalance {
   color: var(--wine-3);
-  font-size: 46px;
+  font-size: 64px;
   line-height: 1;
   font-weight: 900;
-  letter-spacing: 0;
+  letter-spacing: -1px;
 }
 
 .accountCbu,
@@ -492,8 +575,12 @@
 }
 
 .accountCbu {
-  font-size: 16px;
+  font-size: 14px;
   word-break: break-word;
+  font-family: monospace;
+  background: rgba(53, 18, 24, 0.06);
+  padding: 4px 12px;
+  border-radius: 20px;
 }
 
 .accountRow {
@@ -536,15 +623,8 @@
 .cardFooterLeft,
 .cardFooterRight {
   display: flex;
-  padding: 4px 26px 18px;
-}
-
-.cardFooterLeft {
-  justify-content: flex-start;
-}
-
-.cardFooterRight {
-  justify-content: flex-end;
+  padding: 4px 26px 24px;
+  justify-content: center;
 }
 
 .btnTransferNow {
@@ -1099,4 +1179,318 @@
     min-width: 110px;
     font-size: 16px;
   }
+}
+
+/* ── Tarjeta card section ── */
+.tarjetaSection {
+  min-height: 200px;
+}
+
+.tarjetaBody {
+  padding: 36px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Empty state */
+.tarjetaEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.tarjetaEmptyIcon {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  display: block;
+}
+
+.tarjetaEmptyIcon::before {
+  content: '';
+  position: absolute;
+  inset: 10px 4px;
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+}
+
+.tarjetaEmptyIcon::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 22px;
+  height: 2px;
+  background: var(--muted);
+}
+
+.tarjetaEmptyText {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  text-align: center;
+}
+
+.btnSolicitarTarjeta {
+  min-height: 42px;
+  padding: 0 30px;
+  border: 0;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 5px 12px rgba(63, 0, 13, 0.28);
+  transition: background 0.2s ease;
+}
+
+.btnSolicitarTarjeta:hover {
+  background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%);
+}
+
+/* Carousel */
+.tarjetaCarousel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.tarjetaCarouselRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.arrowBtn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--wine-3);
+  font-size: 26px;
+  font-weight: 900;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.arrowBtn:hover {
+  background: rgba(90, 0, 21, 0.1);
+  border-color: var(--wine);
+}
+
+/* The card visual */
+.tarjetaCard {
+  width: 400px;
+  height: 240px;
+  border-radius: 18px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+}
+
+.tarjetaDebito {
+  background: linear-gradient(135deg, #870020 0%, #5c0018 50%, #3b000d 100%);
+}
+
+.tarjetaCredito {
+  background: linear-gradient(135deg, #0d1b3e 0%, #162040 60%, #0a1128 100%);
+}
+
+/* Decorative circles */
+.tarjetaCircles {
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  pointer-events: none;
+}
+
+.tarjetaCircles span {
+  display: block;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.tarjetaCircles span:first-child {
+  width: 130px;
+  height: 130px;
+  background: rgba(255, 255, 255, 0.07);
+  right: 0;
+  bottom: 0;
+}
+
+.tarjetaCircles span:last-child {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.04);
+  right: 60px;
+  bottom: 10px;
+}
+
+/* Top row */
+.tarjetaTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tarjetaTopRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.tarjetaBankLogo {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  line-height: 1;
+}
+
+.tarjetaLogo404 {
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.tarjetaLogoBank {
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: -1px;
+}
+
+/* Chip */
+.chip {
+  width: 44px;
+  height: 34px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #d4b44a 0%, #c9952a 50%, #b8831f 100%);
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.chip::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.25);
+  transform: translateY(-50%);
+}
+
+.chip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.25);
+  transform: translateX(-50%);
+}
+
+/* Type badge */
+.tarjetaTipoBadge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+}
+
+/* Number */
+.tarjetaNumero {
+  margin: 0;
+  font-size: 22px;
+  font-family: 'Courier New', 'Courier', monospace;
+  letter-spacing: 4px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Bottom row */
+.tarjetaBottomRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+}
+
+.tarjetaDato {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tarjetaLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.tarjetaValor {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.5px;
+}
+
+/* VISA logo */
+.visaLogo {
+  margin-left: auto;
+  font-size: 28px;
+  font-weight: 900;
+  font-style: italic;
+  font-family: 'Times New Roman', 'Georgia', serif;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  letter-spacing: -2px;
+}
+
+/* Dots indicator */
+.tarjetaDots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot,
+.dotActive {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.dot {
+  background: rgba(53, 18, 24, 0.2);
+}
+
+.dotActive {
+  background: var(--wine);
+  transform: scale(1.3);
 }
