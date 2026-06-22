@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import { useViewMode } from '../context/ViewModeContext';
 import styles from './Prestamos.module.css';
 
 const API_URL = 'http://localhost:3000';
@@ -17,6 +18,7 @@ function Prestamos() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  const { setViewMode } = useViewMode();
 
   const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +28,12 @@ function Prestamos() {
   const [enviando, setEnviando] = useState(false);
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
   const [errorSolicitud, setErrorSolicitud] = useState('');
+
+  const role = user?.publicMetadata?.role as string | undefined;
+  const esLaboral = role === 'empleado' || role === 'gerente';
+  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
+  const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
+  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
 
   const cargarPrestamos = useCallback(async () => {
     setLoading(true);
@@ -86,79 +94,152 @@ function Prestamos() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <span className={styles.brand}>404Bank</span>
-          <button onClick={() => navigate('/home')} className={styles.btnNav}>Inicio</button>
-          <button onClick={() => navigate('/transferir')} className={styles.btnNav}>Transferir</button>
-          <button onClick={() => navigate('/historial')} className={styles.btnNav}>Historial</button>
-          <button onClick={() => navigate('/tarjetas')} className={styles.btnNav}>Tarjetas</button>
+    <div className={styles.dashboardContainer}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarBrand} aria-label="404Bank">
+          <span className={styles.brand404}>404</span>
+          <span className={styles.brandBank}>Bank</span>
         </div>
-        <div className={styles.navRight}>
-          <span className={styles.userName}>{user?.firstName}</span>
-          <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
-            <button className={styles.btnSignOut}>Cerrar sesión</button>
-          </SignOutButton>
-        </div>
-      </div>
 
-      <div className={styles.content}>
-        <h1 className={styles.title}>Préstamos</h1>
-        <p className={styles.subtitle}>Solicitá un préstamo y seguí el estado de tus solicitudes.</p>
+        <nav className={styles.sidebarNav}>
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Productos</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/home')}>Cuentas</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
+            <button className={`${styles.navSubItem} ${styles.navSubItemActive}`}>Préstamos</button>
+            <button className={styles.navSubItem}>Inversiones</button>
+            <button className={styles.navSubItem}>Comercio Exterior</button>
+            <button className={styles.navSubItem}>Seguros</button>
+            <button className={styles.navSubItem}>Caja de seguridad</button>
+            <button className={styles.navSubItem}>Transporte</button>
+          </div>
 
-        {/* Formulario de solicitud */}
-        <div className={styles.formCard}>
-          <h2 className={styles.formTitle}>Nueva solicitud</h2>
-          <form onSubmit={handleSolicitar} className={styles.form}>
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Monto solicitado ($)</label>
-              <input
-                type="number"
-                min="1"
-                value={monto}
-                onChange={e => setMonto(e.target.value)}
-                placeholder="Ej: 50000"
-                className={styles.input}
-                required
-              />
-            </div>
-            <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
-              {enviando ? 'Enviando...' : 'Solicitar préstamo'}
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Transacciones</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
+            <button className={styles.navSubItem}>Pago de Servicios</button>
+            <button className={styles.navSubItem}>Echeq</button>
+            <button className={styles.navSubItem}>Recargas</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Seguridad</span>
+            <button className={styles.navSubItem}>Gestión de Token</button>
+            <button className={styles.navSubItem}>Seguridad Biométrica</button>
+            <button className={styles.navSubItem}>Cambio de Contraseña</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Atención al cliente</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
+            <button className={styles.navSubItem}>Turnos</button>
+            <button className={styles.navSubItem}>Cajeros y sucursales</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Documentos</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
+            <button className={styles.navSubItem}>Comprobantes</button>
+            <button className={styles.navSubItem}>Informes ARCA</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Beneficios</span>
+            <button className={styles.navSubItem}>Promociones</button>
+          </div>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          {esLaboral && (
+            <button
+              className={styles.btnVolverPanel}
+              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
+            >
+              Volver al panel
             </button>
-          </form>
-          {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
-          {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
-        </div>
-
-        {/* Lista de préstamos */}
-        <h2 className={styles.listTitle}>Mis solicitudes</h2>
-        {loading && <p className={styles.loadingText}>Cargando...</p>}
-        {error && <p className={styles.errorMsg}>{error}</p>}
-        {!loading && !error && prestamos.length === 0 && (
-          <p className={styles.emptyText}>No tenés solicitudes de préstamos todavía.</p>
-        )}
-        <div className={styles.lista}>
-          {prestamos.map(p => (
-            <div key={p.id} className={styles.card}>
-              <div className={styles.cardLeft}>
-                <p className={styles.cardMonto}>
-                  $ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </p>
-                <p className={styles.cardFecha}>
-                  Solicitado: {new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}
-                </p>
-                {p.fecha_resolucion && (
-                  <p className={styles.cardFecha}>
-                    Resuelto: {new Date(p.fecha_resolucion).toLocaleDateString('es-AR')}
-                  </p>
-                )}
-              </div>
-              <span className={badgeClass(p.estado)}>{p.estado.replace('_', ' ')}</span>
+          )}
+          <button className={styles.userSection} onClick={() => navigate('/perfil')}>
+            <div className={styles.userAvatarSidebar}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
+                : (initials || 'U')
+              }
             </div>
-          ))}
+            <span className={styles.userNameSidebar}>{displayName}</span>
+          </button>
         </div>
-      </div>
+      </aside>
+
+      <main className={styles.mainContent}>
+        <header className={styles.topBar}>
+          <h1 className={styles.topBarTitle}>PRÉSTAMOS</h1>
+          <div className={styles.topBarActions}>
+            <span className={styles.topUserName}>{displayName}</span>
+            <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
+              <button className={styles.btnSignOut}>Cerrar sesion</button>
+            </SignOutButton>
+          </div>
+        </header>
+
+        <div className={styles.pageContent}>
+          <div className={styles.pageHeader}>
+            <h2 className={styles.pageTitle}>Solicitá un préstamo</h2>
+            <p className={styles.pageSubtitle}>Completá el formulario y seguí el estado de tus solicitudes.</p>
+          </div>
+
+          <div className={styles.formCard}>
+            <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
+            <form onSubmit={handleSolicitar} className={styles.form}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Monto solicitado ($)</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={monto}
+                  onChange={e => setMonto(e.target.value)}
+                  placeholder="Ej: 50000"
+                  className={styles.input}
+                  required
+                />
+              </div>
+              <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
+                {enviando ? 'Enviando...' : 'Solicitar préstamo'}
+              </button>
+            </form>
+            {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
+            {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
+          </div>
+
+          <div className={styles.listSection}>
+            <h3 className={styles.listTitle}>Mis solicitudes</h3>
+            {loading && <p className={styles.loadingText}>Cargando...</p>}
+            {error && <p className={styles.errorMsg}>{error}</p>}
+            {!loading && !error && prestamos.length === 0 && (
+              <p className={styles.emptyText}>No tenés solicitudes de préstamos todavía.</p>
+            )}
+            <div className={styles.lista}>
+              {prestamos.map(p => (
+                <div key={p.id} className={styles.prestamoCard}>
+                  <div className={styles.prestamoInfo}>
+                    <span className={styles.prestamoMonto}>
+                      $ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className={styles.prestamoFecha}>
+                      Solicitado: {new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}
+                    </span>
+                    {p.fecha_resolucion && (
+                      <span className={styles.prestamoFecha}>
+                        Resuelto: {new Date(p.fecha_resolucion).toLocaleDateString('es-AR')}
+                      </span>
+                    )}
+                  </div>
+                  <span className={badgeClass(p.estado)}>{p.estado.replace('_', ' ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

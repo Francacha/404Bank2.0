@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
@@ -7,6 +8,8 @@ function Perfil() {
   const { user } = useUser();
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const role = user?.publicMetadata?.role as string | undefined;
   const esLaboral = role === 'empleado' || role === 'gerente';
@@ -14,6 +17,20 @@ function Perfil() {
   const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
   const email = user?.primaryEmailAddress?.emailAddress ?? '';
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingPhoto(true);
+    try {
+      await user.setProfileImage({ file });
+    } catch (err) {
+      console.error('Error subiendo imagen:', err);
+    } finally {
+      setUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className={styles.dashboardContainer}>
@@ -53,7 +70,7 @@ function Perfil() {
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Atención al cliente</span>
-            <button className={styles.navSubItem}>Chat</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
             <button className={styles.navSubItem}>Turnos</button>
             <button className={styles.navSubItem}>Cajeros y sucursales</button>
           </div>
@@ -81,7 +98,12 @@ function Perfil() {
             </button>
           )}
           <button className={styles.userSection} onClick={() => navigate('/perfil')}>
-            <div className={styles.userAvatarSidebar}>{initials || 'U'}</div>
+            <div className={styles.userAvatarSidebar}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
+                : (initials || 'U')
+              }
+            </div>
             <span className={styles.userNameSidebar}>{displayName}</span>
           </button>
         </div>
@@ -100,7 +122,25 @@ function Perfil() {
 
         <div className={styles.profileContent}>
           <div className={styles.profileHeader}>
-            <div className={styles.profileAvatar}>{initials || 'U'}</div>
+            <div className={styles.profileAvatar} onClick={() => fileInputRef.current?.click()}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={styles.profileAvatarImg} />
+                : (initials || 'U')
+              }
+              <div className={styles.profileAvatarOverlay}>
+                {uploadingPhoto
+                  ? <span className={styles.profileAvatarSpinner}></span>
+                  : <span className={styles.profileAvatarCameraIcon}></span>
+                }
+              </div>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className={styles.profileAvatarInput}
+              onChange={handlePhotoChange}
+            />
             <div className={styles.profileHeaderInfo}>
               <h2 className={styles.profileName}>{displayName}</h2>
               <span className={styles.profileEmail}>{email}</span>

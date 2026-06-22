@@ -1,182 +1,451 @@
-.page {
+:root {
+  --wine: #5a0015;
+  --wine-2: #76051f;
+  --wine-3: #3b000d;
+  --paper: #f7f8f3;
+  --ink: #220007;
+  --muted: #6c6662;
+  --line: rgba(53, 18, 24, 0.16);
+  --silver: #c7c7c4;
+  --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
+}
+
+.dashboardContainer {
   min-height: 100vh;
-  background-color: #f4f7fb;
-  font-family: Arial, sans-serif;
-}
-
-.navbar {
-  background-color: #1f3b73;
-  padding: 14px 32px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  overflow-x: hidden;
 }
 
-.navLeft {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.navRight {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.brand {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 700;
-  margin-right: 8px;
-}
-
-.btnNav {
-  background: transparent;
-  color: #cbd5e1;
-  border: none;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-.btnNav:hover { color: #ffffff; background: rgba(255,255,255,0.1); }
-
-.userName { color: #cbd5e1; font-size: 14px; }
-
-.btnSignOut {
-  background: transparent;
-  color: #ffffff;
-  border: 1px solid #ffffff;
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.content {
-  padding: 40px 32px;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.title {
-  color: #1f3b73;
-  font-size: 22px;
-  margin-bottom: 4px;
-}
-
-.subtitle {
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 32px;
-}
-
-.formCard {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  margin-bottom: 36px;
-}
-
-.formTitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f3b73;
-  margin: 0 0 16px 0;
-}
-
-.form {
+/* ── Sidebar ── */
+.sidebar {
+  width: 264px;
+  min-height: 100vh;
+  position: fixed;
+  inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0, rgba(255, 255, 255, 0) 100px),
+    linear-gradient(180deg, #690016 0%, #4d0010 100%);
+  box-shadow: 8px 0 22px rgba(25, 0, 6, 0.28);
+  z-index: 10;
 }
 
-.inputGroup {
+.sidebarBrand {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  padding: 0 26px;
+  background: rgba(248, 249, 244, 0.96);
+  white-space: nowrap;
+}
+
+.brand404 {
+  color: var(--wine);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
+}
+
+.brandBank {
+  color: var(--silver);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
+  text-shadow: 0 1px 0 #fff, 0 2px 5px rgba(0, 0, 0, 0.22);
+}
+
+.sidebarNav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-}
-
-.tipoRow {
-  display: flex;
-  gap: 10px;
-}
-
-.tipoBtn {
+  gap: 0;
+  padding: 16px 0 0;
   flex: 1;
-  padding: 10px;
-  border: 2px solid #d1d5db;
-  border-radius: 8px;
-  background: #f9fafb;
-  color: #6b7280;
-  font-size: 14px;
-  font-weight: 600;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) rgba(255, 255, 255, 0.07);
+}
+
+.sidebarNav::-webkit-scrollbar { width: 6px; }
+.sidebarNav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+}
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+}
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navGroup:last-child { border-bottom: 0; }
+
+.navGroupTitle {
+  padding: 12px 22px 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.navSubItem {
+  width: 100%;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px 0 28px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 400;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.15s;
-}
-.tipoBtn:hover { border-color: #1f3b73; color: #1f3b73; }
-.tipoBtnActive {
-  border-color: #1f3b73;
-  background: #1f3b73;
-  color: #ffffff;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.btnSolicitar {
-  padding: 10px 20px;
-  background-color: #1f3b73;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
+.navSubItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.navSubItemActive {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
   font-weight: 600;
-  cursor: pointer;
-  align-self: flex-start;
-}
-.btnSolicitar:hover:not(:disabled) { background-color: #162d5a; }
-.btnSolicitar:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.successMsg { color: #065f46; background: #d1fae5; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-top: 12px; }
-.errorMsg   { color: #991b1b; background: #fee2e2; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-top: 12px; }
-
-.listTitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f3b73;
-  margin-bottom: 16px;
 }
 
-.loadingText { color: #6b7280; font-size: 14px; }
-.emptyText   { color: #6b7280; font-size: 14px; }
-
-.lista {
+.sidebarFooter {
+  padding: 18px 0 30px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-/* Tarjeta pendiente/rechazada */
-.card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 18px 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.btnVolverPanel {
+  margin: 0 18px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--wine);
+  font-weight: 800;
+  cursor: pointer;
 }
 
-/* Tarjeta activa con estilo bancario */
-.cardActiva {
-  background: linear-gradient(135deg, #1f3b73 0%, #2d5bbf 100%);
-  color: #ffffff;
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  color: #fff;
+  width: 100%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+}
+
+.userSection:hover { background: rgba(255, 255, 255, 0.18); }
+
+.userAvatarSidebar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--wine);
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.userAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.userNameSidebar {
+  font-size: 15px;
+  line-height: 1;
+  text-align: left;
+}
+
+/* ── Main ── */
+.mainContent {
+  margin-left: 264px;
+  flex: 1;
+  min-width: 0;
+}
+
+.topBar {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px 0 42px;
+  background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
+}
+
+.topBarTitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.topBarActions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.topUserName {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.btnSignOut {
+  min-height: 45px;
+  padding: 0 24px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ── Page content ── */
+.pageContent {
+  padding: 36px 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 720px;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--wine-3);
+}
+
+.pageSubtitle {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* ── Form card ── */
+.formCard {
+  background: rgba(248, 249, 244, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formCardTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--wine-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tipoRow {
+  display: flex;
+  gap: 12px;
+}
+
+.tipoBtn {
+  flex: 1;
+  padding: 11px 0;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  font-family: inherit;
+}
+
+.tipoBtn:hover {
+  border-color: var(--wine-2);
+  color: var(--wine);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.tipoBtnActive {
+  border-color: var(--wine);
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine) 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(90, 0, 21, 0.3);
+}
+
+.btnSolicitar {
+  align-self: flex-start;
+  padding: 0 28px;
+  min-height: 44px;
+  border: none;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine) 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 4px 14px rgba(90, 0, 21, 0.35);
+  font-family: inherit;
+}
+
+.btnSolicitar:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btnSolicitar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.successMsg {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(6, 95, 70, 0.1);
+  color: #065f46;
+  border: 1px solid rgba(6, 95, 70, 0.2);
+}
+
+.errorMsg {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(153, 27, 27, 0.08);
+  color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.18);
+}
+
+/* ── List section ── */
+.listSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.listTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--wine-3);
+}
+
+.loadingText {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.emptyText {
+  color: var(--muted);
+  font-size: 15px;
+  padding: 20px 0;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Tarjeta cards ── */
+.tarjetaCard {
+  background: rgba(248, 249, 244, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(43, 22, 24, 0.08);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: box-shadow 0.15s ease;
+}
+
+.tarjetaCard:hover {
+  box-shadow: 0 8px 22px rgba(43, 22, 24, 0.14);
+}
+
+.tarjetaCardActiva {
+  background: linear-gradient(135deg, #5a0015 0%, #3b000d 60%, #2a0009 100%);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 28px rgba(43, 0, 11, 0.35);
+}
+
+.tarjetaCardActiva:hover {
+  box-shadow: 0 12px 34px rgba(43, 0, 11, 0.45);
 }
 
 .cardTop {
@@ -187,9 +456,17 @@
 
 .cardTipo {
   font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   color: inherit;
+}
+
+.tarjetaCard:not(.tarjetaCardActiva) .cardTipo {
+  color: var(--wine-3);
+}
+
+.tarjetaCardActiva .cardTipo {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .cardDatos {
@@ -199,12 +476,12 @@
 }
 
 .cardNumero {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  font-family: monospace;
-  color: #ffffff;
-  margin: 4px 0;
+  letter-spacing: 0.18em;
+  font-family: "Courier New", monospace;
+  color: #fff;
+  margin: 0;
 }
 
 .cardRow {
@@ -215,21 +492,73 @@
 .cardDatoLabel {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
 
 .cardDatoValor {
-  font-size: 14px;
-  font-weight: 600;
-  color: #ffffff;
-  margin: 2px 0 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 3px 0 0 0;
 }
 
-.cardFecha { font-size: 12px; color: #6b7280; margin: 0; }
+.cardFecha {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
 
-.badgePendiente   { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.badgePreAprobada { background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.badgeActiva      { background: rgba(255,255,255,0.25); color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.badgeRechazada   { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+/* ── Badges ── */
+.badgePendiente {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background: rgba(180, 120, 0, 0.12);
+  color: #92400e;
+  border: 1px solid rgba(180, 120, 0, 0.25);
+}
+
+.badgePreAprobada {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background: rgba(90, 0, 21, 0.1);
+  color: var(--wine);
+  border: 1px solid rgba(90, 0, 21, 0.2);
+}
+
+.badgeActiva {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.badgeRechazada {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  background: rgba(153, 27, 27, 0.1);
+  color: #991b1b;
+  border: 1px solid rgba(153, 27, 27, 0.2);
+}

@@ -128,7 +128,7 @@ function Home() {
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Atención al cliente</span>
-            <button className={styles.navSubItem}>Chat</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
             <button className={styles.navSubItem}>Turnos</button>
             <button className={styles.navSubItem}>Cajeros y sucursales</button>
           </div>
@@ -156,7 +156,12 @@ function Home() {
             </button>
           )}
 <button className={styles.userSection} onClick={() => navigate('/perfil')}>
-            <div className={styles.userAvatarSidebar}>{initials || 'U'}</div>
+            <div className={styles.userAvatarSidebar}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
+                : (initials || 'U')
+              }
+            </div>
             <span className={styles.userNameSidebar}>{displayName}</span>
           </button>
         </div>
