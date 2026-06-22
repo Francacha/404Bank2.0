@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@clerk/react';
+import { useAuth, useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Onboarding.module.css';
 
@@ -7,6 +7,7 @@ const API_URL = 'http://localhost:3000';
 
 function Onboarding() {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,8 @@ function Onboarding() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al guardar el perfil');
+
+      await user?.update({ firstName: form.nombre, lastName: form.apellido });
 
       navigate('/home');
     } catch (err: unknown) {
