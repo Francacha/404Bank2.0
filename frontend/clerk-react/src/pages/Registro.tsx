@@ -66,27 +66,25 @@ function Register() {
                     padding: '18px 0 0',
                   },
                   footerActionLink: {
-                    color: '#7e0827',
+                    color: '#4F0919',
                     fontWeight: '700',
                   },
+                  formFieldInput: {
+                    backgroundColor: '#ffffff',
+                    color: '#111827',
+                    borderRadius: '8px',
+                    fontSize: '15px',
+                    padding: '12px 14px',
+                    border: '2px solid #4F0919',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), 0 1px 6px rgba(79,9,25,0.08)',
+                  },
+                  formFieldLabel: {
+                    color: '#000000',
+                    fontWeight: '600',
+                    fontSize: '13px',
+                  },
                 },
-                footerActionLink: { color: '#4F0919' },
-                formFieldInput: {
-                  backgroundColor: '#ffffff',
-                  color: '#111827',
-                  borderRadius: '8px',
-                  fontSize: '15px',
-                  padding: '12px 14px',
-                  border: '2px solid #4F0919',
-                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), 0 1px 6px rgba(79,9,25,0.08)',
-                },
-                formFieldLabel: {
-                  color: '#000000',
-                  fontWeight: '600',
-                  fontSize: '13px',
-                },
-              },
-            }}
+              }}
           />
           </div>
         </ClerkLoaded>
