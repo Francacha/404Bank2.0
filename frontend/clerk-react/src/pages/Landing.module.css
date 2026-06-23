@@ -52,7 +52,7 @@
 
 .navLinks li a {
   text-decoration: none;
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 500;
   color: #374151;
   transition: color 0.2s;
@@ -136,7 +136,7 @@
   display: inline-block;
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   padding: 5px 14px;
   border-radius: 999px;
@@ -146,7 +146,7 @@
 }
 
 .heroTitle {
-  font-size: 58px;
+  font-size: 72px;
   font-weight: 800;
   color: #ffffff;
   line-height: 1.1;
@@ -155,7 +155,7 @@
 }
 
 .heroSubtitle {
-  font-size: 17px;
+  font-size: 20px;
   color: rgba(255, 255, 255, 0.78);
   line-height: 1.65;
   margin: 0 0 36px;
@@ -172,7 +172,7 @@
   display: inline-block;
   background: #ffffff;
   color: #4F0919;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   padding: 14px 32px;
   border-radius: 10px;
@@ -268,7 +268,7 @@
 }
 
 .sectionTitle {
-  font-size: 34px;
+  font-size: 42px;
   font-weight: 800;
   color: #111827;
   margin: 0 0 12px;
@@ -276,7 +276,7 @@
 }
 
 .sectionSubtitle {
-  font-size: 16px;
+  font-size: 18px;
   color: #6b7280;
   margin: 0;
 }
@@ -316,14 +316,14 @@
 }
 
 .serviceTitle {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 10px;
 }
 
 .serviceDesc {
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
   line-height: 1.6;
   margin: 0;
@@ -343,7 +343,7 @@
 }
 
 .cotTitle {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
@@ -381,7 +381,7 @@
 }
 
 .cotNombre {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.2px;
@@ -394,13 +394,13 @@
 }
 
 .cotRowLabel {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.55);
   font-weight: 500;
 }
 
 .cotRowValue {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.3px;
@@ -450,14 +450,14 @@
 }
 
 .benefitTitle {
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 700;
   color: #111827;
   margin: 0 0 10px;
 }
 
 .benefitDesc {
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
   line-height: 1.65;
   margin: 0;
@@ -476,7 +476,7 @@
 }
 
 .ctaTitle {
-  font-size: 38px;
+  font-size: 48px;
   font-weight: 800;
   color: #ffffff;
   margin: 0 0 12px;
@@ -484,7 +484,7 @@
 }
 
 .ctaSubtitle {
-  font-size: 17px;
+  font-size: 20px;
   color: rgba(255, 255, 255, 0.75);
   margin: 0 0 36px;
 }
@@ -494,7 +494,7 @@
   display: inline-block;
   background: #ffffff;
   color: #4F0919;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   padding: 15px 40px;
   border-radius: 10px;
@@ -636,7 +636,7 @@
   }
 
   .heroTitle {
-    font-size: 40px;
+    font-size: 50px;
   }
 
   .heroActions {
@@ -698,7 +698,7 @@
   }
 
   .heroTitle {
-    font-size: 32px;
+    font-size: 40px;
   }
 
   .services,

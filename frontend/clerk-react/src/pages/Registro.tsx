@@ -58,7 +58,7 @@ function Register() {
                   boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06), 0 1px 6px rgba(79,9,25,0.08)',
                 },
                 formFieldLabel: {
-                  color: '#374151',
+                  color: '#000000',
                   fontWeight: '600',
                   fontSize: '13px',
                 },
