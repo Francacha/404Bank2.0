@@ -61,6 +61,11 @@ function Register() {
                     width: '100%',
                     boxShadow: '0 9px 18px rgba(93, 4, 26, 0.18)',
                   },
+                  formFieldLabel: {
+                    color: '#000000',
+                    fontWeight: '600',
+                    fontSize: '13px'
+                  },
                   footer: {
                     background: 'transparent',
                     padding: '18px 0 0',
