@@ -27,7 +27,7 @@ function App() {
       <Routes>
         <Route path="/login/*" element={<Login />} />
         <Route path="/register/*" element={<Register />} />
-        <Route path="/onboarding" element={<PrivateRoute><Onboarding /></PrivateRoute>} />
+        <Route path="/onboarding" element={<PrivateRoute><OnboardingGuard onlyIncomplete><Onboarding /></OnboardingGuard></PrivateRoute>} />
         <Route path="/home" element={<PrivateRoute><OnboardingGuard><Home /></OnboardingGuard></PrivateRoute>} />
         <Route path="/transferir" element={<PrivateRoute><OnboardingGuard><Transferir /></OnboardingGuard></PrivateRoute>} />
         <Route path="/historial" element={<PrivateRoute><OnboardingGuard><Historial /></OnboardingGuard></PrivateRoute>} />

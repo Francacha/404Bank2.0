@@ -18,7 +18,7 @@ const empleadoRoutes = require('./src/routes/empleadoRoutes');
 const gerenteRoutes = require('./src/routes/gerenteRoutes');
 const prestamosRoutes = require('./src/routes/prestamosRoutes');
 const tarjetasRoutes = require('./src/routes/tarjetasRoutes');
-
+const chatRoutes = require('./src/routes/chatRoutes');
 
 
 
@@ -40,7 +40,7 @@ app.use('/api/empleado', authMiddleware, empleadoRoutes);
 app.use('/api/gerente', authMiddleware, gerenteRoutes);
 app.use('/api/prestamos', authMiddleware, prestamosRoutes);
 app.use('/api/tarjetas', authMiddleware, tarjetasRoutes);
-
+app.use('/api/chat', authMiddleware, chatRoutes);
 
 
 

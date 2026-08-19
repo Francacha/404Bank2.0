@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useUser, SignOutButton } from '@clerk/react';
+import { useUser, useAuth , SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Chat.module.css';
@@ -71,18 +71,13 @@ const FALLBACK =
 const WELCOME =
   '¡Hola! Soy Ban, tu asistente virtual de 404Bank. ¿En qué puedo ayudarte hoy?';
 
-function findAnswer(input: string): string {
-  const lower = input.toLowerCase();
-  for (const qa of QA) {
-    if (qa.keywords.some(k => lower.includes(k))) return qa.answer;
-  }
-  return FALLBACK;
-}
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 let nextId = 1;
 
 function Chat() {
   const { user } = useUser();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
 
@@ -104,21 +99,40 @@ function Chat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim() || isTyping) return;
     setMessages(prev => [...prev, { id: nextId++, from: 'user', text: text.trim() }]);
     setInput('');
     setShowChips(false);
     setIsTyping(true);
-    setTimeout(() => {
-      setMessages(prev => [...prev, { id: nextId++, from: 'ban', text: findAnswer(text) }]);
+
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          message: text.trim(),
+          history: messages.slice(-10),
+        }),
+      });
+
+      if (!res.ok) throw new Error('Respuesta no válida');
+      const data = await res.json();
+      setMessages(prev => [...prev, { id: nextId++, from: 'ban', text: data.reply }]);
+    } catch {
+      setMessages(prev => [...prev, { id: nextId++, from: 'ban', text: FALLBACK }]);
+    } finally {
       setIsTyping(false);
-    }, 900);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    sendMessage(input);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    void sendMessage(input);
   };
 
   return (

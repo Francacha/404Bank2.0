@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.16.1",
     "cors": "^2.8.6",
