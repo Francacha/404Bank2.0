@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const centralBank = require('../services/centralBankService');
 
 // Función para obtener las cuentas de un cliente
 const getCuentasByCliente = async (req, res) => {
@@ -47,5 +48,65 @@ const getMisCuentas = async (req, res) => {
     }
 };
 
+const abrirCajaAhorro = async (req, res) => {
+    const clerkId = req.auth?.userId;
+    if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
 
-module.exports = { getCuentasByCliente,getMisCuentas };
+    const body = req.body || {};
+    const moneda = (body.moneda || 'USD').toUpperCase();
+    let { dni } = body;
+
+    if (!['ARS', 'USD'].includes(moneda)) {
+        return res.status(400).json({ error: 'La moneda debe ser ARS o USD.' });
+    }
+
+    try {
+        if (!dni) {
+            const personaResult = await pool.query(
+                'SELECT dni FROM Personas WHERE clerk_id = $1',
+                [clerkId]
+            );
+
+            if (personaResult.rows.length === 0) {
+                return res.status(404).json({ error: 'No se encontró una persona local para el usuario autenticado. Enviá el dni en el body o completá el onboarding primero.' });
+            }
+
+            dni = personaResult.rows[0].dni;
+        }
+
+        const resultado = await centralBank.abrirCajaAhorro(String(dni), moneda);
+        const cuenta = resultado.data || {};
+
+        return res.status(resultado.status).json({
+            mensaje: resultado.status === 201
+                ? `Caja de ahorro en ${moneda} creada en Banco Central.`
+                : `Caja de ahorro en ${moneda} encontrada en Banco Central.`,
+            dni: cuenta.dni || String(dni),
+            moneda: cuenta.moneda || moneda,
+            cbu: cuenta.cbu,
+            alias: cuenta.alias,
+            cuenta
+        });
+    } catch (err) {
+        const status = err.response?.status;
+        const data = err.response?.data;
+
+        if (status === 400) {
+            return res.status(400).json({ error: data?.error || 'Falta un campo o la moneda no es válida.', detalle: data });
+        }
+
+        if (status === 401) {
+            return res.status(502).json({ error: 'API key inválida o ausente para Banco Central.' });
+        }
+
+        if (status === 404) {
+            return res.status(404).json({ error: 'Persona no encontrada en Banco Central. Registrala primero con POST /persons.', detalle: data });
+        }
+
+        console.error('Error abriendo caja de ahorro en Banco Central:', data || err.message);
+        return res.status(502).json({ error: 'Error al comunicarse con el Banco Central.' });
+    }
+};
+
+
+module.exports = { getCuentasByCliente, getMisCuentas, abrirCajaAhorro };

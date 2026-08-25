@@ -15,6 +15,18 @@ const registrarPersona = async (nombre, apellido, dni) => {
     return res.data; // { cbu, nombre, apellido, dni, message }
 };
 
+const abrirCajaAhorro = async (dni, moneda = 'USD') => {
+    const res = await axios.post(
+        `${BASE_URL}/accounts`,
+        { dni, moneda },
+        { headers: headers() }
+    );
+    return {
+        status: res.status,
+        data: res.data
+    };
+};
+
 const asignarAlias = async (cbu, alias) => {
     const res = await axios.put(`${BASE_URL}/persons/${cbu}/alias`, { alias }, { headers: headers() });
     return res.data;
@@ -49,6 +61,7 @@ const obtenerTransacciones = async (minutos = 30) => {
 
 module.exports = {
     registrarPersona,
+    abrirCajaAhorro,
     asignarAlias,
     buscarPorCbu,
     buscarPorAlias,
