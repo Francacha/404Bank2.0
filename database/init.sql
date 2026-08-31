@@ -58,6 +58,7 @@ CREATE TABLE Cuentas_Bancarias (
 	cbu VARCHAR(22),
 	alias VARCHAR(255),
 	saldo DECIMAL(15, 2),
+	moneda VARCHAR(3) DEFAULT 'ARS',
 	fecha_apertura DATE,
 	estado estado_cuenta
 );

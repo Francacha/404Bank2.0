@@ -1,6 +1,10 @@
 -- Migración: integración con Banco Central
 -- Ejecutar este script en la base de datos existente (404bank)
 
+-- Moneda de la cuenta (ARS, USD, etc.)
+ALTER TABLE Cuentas_Bancarias
+    ADD COLUMN IF NOT EXISTS moneda VARCHAR(3) DEFAULT 'ARS';
+
 -- Columnas de dirección faltantes en Personas
 ALTER TABLE Personas
     ADD COLUMN IF NOT EXISTS ciudad VARCHAR(255),
