@@ -61,33 +61,25 @@ const abrirCajaAhorro = async (req, res) => {
 
     const body = req.body || {};
     const moneda = (body.moneda || 'USD').toUpperCase();
-    let { dni } = body;
 
     if (!['ARS', 'USD'].includes(moneda)) {
         return res.status(400).json({ error: 'La moneda debe ser ARS o USD.' });
     }
 
     try {
-        let personaResult;
-
-        if (dni) {
-            personaResult = await pool.query(
-                'SELECT id, dni FROM Personas WHERE dni = $1',
-                [String(dni)]
-            );
-        } else {
-            personaResult = await pool.query(
-                'SELECT id, dni FROM Personas WHERE clerk_id = $1',
-                [clerkId]
-            );
-        }
+        // La identidad siempre se obtiene del token autenticado. El DNI no se
+        // acepta desde el body para evitar vincular cuentas de otra persona.
+        const personaResult = await pool.query(
+            'SELECT id, dni FROM Personas WHERE clerk_id = $1',
+            [clerkId]
+        );
 
         if (personaResult.rows.length === 0) {
-            return res.status(404).json({ error: 'No se encontró una persona local para ese DNI o usuario autenticado. Completá el onboarding primero.' });
+            return res.status(404).json({ error: 'No se encontró una persona local para el usuario autenticado. Completá el onboarding primero.' });
         }
 
         const persona = personaResult.rows[0];
-        dni = persona.dni;
+        const dni = persona.dni;
 
         const resultado = await centralBank.abrirCajaAhorro(String(dni), moneda);
         const respuestaBancoCentral = resultado.data || {};
@@ -121,7 +113,7 @@ const abrirCajaAhorro = async (req, res) => {
                 await client.query(
                     `UPDATE Cuentas_Bancarias
                      SET alias = COALESCE($1, alias),
-                         moneda = COALESCE(moneda, $2),
+                         moneda = $2,
                          estado = 'Activa'
                      WHERE id_cuenta = $3`,
                     [alias, monedaCuenta, idCuenta]

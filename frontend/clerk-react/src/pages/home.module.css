@@ -534,6 +534,44 @@
   border-bottom: 1px solid var(--line);
 }
 
+.accountHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.accountTabs {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 22px;
+  background: rgba(53, 18, 24, 0.06);
+}
+
+.accountTab {
+  min-height: 32px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.accountTab:hover {
+  color: var(--wine-3);
+}
+
+.accountTabActive {
+  background: var(--wine-3);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(63, 0, 13, 0.2);
+}
+
 .cardTitle {
   margin: 0;
   color: var(--wine-3);
@@ -662,6 +700,38 @@
 
 .btnTransferNow:hover {
   background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%);
+}
+
+.btnOpenUsd {
+  min-height: 38px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btnOpenUsd:hover:not(:disabled) {
+  background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%);
+}
+
+.btnOpenUsd:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.successMessage {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(30, 112, 58, 0.3);
+  border-radius: 8px;
+  color: #1e703a;
+  background: rgba(30, 112, 58, 0.08);
+  font-weight: 700;
 }
 
 .chartCard {
@@ -1164,6 +1234,20 @@
   .sectionHeader {
     grid-template-columns: 1fr;
     gap: 10px;
+  }
+
+  .accountHeaderRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accountTabs {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .accountTab {
+    white-space: nowrap;
   }
 
   .heroLogo {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
@@ -7,6 +7,7 @@ import styles from './home.module.css';
 interface Cuenta {
   cbu: string;
   saldo: number;
+  moneda: 'ARS' | 'USD';
 }
 
 interface Tarjeta {
@@ -28,6 +29,9 @@ function Home() {
   const [error, setError] = useState('');
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
   const [tarjetaIdx, setTarjetaIdx] = useState(0);
+  const [cuentaActiva, setCuentaActiva] = useState<'pesos' | 'dolares'>('pesos');
+  const [abriendoCuentaUSD, setAbriendoCuentaUSD] = useState(false);
+  const [mensajeCuentaUSD, setMensajeCuentaUSD] = useState('');
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
 
@@ -36,18 +40,25 @@ function Home() {
   const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
   const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
-  const primaryAccount = cuentas[0];
+  const cuentasARS = cuentas.filter(cuenta => cuenta.moneda === 'ARS');
+  const cuentasUSD = cuentas.filter(cuenta => cuenta.moneda === 'USD');
+  const primaryAccount = cuentasARS[0];
+  const primaryUsdAccount = cuentasUSD[0];
+
+  const obtenerCuentas = useCallback(async (): Promise<Cuenta[]> => {
+    const token = await getToken();
+    const res = await fetch(`${API_URL}/api/cuentas/mis-cuentas`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al cargar las cuentas');
+    return data.cuentas;
+  }, [getToken]);
 
   useEffect(() => {
     const cargarCuentas = async () => {
       try {
-        const token = await getToken();
-        const res = await fetch(`${API_URL}/api/cuentas/mis-cuentas`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al cargar las cuentas');
-        setCuentas(data.cuentas);
+        setCuentas(await obtenerCuentas());
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError('Error inesperado');
@@ -56,7 +67,35 @@ function Home() {
       }
     };
     cargarCuentas();
-  }, [getToken]);
+  }, [obtenerCuentas]);
+
+  const abrirCuentaUSD = async () => {
+    setAbriendoCuentaUSD(true);
+    setError('');
+    setMensajeCuentaUSD('');
+
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/cuentas/caja-ahorro`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ moneda: 'USD' }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'No se pudo abrir la cuenta en dólares');
+
+      setMensajeCuentaUSD(data.mensaje || 'Tu cuenta en dólares fue creada correctamente.');
+      setCuentas(await obtenerCuentas());
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Error inesperado al abrir la cuenta en dólares');
+    } finally {
+      setAbriendoCuentaUSD(false);
+    }
+  };
 
   useEffect(() => {
     if (!user || user.firstName) return;
@@ -71,7 +110,9 @@ function Home() {
         if (data.nombre) {
           await user.update({ firstName: data.nombre, lastName: data.apellido ?? '' });
         }
-      } catch {}
+      } catch {
+        // La sincronización del nombre es opcional para la pantalla.
+      }
     };
     syncNombre();
   }, [user, getToken]);
@@ -85,7 +126,9 @@ function Home() {
         });
         const data = await res.json();
         if (res.ok) setTarjetas(data.tarjetas.filter((t: Tarjeta) => t.estado === 'activa'));
-      } catch {}
+      } catch {
+        // Las tarjetas no bloquean la carga del resumen de cuentas.
+      }
     };
     cargarTarjetas();
   }, [getToken]);
@@ -187,37 +230,103 @@ function Home() {
             <div className={styles.summaryRow}>
               <article className={`${styles.card} ${styles.accountCard}`}>
                 <div className={styles.cardHeader}>
-                  <h3 className={styles.cardTitle}>Cuentas</h3>
+                  <div className={styles.accountHeaderRow}>
+                    <h3 className={styles.cardTitle}>Cuentas</h3>
+                    <div className={styles.accountTabs} role="tablist" aria-label="Tipo de cuenta">
+                      <button
+                        className={`${styles.accountTab} ${cuentaActiva === 'pesos' ? styles.accountTabActive : ''}`}
+                        onClick={() => setCuentaActiva('pesos')}
+                        role="tab"
+                        aria-selected={cuentaActiva === 'pesos'}
+                      >
+                        Pesos
+                      </button>
+                      <button
+                        className={`${styles.accountTab} ${cuentaActiva === 'dolares' ? styles.accountTabActive : ''}`}
+                        onClick={() => setCuentaActiva('dolares')}
+                        role="tab"
+                        aria-selected={cuentaActiva === 'dolares'}
+                      >
+                        Cuenta en dólares
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <div className={styles.cardBody}>
-                  {loading && <p className={styles.loadingText}>Cargando tus cuentas...</p>}
-                  {error && <div className={styles.errorBox}>{error}</div>}
-                  {!loading && !error && cuentas.length === 0 && (
-                    <p className={styles.emptyText}>No tenes cuentas activas.</p>
-                  )}
+                  {cuentaActiva === 'pesos' ? (
+                    <>
+                      {loading && <p className={styles.loadingText}>Cargando tus cuentas...</p>}
+                      {error && <div className={styles.errorBox}>{error}</div>}
+                      {!loading && !error && cuentasARS.length === 0 && (
+                        <p className={styles.emptyText}>No tenes cuentas activas.</p>
+                      )}
 
-                  {!loading && !error && primaryAccount && (
-                    <div className={styles.featuredAccount}>
-                      <span className={styles.accountLabel}>Cuenta de ahorro</span>
-                      <strong className={styles.accountBalance}>
-                        $ {Number(primaryAccount.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                      </strong>
-                      <span className={styles.accountCbu}>CBU: {primaryAccount.cbu}</span>
-                    </div>
-                  )}
+                      {!loading && !error && primaryAccount && (
+                        <div className={styles.featuredAccount}>
+                          <span className={styles.accountLabel}>Cuenta de ahorro</span>
+                          <strong className={styles.accountBalance}>
+                            $ {Number(primaryAccount.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                          </strong>
+                          <span className={styles.accountCbu}>CBU: {primaryAccount.cbu}</span>
+                        </div>
+                      )}
 
-                  {cuentas.slice(1).map((cuenta, index) => (
-                    <div key={index} className={styles.accountRow}>
-                      <div className={styles.accountInfo}>
-                        <span className={styles.accountLabel}>Cuenta adicional</span>
-                        <span className={styles.accountCbu}>CBU: {cuenta.cbu}</span>
-                      </div>
-                      <span className={styles.accountRowBalance}>
-                        $ {Number(cuenta.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                  ))}
+                      {cuentasARS.slice(1).map((cuenta) => (
+                        <div key={cuenta.cbu} className={styles.accountRow}>
+                          <div className={styles.accountInfo}>
+                            <span className={styles.accountLabel}>Cuenta adicional</span>
+                            <span className={styles.accountCbu}>CBU: {cuenta.cbu}</span>
+                          </div>
+                          <span className={styles.accountRowBalance}>
+                            $ {Number(cuenta.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {loading && <p className={styles.loadingText}>Cargando tus cuentas...</p>}
+                      {error && <div className={styles.errorBox}>{error}</div>}
+                      {mensajeCuentaUSD && <p className={styles.successMessage}>{mensajeCuentaUSD}</p>}
+
+                      {!loading && !error && !primaryUsdAccount && (
+                        <div className={styles.featuredAccount}>
+                          <span className={styles.accountLabel}>Cuenta en dólares</span>
+                          <p className={styles.emptyText}>Todavía no tenés una cuenta en dólares.</p>
+                          <button
+                            className={styles.btnOpenUsd}
+                            onClick={abrirCuentaUSD}
+                            disabled={abriendoCuentaUSD}
+                          >
+                            {abriendoCuentaUSD ? 'Abriendo cuenta...' : 'Abrir cuenta en dólares'}
+                          </button>
+                        </div>
+                      )}
+
+                      {!loading && !error && primaryUsdAccount && (
+                        <div className={styles.featuredAccount}>
+                          <span className={styles.accountLabel}>Cuenta en dólares</span>
+                          <strong className={styles.accountBalance}>
+                            US$ {Number(primaryUsdAccount.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                          </strong>
+                          <span className={styles.accountCbu}>CBU: {primaryUsdAccount.cbu}</span>
+                        </div>
+                      )}
+
+                      {cuentasUSD.slice(1).map((cuenta) => (
+                        <div key={cuenta.cbu} className={styles.accountRow}>
+                          <div className={styles.accountInfo}>
+                            <span className={styles.accountLabel}>Cuenta adicional en dólares</span>
+                            <span className={styles.accountCbu}>CBU: {cuenta.cbu}</span>
+                          </div>
+                          <span className={styles.accountRowBalance}>
+                            US$ {Number(cuenta.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
 
                 <div className={styles.cardFooterLeft}>
