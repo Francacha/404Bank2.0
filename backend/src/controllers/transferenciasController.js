@@ -5,10 +5,14 @@ const realizarTransferencia = async (req, res) => {
     const clerkId = req.auth?.userId;
     if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
 
-    const { cbuDestino, importe, moneda = 'ARS' } = req.body; // Se agrega la propiedad moneda (default 'ARS')
+    const { cbuDestino, importe, moneda = 'ARS' } = req.body;
 
     if (!cbuDestino || !importe || Number(importe) <= 0) {
         return res.status(400).json({ error: 'cbuDestino e importe son requeridos. El importe debe ser mayor a 0.' });
+    }
+
+    if (typeof moneda !== 'string') {
+        return res.status(400).json({ error: 'Moneda no válida. Use ARS o USD.' });
     }
 
     const monedaOp = moneda.toUpperCase();
@@ -26,8 +30,8 @@ const realizarTransferencia = async (req, res) => {
     `, [clerkId, monedaOp]);
 
     if (cuentaResult.rows.length === 0) {
-        return res.status(404).json({ 
-            error: `No posees una cuenta activa en ${monedaOp} para realizar esta transferencia.` 
+        return res.status(404).json({
+            error: `No posees una cuenta activa en ${monedaOp} para realizar esta transferencia.`
         });
     }
 
@@ -51,8 +55,8 @@ const realizarTransferencia = async (req, res) => {
     if (esTransferenciaInterna) {
         const monedaDestino = cuentaDestinoResult.rows[0].moneda;
         if (monedaDestino !== monedaOp) {
-            return res.status(400).json({ 
-                error: `Incompatibilidad de moneda. Intentas enviar ${monedaOp} a una cuenta en ${monedaDestino}. Utiliza el módulo de Cambio de Divisas.` 
+            return res.status(400).json({
+                error: `Incompatibilidad de moneda. Intentas enviar ${monedaOp} a una cuenta en ${monedaDestino}. Utiliza el módulo de Cambio de Divisas.`
             });
         }
     }
@@ -119,7 +123,7 @@ const realizarTransferencia = async (req, res) => {
     } catch (err) {
         await client.query('ROLLBACK');
         console.error('Error guardando transferencia localmente:', err);
-        return res.status(500).json({ error: 'Error interno del servidor', detalle: err.message });
+        return res.status(500).json({ error: 'Error interno del servidor' });
     } finally {
         client.release();
     }

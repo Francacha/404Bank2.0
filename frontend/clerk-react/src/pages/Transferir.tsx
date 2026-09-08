@@ -30,9 +30,17 @@ function Transferir() {
   const [errorBusqueda, setErrorBusqueda] = useState('');
 
   const [importe, setImporte] = useState('');
+  const [moneda, setMoneda] = useState<'ARS' | 'USD'>('ARS');
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState('');
   const [errorTransferencia, setErrorTransferencia] = useState('');
+
+  const formatearImporte = (monto: number, monedaOperacion: 'ARS' | 'USD') =>
+    new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: monedaOperacion,
+      minimumFractionDigits: 2,
+    }).format(monto);
 
   const buscarDestinatario = async () => {
     if (!busqueda.trim()) return;
@@ -74,11 +82,15 @@ function Transferir() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ cbuDestino: destinatario.cbu, importe: Number(importe) }),
+        body: JSON.stringify({
+          cbuDestino: destinatario.cbu,
+          importe: Number(importe),
+          moneda,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al transferir');
-      setResultado(`Transferencia de $${Number(importe).toLocaleString('es-AR')} realizada con éxito.`);
+      setResultado(`Transferencia de ${formatearImporte(Number(importe), moneda)} realizada con éxito.`);
       setImporte('');
       setDestinatario(null);
       setBusqueda('');
@@ -225,8 +237,23 @@ function Transferir() {
             <div className={styles.formCard}>
               <h3 className={styles.formCardTitle}>Importe</h3>
               <div className={styles.inputGroup}>
-                <label className={styles.label}>Monto a transferir ($)</label>
+                <label className={styles.label} htmlFor="moneda">Moneda de origen</label>
+                <select
+                  id="moneda"
+                  value={moneda}
+                  onChange={e => setMoneda(e.target.value as 'ARS' | 'USD')}
+                  className={styles.input}
+                >
+                  <option value="ARS">Pesos argentinos (ARS)</option>
+                  <option value="USD">Dólares estadounidenses (USD)</option>
+                </select>
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="importe">
+                  Monto a transferir ({moneda})
+                </label>
                 <input
+                  id="importe"
                   type="number"
                   value={importe}
                   onChange={e => setImporte(e.target.value)}
