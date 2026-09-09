@@ -1,15 +1,33 @@
+:root {
+  --wine: #5a0015;
+  --wine-2: #76051f;
+  --wine-3: #3b000d;
+  --paper: #f7f8f3;
+  --paper-soft: #eef1eb;
+  --ink: #220007;
+  --muted: #6c6662;
+  --line: rgba(53, 18, 24, 0.16);
+  --silver: #c7c7c4;
+  --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
+}
+
 .page {
   min-height: 100vh;
-  background-color: #f4f7fb;
-  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 .navbar {
-  background-color: #1f3b73;
-  padding: 16px 32px;
+  padding: 0 32px;
+  min-height: 72px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
+  box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
 }
 
 .navLeft {
@@ -19,30 +37,45 @@
 }
 
 .brand {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
 .btnInicio {
+  min-height: 38px;
   background-color: transparent;
   color: #ffffff;
-  border: 1px solid #ffffff;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  padding: 0 16px;
+  border-radius: 22px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s ease;
+}
+
+.btnInicio:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btnTransferir {
-  background-color: #ffffff;
-  color: #1f3b73;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  min-height: 38px;
+  border: 0;
+  padding: 0 18px;
+  border-radius: 22px;
+  color: #fff;
+  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 800;
   font-size: 13px;
+  transition: background 0.2s ease;
+}
+
+.btnTransferir:hover {
+  background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%);
 }
 
 .navRight {
@@ -51,66 +84,77 @@
 }
 
 .btnVolverPanel {
-  background-color: #f59e0b;
-  color: #1f2937;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 4px;
-  cursor: pointer;
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 22px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--wine);
+  font-weight: 800;
   font-size: 13px;
-  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
+
 .btnVolverPanel:hover {
-  background-color: #d97706;
+  background: #ffffff;
+  transform: translateY(-1px);
 }
 
 .content {
-  padding: 40px 32px;
+  padding: 40px 32px 56px;
   max-width: 800px;
   margin: 0 auto;
 }
 
 .title {
-  color: #1f3b73;
-  font-size: 22px;
+  color: var(--wine-3);
+  font-size: 28px;
+  font-weight: 900;
   margin-bottom: 32px;
 }
 
 .loadingText {
-  color: #6b7280;
+  color: var(--muted);
+  font-size: 17px;
 }
 
 .errorBox {
-  background-color: #fee2e2;
-  color: #991b1b;
+  margin-top: 12px;
   padding: 12px 16px;
+  border: 1px solid rgba(128, 0, 28, 0.28);
   border-radius: 8px;
+  color: #8b001f;
+  background: rgba(128, 0, 28, 0.08);
+  font-weight: 700;
   font-size: 14px;
 }
 
 .emptyText {
-  color: #6b7280;
+  color: var(--muted);
+  font-size: 17px;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .card {
-  background-color: #ffffff;
+  background-color: rgba(248, 249, 244, 0.9);
+  border: 1px solid rgba(38, 20, 22, 0.14);
   border-radius: 10px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 18px 22px;
+  box-shadow: var(--shadow);
 }
 
 .cardEntrante {
-  border-left: 4px solid #059669;
+  border-left: 4px solid #1e703a;
 }
 
 .cardSaliente {
-  border-left: 4px solid #1f3b73;
+  border-left: 4px solid var(--wine-3);
 }
 
 .cardTop {
@@ -120,44 +164,46 @@
 }
 
 .amount {
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: 900;
+  font-size: 18px;
 }
 
 .amountEntrante {
-  color: #059669;
+  color: #1e703a;
 }
 
 .amountSaliente {
-  color: #1f3b73;
+  color: var(--wine-3);
 }
 
 .date {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--muted);
 }
 
 .fromTo {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: #6b7280;
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  font-family: monospace;
 }
 
 .badge {
   display: inline-block;
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 11px;
-  font-weight: 600;
-  padding: 2px 8px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 3px 10px;
   border-radius: 999px;
 }
 
 .badgeAprobada {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
 }
 
 .badgeRechazada {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
 }

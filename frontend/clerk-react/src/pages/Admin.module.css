@@ -1,21 +1,40 @@
+:root {
+  --wine: #5a0015;
+  --wine-2: #76051f;
+  --wine-3: #3b000d;
+  --paper: #f7f8f3;
+  --paper-soft: #eef1eb;
+  --ink: #220007;
+  --muted: #6c6662;
+  --line: rgba(53, 18, 24, 0.16);
+  --silver: #c7c7c4;
+  --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
+  --gold: linear-gradient(135deg, #d4b44a 0%, #c9952a 50%, #b8831f 100%);
+}
+
 .page {
   min-height: 100vh;
-  background-color: #f4f7fb;
-  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
 .navbar {
-  background-color: #1f3b73;
-  padding: 16px 32px;
+  background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
+  box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
+  padding: 0 32px;
+  min-height: 68px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .brand {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 21px;
+  font-weight: 900;
 }
 
 .navRight {
@@ -25,25 +44,29 @@
 }
 
 .adminBadge {
-  background-color: #f59e0b;
-  color: #1f3b73;
+  background: var(--gold);
+  color: var(--wine-3);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   padding: 3px 10px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btnSignOut {
   background-color: transparent;
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.65);
   padding: 6px 14px;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s ease;
 }
+.btnSignOut:hover { background: rgba(255, 255, 255, 0.12); }
 
 .content {
   padding: 40px 32px;
@@ -52,13 +75,14 @@
 }
 
 .title {
-  color: #1f3b73;
-  font-size: 22px;
+  color: var(--wine-3);
+  font-size: 28px;
+  font-weight: 900;
   margin-bottom: 4px;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 14px;
   margin-bottom: 32px;
 }
@@ -67,7 +91,7 @@
   display: flex;
   gap: 8px;
   margin-bottom: 28px;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid var(--line);
   padding-bottom: 0;
 }
 
@@ -76,29 +100,31 @@
   border: none;
   padding: 10px 20px;
   font-size: 14px;
-  font-weight: 600;
-  color: #6b7280;
+  font-weight: 700;
+  color: var(--muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
 }
 
 .tabActive {
-  color: #1f3b73;
-  border-bottom: 2px solid #1f3b73;
+  color: var(--wine-3);
+  border-bottom: 2px solid var(--wine);
 }
 
 .loadingText {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 14px;
 }
 
 .errorBox {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.08);
+  border: 1px solid rgba(128, 0, 28, 0.28);
+  color: #8b001f;
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
+  font-weight: 700;
 }
 
 /* Buscador */
@@ -112,30 +138,31 @@
 .searchInput {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #334155;
-  border-radius: 6px;
-  background: #1e293b;
-  color: #f1f5f9;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
   font-size: 14px;
 }
-.searchInput::placeholder { color: #64748b; }
-.searchInput:focus { outline: none; border-color: #6366f1; }
+.searchInput::placeholder { color: var(--silver); }
+.searchInput:focus { outline: none; border-color: var(--wine); }
 
 .btnLimpiar {
-  padding: 8px 14px;
+  padding: 8px 16px;
   background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
-  border-radius: 6px;
+  border: 2px solid var(--wine-3);
+  color: var(--wine-3);
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
   white-space: nowrap;
 }
-.btnLimpiar:hover { background: #1e293b; color: #f1f5f9; }
+.btnLimpiar:hover { background: rgba(90, 0, 21, 0.08); }
 
 .searchNote {
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--muted);
   margin-bottom: 10px;
 }
 
@@ -151,119 +178,170 @@
 }
 
 .table th {
-  background-color: #1f3b73;
+  background-color: var(--wine-3);
   color: #ffffff;
   padding: 10px 14px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .table td {
   padding: 10px 14px;
-  border-bottom: 1px solid #f3f4f6;
-  color: #374151;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
 }
 
 .table tr:hover td {
-  background-color: #f9fafb;
+  background-color: rgba(53, 18, 24, 0.05);
 }
 
 /* Badges de estado */
 .estadoActiva {
   display: inline-block;
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 .estadoBloqueada {
   display: inline-block;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 /* Botones de acción */
 .btnBloquear {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   border: none;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btnActivar {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   border: none;
   padding: 4px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Badge tipo transferencia */
 .tipoEntrante {
-  color: #059669;
-  font-weight: 700;
+  color: #1e703a;
+  font-weight: 800;
 }
 
 .tipoSaliente {
-  color: #1f3b73;
-  font-weight: 700;
+  color: var(--wine-3);
+  font-weight: 800;
 }
 
 .estadoAprobada {
   display: inline-block;
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 .estadoRechazada {
   display: inline-block;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
+
 /* Pestaña Roles */
 .rolesSection { display: flex; flex-direction: column; gap: 24px; }
-.rolesForm { background: #1e293b; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-.rolesTitle { font-size: 18px; font-weight: 600; color: #f1f5f9; margin: 0; }
+.rolesForm {
+  background: rgba(248, 249, 244, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rolesTitle { font-size: 18px; font-weight: 800; color: var(--wine-3); margin: 0; }
 .rolesInputRow { display: flex; gap: 10px; flex-wrap: wrap; }
-.rolesInput { flex: 1; min-width: 200px; padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 14px; }
-.rolesSelect { padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #f1f5f9; font-size: 14px; }
-.btnAsignar { padding: 8px 18px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-.btnAsignar:hover { background: #4f46e5; }
-.rolesSuccess { color: #4ade80; font-size: 14px; margin: 0; }
-.rolesError { color: #f87171; font-size: 14px; margin: 0; }
-.badgeGerente { background: #7c3aed; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-.badgeEmpleado { background: #0891b2; color: white; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.rolesInput {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+}
+.rolesInput:focus { outline: none; border-color: var(--wine); }
+.rolesSelect {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+}
+.btnAsignar {
+  padding: 8px 20px;
+  border: 0;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.btnAsignar:hover { background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%); }
+.rolesSuccess { color: #1e703a; font-size: 14px; margin: 0; }
+.rolesError { color: #8b001f; font-size: 14px; margin: 0; }
+.badgeGerente {
+  background: var(--wine);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badgeEmpleado {
+  background: var(--wine-2);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
 
 /* Picker de usuario en Roles */
 .pickerContainer { display: flex; flex-direction: column; gap: 4px; }
 .pickerList {
   max-height: 220px;
   overflow-y: auto;
-  border: 1px solid #334155;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #0f172a;
+  background: #fff;
 }
 .pickerItem {
   display: flex;
@@ -271,36 +349,35 @@
   align-items: center;
   padding: 10px 14px;
   cursor: pointer;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--line);
   transition: background 0.12s;
 }
 .pickerItem:last-child { border-bottom: none; }
-.pickerItem:hover { background: #1e293b; }
-.pickerItemNombre { font-size: 14px; color: #f1f5f9; font-weight: 500; }
-.pickerItemEmail { font-size: 12px; color: #64748b; }
-.pickerEmpty { color: #64748b; font-size: 13px; padding: 12px 14px; margin: 0; }
+.pickerItem:hover { background: rgba(53, 18, 24, 0.05); }
+.pickerItemNombre { font-size: 14px; color: var(--ink); font-weight: 600; }
+.pickerItemEmail { font-size: 12px; color: var(--muted); }
+.pickerEmpty { color: var(--muted); font-size: 13px; padding: 12px 14px; margin: 0; }
 
 .pickerSelected {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #0f172a;
-  border: 1px solid #6366f1;
+  background: rgba(90, 0, 21, 0.05);
+  border: 1px solid var(--wine);
   border-radius: 8px;
   padding: 10px 14px;
   flex-wrap: wrap;
 }
-.pickerSelectedNombre { font-size: 14px; color: #f1f5f9; font-weight: 600; flex: 1; }
-.pickerSelectedEmail { font-size: 12px; color: #94a3b8; }
+.pickerSelectedNombre { font-size: 14px; color: var(--wine-3); font-weight: 700; flex: 1; }
+.pickerSelectedEmail { font-size: 12px; color: var(--muted); }
 .btnLimpiarPicker {
   padding: 4px 12px;
   background: transparent;
-  border: 1px solid #475569;
-  color: #94a3b8;
-  border-radius: 6px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 14px;
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
 }
-.btnLimpiarPicker:hover { background: #1e293b; color: #f1f5f9; }
-
+.btnLimpiarPicker:hover { background: rgba(53, 18, 24, 0.06); color: var(--wine-3); }

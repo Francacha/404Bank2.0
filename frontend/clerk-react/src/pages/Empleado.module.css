@@ -1,25 +1,43 @@
+:root {
+  --wine: #5a0015;
+  --wine-2: #76051f;
+  --wine-3: #3b000d;
+  --paper: #f7f8f3;
+  --paper-soft: #eef1eb;
+  --ink: #220007;
+  --muted: #6c6662;
+  --line: rgba(53, 18, 24, 0.16);
+  --silver: #c7c7c4;
+  --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
+}
+
 .page {
   min-height: 100vh;
-  background-color: #f4f7fb;
-  font-family: Arial, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
 .navbar {
-  background-color: #1f3b73;
-  padding: 16px 32px;
+  padding: 0 32px;
+  min-height: 68px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
+  box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
 }
 
 .brand {
-  color: #ffffff;
-  font-size: 20px;
-  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 21px;
+  font-weight: 900;
 }
 
 .empleadoBadge {
-  background-color: #3b82f6;
+  background-color: var(--wine-2);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -38,25 +56,29 @@
 .btnSignOut {
   background-color: transparent;
   color: #ffffff;
-  border: 1px solid #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.65);
   padding: 6px 14px;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s ease;
 }
+.btnSignOut:hover { background: rgba(255, 255, 255, 0.12); }
 
 .btnMiCuenta {
-  background-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
   color: #ffffff;
   border: none;
   padding: 6px 14px;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 .btnMiCuenta:hover {
-  background-color: #2563eb;
+  background: rgba(255, 255, 255, 0.26);
 }
 
 .content {
@@ -66,23 +88,25 @@
 }
 
 .title {
-  color: #1f3b73;
-  font-size: 22px;
+  color: var(--wine-3);
+  font-size: 28px;
+  font-weight: 900;
   margin-bottom: 4px;
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 14px;
   margin-bottom: 32px;
 }
 
 /* Buscador */
 .searchBox {
-  background-color: #ffffff;
+  background-color: rgba(248, 249, 244, 0.9);
+  border: 1px solid var(--line);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow);
   margin-bottom: 24px;
 }
 
@@ -93,18 +117,18 @@
 }
 
 .toggleBtn {
-  background-color: #f3f4f6;
-  color: #6b7280;
+  background-color: rgba(53, 18, 24, 0.06);
+  color: var(--muted);
   border: none;
   padding: 6px 16px;
-  border-radius: 6px;
+  border-radius: 16px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .toggleActive {
-  background-color: #1f3b73;
+  background-color: var(--wine-3);
   color: #ffffff;
 }
 
@@ -116,38 +140,44 @@
 .searchInput {
   flex: 1;
   padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
   font-size: 14px;
 }
+.searchInput:focus { outline: none; border-color: var(--wine); }
 
 .btnBuscar {
-  background-color: #1f3b73;
+  border: 0;
+  border-radius: 20px;
   color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
+  padding: 10px 22px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
 }
-
+.btnBuscar:hover:not(:disabled) { background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%); }
 .btnBuscar:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .btnVerTodos {
   background-color: transparent;
-  color: #1f3b73;
-  border: 1px solid #1f3b73;
-  padding: 10px 16px;
-  border-radius: 6px;
+  color: var(--wine-3);
+  border: 2px solid var(--wine-3);
+  padding: 10px 18px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 700;
   white-space: nowrap;
 }
-.btnVerTodos:disabled { opacity: 0.7; cursor: not-allowed; }
+.btnVerTodos:hover:not(:disabled) { background: rgba(90, 0, 21, 0.08); }
+.btnVerTodos:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .resultadosSection {
   margin-bottom: 24px;
@@ -155,12 +185,12 @@
 
 .searchNote {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--muted);
   margin-bottom: 10px;
 }
 
 .emptyText {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -175,71 +205,71 @@
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow);
 }
 .tableResultados th {
-  background-color: #1f3b73;
+  background-color: var(--wine-3);
   color: #fff;
   padding: 10px 14px;
   text-align: left;
-  font-weight: 600;
+  font-weight: 700;
 }
 .tableResultados td {
   padding: 10px 14px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #374151;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
 }
 
 .filaCliente {
   cursor: pointer;
   transition: background 0.15s;
 }
-.filaCliente:hover { background-color: #eff6ff; }
-.filaActiva { background-color: #dbeafe !important; }
+.filaCliente:hover { background-color: rgba(53, 18, 24, 0.05); }
+.filaActiva { background-color: rgba(90, 0, 21, 0.1) !important; }
 
 .errorText {
-  color: #991b1b;
+  color: #8b001f;
   font-size: 13px;
   margin-top: 8px;
 }
 
 /* Tarjeta del cliente */
 .clienteCard {
-  background-color: #ffffff;
+  background-color: rgba(248, 249, 244, 0.9);
   border-radius: 12px;
   padding: 24px 28px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow);
   margin-bottom: 24px;
-  border-left: 4px solid #1f3b73;
+  border-left: 4px solid var(--wine-3);
 }
 
 .clienteNombre {
   margin: 0;
   font-size: 18px;
-  font-weight: 700;
-  color: #111827;
+  font-weight: 800;
+  color: var(--wine-3);
 }
 
 .clienteDetalle {
   margin: 4px 0 0;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .cuentaRow {
   display: flex;
   gap: 32px;
   padding: 16px 0;
-  border-top: 1px solid #f3f4f6;
-  border-bottom: 1px solid #f3f4f6;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   margin: 16px 0;
 }
 
 .cuentaLabel {
   margin: 0;
   font-size: 11px;
-  font-weight: 600;
-  color: #9ca3af;
+  font-weight: 700;
+  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -248,22 +278,22 @@
   margin: 4px 0 0;
   font-family: monospace;
   font-size: 13px;
-  color: #374151;
+  color: var(--ink);
 }
 
 .cuentaSaldo {
   margin: 4px 0 0;
   font-size: 18px;
-  font-weight: 700;
-  color: #111827;
+  font-weight: 800;
+  color: var(--wine-3);
 }
 
 .estadoActiva {
   display: inline-block;
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 3px 10px;
   border-radius: 999px;
   margin-top: 4px;
@@ -271,10 +301,10 @@
 
 .estadoBloqueada {
   display: inline-block;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 3px 10px;
   border-radius: 999px;
   margin-top: 4px;
@@ -286,36 +316,36 @@
 }
 
 .btnBloquear {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btnActivar {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   border: none;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .btnMovimientos {
-  background-color: #eff6ff;
-  color: #1f3b73;
-  border: 1px solid #bfdbfe;
+  background-color: rgba(90, 0, 21, 0.08);
+  color: var(--wine-3);
+  border: 1px solid var(--line);
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Movimientos */
@@ -324,13 +354,14 @@
 }
 
 .movimientosTitle {
-  color: #1f3b73;
-  font-size: 16px;
+  color: var(--wine-3);
+  font-size: 17px;
+  font-weight: 800;
   margin-bottom: 16px;
 }
 
 .loadingText {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 14px;
 }
 
@@ -341,18 +372,18 @@
 }
 
 .movimientoCard {
-  background-color: #ffffff;
+  background-color: rgba(248, 249, 244, 0.9);
   border-radius: 10px;
   padding: 14px 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
 }
 
 .cardEntrante {
-  border-left: 4px solid #059669;
+  border-left: 4px solid #1e703a;
 }
 
 .cardSaliente {
-  border-left: 4px solid #1f3b73;
+  border-left: 4px solid var(--wine-3);
 }
 
 .movimientoTop {
@@ -362,54 +393,55 @@
 }
 
 .importe {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 15px;
 }
 
 .importeEntrante {
-  color: #059669;
+  color: #1e703a;
 }
 
 .importeSaliente {
-  color: #1f3b73;
+  color: var(--wine-3);
 }
 
 .fecha {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--muted);
 }
 
 .cbuInfo {
   margin: 4px 0 6px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--muted);
 }
 
 .badgeAprobada {
   display: inline-block;
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: rgba(30, 112, 58, 0.12);
+  color: #1e703a;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
 
 .badgeRechazada {
   display: inline-block;
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: rgba(128, 0, 28, 0.1);
+  color: #8b001f;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 2px 8px;
   border-radius: 999px;
 }
+
 .tabsBar {
-  background: #0f172a;
+  background: rgba(248, 249, 244, 0.9);
   display: flex;
   gap: 4px;
   padding: 0 32px;
-  border-bottom: 1px solid #1e293b;
+  border-bottom: 1px solid var(--line);
 }
 
 .tabBtn {
@@ -417,29 +449,28 @@
   border: none;
   padding: 14px 20px;
   font-size: 14px;
-  font-weight: 600;
-  color: #64748b;
+  font-weight: 700;
+  color: var(--muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
-.tabBtn:hover { color: #cbd5e1; }
-.tabBtnActive { color: #f1f5f9; border-bottom-color: #6366f1; }
+.tabBtn:hover { color: var(--wine-3); }
+.tabBtnActive { color: var(--wine-3); border-bottom-color: var(--wine); }
 
 .listTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: #f1f5f9;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--wine-3);
   margin: 0 0 12px 0;
 }
 
 .successMsg {
-  color: #4ade80;
-  background: rgba(74,222,128,0.1);
-  border: 1px solid rgba(74,222,128,0.2);
+  color: #1e703a;
+  background: rgba(30, 112, 58, 0.1);
+  border: 1px solid rgba(30, 112, 58, 0.25);
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 14px;
   margin-bottom: 16px;
 }
-
