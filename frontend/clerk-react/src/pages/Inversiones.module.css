@@ -1,0 +1,50 @@
+.pageContent { max-width: 740px; }
+
+.summaryCard { gap: 16px; }
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryGrid > div {
+  display: flex;
+  min-height: 82px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(53, 18, 24, 0.16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.summaryGrid strong { color: #3b000d; font-size: 16px; }
+
+.metricLabel {
+  color: #6c6662;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+.muted { margin: 0; color: #6c6662; line-height: 1.5; }
+
+.estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 9px;
+  background: rgba(90, 0, 21, 0.06);
+  color: #5a0015;
+}
+
+.estimate strong { font-size: 23px; }
+.estimate small { color: #6c6662; }
+
+@media (max-width: 720px) {
+  .summaryGrid { grid-template-columns: 1fr; }
+}

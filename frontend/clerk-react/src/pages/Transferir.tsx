@@ -116,7 +116,7 @@ function Transferir() {
             <button className={styles.navSubItem} onClick={() => navigate('/home')}>Cuentas</button>
             <button className={styles.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
             <button className={styles.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
-            <button className={styles.navSubItem}>Inversiones</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/inversiones')}>Inversiones</button>
             <button className={styles.navSubItem}>Comercio Exterior</button>
             <button className={styles.navSubItem}>Seguros</button>
             <button className={styles.navSubItem}>Caja de seguridad</button>
