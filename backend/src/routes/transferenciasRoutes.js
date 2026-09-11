@@ -4,6 +4,6 @@ const { realizarTransferencia, obtenerMisTransferencias, buscarDestinatario } = 
 
 router.post('/', realizarTransferencia);
 router.get('/mis-transferencias', obtenerMisTransferencias);
-router.get('/buscar',buscarDestinatario)
+router.get('/destinatario', buscarDestinatario); // Se cambia /buscar por /destinatario
 
 module.exports = router;

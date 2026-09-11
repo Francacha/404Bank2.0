@@ -8,6 +8,27 @@ const asegurarColumnaMoneda = async (db = pool) => {
     `);
 };
 
+// Función helper para limpiar y generar el alias con sufijo según la moneda
+const generarAliasFormateado = (baseTexto, moneda) => {
+    if (!baseTexto) return null;
+
+    // Convertir a minúsculas, quitar tildes y caracteres especiales (solo deja letras, números y puntos)
+    let aliasLimpio = baseTexto
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9.]/g, "");
+
+    // Evitar duplicaciones como .usd.usd o .ars.usd
+    aliasLimpio = aliasLimpio.replace(/\.usd$/i, "").replace(/\.ars$/i, "");
+
+    // Si la moneda es USD, concatenar el sufijo .usd
+    if (moneda && moneda.toUpperCase() === 'USD') {
+        return `${aliasLimpio}.usd`;
+    }
+
+    return aliasLimpio;
+};
+
 // Función para obtener las cuentas de un cliente
 const getCuentasByCliente = async (req, res) => {
     const { id_persona } = req.params; // Saca el ID de la URL
@@ -85,7 +106,10 @@ const abrirCajaAhorro = async (req, res) => {
         const respuestaBancoCentral = resultado.data || {};
         const cuenta = respuestaBancoCentral.cuenta || respuestaBancoCentral;
         const cbu = cuenta.cbu;
-        const alias = cuenta.alias || null;
+
+        const aliasBase = cuenta.alias || body.alias || `cuenta.${dni}`;
+        const alias = generarAliasFormateado(aliasBase, moneda);
+        
         const saldo = cuenta.saldo ?? 0;
         const monedaCuenta = (cuenta.moneda || moneda).toUpperCase();
 

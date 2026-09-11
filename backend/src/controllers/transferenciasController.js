@@ -1,14 +1,44 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
 
+// Función helper local para resolver un Alias o CBU localmente primero
+const resolverCuentaLocal = async (identificador) => {
+    const query = `
+        SELECT cbu, alias, moneda 
+        FROM Cuentas_Bancarias 
+        WHERE (alias = $1 OR cbu = $1) AND estado = 'Activa'
+        LIMIT 1;
+    `;
+    const res = await pool.query(query, [identificador]);
+    return res.rows[0] || null;
+};
+
 const realizarTransferencia = async (req, res) => {
     const clerkId = req.auth?.userId;
     if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
 
-    const { cbuDestino, importe, moneda = 'ARS' } = req.body;
+    let { cbuDestino, aliasDestino, importe, moneda = 'ARS' } = req.body;
 
-    if (!cbuDestino || !importe || Number(importe) <= 0) {
-        return res.status(400).json({ error: 'cbuDestino e importe son requeridos. El importe debe ser mayor a 0.' });
+    // 1. Validar requerimientos
+    if ((!cbuDestino && !aliasDestino) || !importe || Number(importe) <= 0) {
+        return res.status(400).json({ error: 'Se requiere cbuDestino o aliasDestino, y el importe debe ser mayor a 0.' });
+    }
+
+    // 2. Si se envió aliasDestino, resolver el CBU (Híbrido: Local + Banco Central)
+    if (!cbuDestino && aliasDestino) {
+        // Intento 1: Buscar en la base de datos local
+        const cuentaLocal = await resolverCuentaLocal(aliasDestino);
+        if (cuentaLocal) {
+            cbuDestino = cuentaLocal.cbu;
+        } else {
+            // Intento 2: Buscar en el Banco Central
+            try {
+                const destinatarioCentral = await centralBank.buscarPorAlias(aliasDestino);
+                cbuDestino = destinatarioCentral.cbu;
+            } catch (err) {
+                return res.status(404).json({ error: 'No se encontró ninguna cuenta asociada al alias proporcionado.' });
+            }
+        }
     }
 
     if (typeof moneda !== 'string') {
@@ -20,7 +50,7 @@ const realizarTransferencia = async (req, res) => {
         return res.status(400).json({ error: 'Moneda no soportada. Use ARS o USD.' });
     }
 
-    // 1. Obtener la cuenta activa del usuario específica para la moneda indicada
+    // 3. Obtener la cuenta activa del usuario origen específica para la moneda indicada
     const cuentaResult = await pool.query(`
         SELECT cb.cbu, cb.saldo, cb.id_cuenta, cb.moneda
         FROM Cuentas_Bancarias cb
@@ -45,7 +75,7 @@ const realizarTransferencia = async (req, res) => {
         return res.status(422).json({ error: `Saldo insuficiente en tu cuenta en ${monedaOp}.` });
     }
 
-    // 2. Verificar la cuenta destino en nuestro banco para validar la moneda
+    // 4. Verificar si es transferencia interna local
     const cuentaDestinoResult = await pool.query(
         `SELECT id_cuenta, moneda FROM Cuentas_Bancarias WHERE cbu = $1 AND estado = 'Activa'`,
         [cbuDestino]
@@ -61,7 +91,7 @@ const realizarTransferencia = async (req, res) => {
         }
     }
 
-    // 3. Notificar o procesar con el Banco Central
+    // 5. Notificar o procesar con el Banco Central
     let resultado;
     try {
         resultado = await centralBank.realizarTransferencia(
@@ -87,7 +117,7 @@ const realizarTransferencia = async (req, res) => {
         return res.status(502).json({ error: 'Error al comunicarse con el Banco Central' });
     }
 
-    // 4. Descontar saldo local y registrar la transferencia con sus columnas exactas
+    // 6. Descontar saldo local y registrar la transferencia
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -98,13 +128,13 @@ const realizarTransferencia = async (req, res) => {
             [Number(importe), id_cuenta]
         );
 
-        // Registrar salida desde el origen incluyendo 'moneda'
+        // Registrar salida
         await client.query(`
             INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda)
             VALUES ($1, $2, $3, $4, 'aprobada', 'saliente', NOW(), $5)
         `, [resultado.transaccionId || `LOCAL-${Date.now()}`, cbuOrigen, cbuDestino, Number(importe), monedaOp]);
 
-        // Si el destino es de nuestro banco, acreditar directamente
+        // Si es transferencia interna local, acreditar
         if (esTransferenciaInterna) {
             await client.query(
                 'UPDATE Cuentas_Bancarias SET saldo = saldo + $1 WHERE cbu = $2',
@@ -115,8 +145,6 @@ const realizarTransferencia = async (req, res) => {
                 INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda)
                 VALUES ($1, $2, $3, $4, 'aprobada', 'entrante', NOW(), $5)
             `, [(resultado.transaccionId || `LOCAL-${Date.now()}`) + '_in', cbuOrigen, cbuDestino, Number(importe), monedaOp]);
-
-            console.log(`[Transferencia interna ${monedaOp}] $${importe} de ${cbuOrigen} → ${cbuDestino} acreditado localmente`);
         }
 
         await client.query('COMMIT');
@@ -145,7 +173,6 @@ const obtenerMisTransferencias = async (req, res) => {
     if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
 
     try {
-        // Obtener todos los CBUs del usuario (ARS y USD)
         const cuentaResult = await pool.query(`
             SELECT cb.cbu
             FROM Cuentas_Bancarias cb
@@ -187,6 +214,14 @@ const buscarDestinatario = async (req, res) => {
     }
 
     try {
+        // Intento local primero
+        const identificador = cbu || alias;
+        const cuentaLocal = await resolverCuentaLocal(identificador);
+        if (cuentaLocal) {
+            return res.json(cuentaLocal);
+        }
+
+        // Si no está local, buscar en el Banco Central
         let resultado;
         if (cbu) {
             resultado = await centralBank.buscarPorCbu(cbu);
