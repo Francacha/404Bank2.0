@@ -168,42 +168,44 @@ function Inversiones() {
           <h1 className={layout.topBarTitle}>INVERSIONES</h1>
           <div className={layout.topBarActions}><span className={layout.topUserName}>{displayName}</span><SignOutButton signOutOptions={{ redirectUrl: '/login' }}><button className={layout.btnSignOut}>Cerrar sesión</button></SignOutButton></div>
         </header>
-        <div className={`${layout.pageContent} ${styles.pageContent}`}>
-          <div className={layout.pageHeader}>
-            <h2 className={layout.pageTitle}>Compra de dólares</h2>
-            <p className={layout.pageSubtitle}>Convertí pesos de tu cuenta en dólares al tipo de cambio oficial vigente.</p>
+        <div className={layout.pageContent}>
+          <div className={`${layout.pageWrapper} ${styles.pageWrapper}`}>
+            <div className={layout.pageHeader}>
+              <h2 className={layout.pageTitle}>Compra de dólares</h2>
+              <p className={layout.pageSubtitle}>Convertí pesos de tu cuenta en dólares al tipo de cambio oficial vigente.</p>
+            </div>
+
+            {error && <p className={layout.errorMsg}>{error}</p>}
+            {exito && <p className={layout.successMsg}>{exito}</p>}
+
+            <section className={`${layout.formCard} ${styles.summaryCard}`}>
+              <h3 className={layout.formCardTitle}>Cotización y saldos</h3>
+              {cargando ? <p className={styles.muted}>Cargando información...</p> : <div className={styles.summaryGrid}>
+                <div><span className={styles.metricLabel}>Dólar vendedor</span><strong>{cotizacion ? formatear(Number(cotizacion.venta), 'ARS') : 'No disponible'}</strong></div>
+                <div><span className={styles.metricLabel}>Saldo en pesos</span><strong>{cuentaARS ? formatear(Number(cuentaARS.saldo), 'ARS') : 'Sin cuenta ARS'}</strong></div>
+                <div><span className={styles.metricLabel}>Saldo en dólares</span><strong>{cuentaUSD ? formatear(Number(cuentaUSD.saldo), 'USD') : 'Sin cuenta USD'}</strong></div>
+              </div>}
+            </section>
+
+            {!cargando && !cuentaUSD ? (
+              <section className={layout.formCard}>
+                <h3 className={layout.formCardTitle}>Necesitás una cuenta en dólares</h3>
+                <p className={styles.muted}>Abrila sin salir de esta pantalla para poder acreditar allí tus dólares.</p>
+                <button className={layout.btnTransferir} onClick={abrirCuentaUSD} disabled={abriendoCuenta}>{abriendoCuenta ? 'Abriendo cuenta...' : 'Abrir cuenta en dólares'}</button>
+              </section>
+            ) : !cargando && (
+              <section className={layout.formCard}>
+                <h3 className={layout.formCardTitle}>¿Cuántos dólares querés comprar?</h3>
+                <div className={layout.inputGroup}>
+                  <label className={layout.label} htmlFor="monto-usd">Monto en USD</label>
+                  <input id="monto-usd" className={layout.input} type="number" min="0.01" step="0.01" inputMode="decimal" value={montoUSD} onChange={event => setMontoUSD(event.target.value)} placeholder="Ej.: 100" />
+                </div>
+                <div className={styles.estimate}><span>Vas a debitar aproximadamente</span><strong>{formatear(totalARS, 'ARS')}</strong><small>La cotización final la confirma el servidor al operar.</small></div>
+                <button className={layout.btnTransferir} onClick={comprarDolares} disabled={comprando || !cuentaARS || montoNumerico <= 0 || totalARS > Number(cuentaARS.saldo)}>{comprando ? 'Comprando...' : 'Comprar dólares'}</button>
+                {cuentaARS && totalARS > Number(cuentaARS.saldo) && <p className={layout.errorMsg}>No contás con saldo suficiente en pesos para esta compra.</p>}
+              </section>
+            )}
           </div>
-
-          {error && <p className={layout.errorMsg}>{error}</p>}
-          {exito && <p className={layout.successMsg}>{exito}</p>}
-
-          <section className={`${layout.formCard} ${styles.summaryCard}`}>
-            <h3 className={layout.formCardTitle}>Cotización y saldos</h3>
-            {cargando ? <p className={styles.muted}>Cargando información...</p> : <div className={styles.summaryGrid}>
-              <div><span className={styles.metricLabel}>Dólar vendedor</span><strong>{cotizacion ? formatear(Number(cotizacion.venta), 'ARS') : 'No disponible'}</strong></div>
-              <div><span className={styles.metricLabel}>Saldo en pesos</span><strong>{cuentaARS ? formatear(Number(cuentaARS.saldo), 'ARS') : 'Sin cuenta ARS'}</strong></div>
-              <div><span className={styles.metricLabel}>Saldo en dólares</span><strong>{cuentaUSD ? formatear(Number(cuentaUSD.saldo), 'USD') : 'Sin cuenta USD'}</strong></div>
-            </div>}
-          </section>
-
-          {!cargando && !cuentaUSD ? (
-            <section className={layout.formCard}>
-              <h3 className={layout.formCardTitle}>Necesitás una cuenta en dólares</h3>
-              <p className={styles.muted}>Abrila sin salir de esta pantalla para poder acreditar allí tus dólares.</p>
-              <button className={layout.btnTransferir} onClick={abrirCuentaUSD} disabled={abriendoCuenta}>{abriendoCuenta ? 'Abriendo cuenta...' : 'Abrir cuenta en dólares'}</button>
-            </section>
-          ) : !cargando && (
-            <section className={layout.formCard}>
-              <h3 className={layout.formCardTitle}>¿Cuántos dólares querés comprar?</h3>
-              <div className={layout.inputGroup}>
-                <label className={layout.label} htmlFor="monto-usd">Monto en USD</label>
-                <input id="monto-usd" className={layout.input} type="number" min="0.01" step="0.01" inputMode="decimal" value={montoUSD} onChange={event => setMontoUSD(event.target.value)} placeholder="Ej.: 100" />
-              </div>
-              <div className={styles.estimate}><span>Vas a debitar aproximadamente</span><strong>{formatear(totalARS, 'ARS')}</strong><small>La cotización final la confirma el servidor al operar.</small></div>
-              <button className={layout.btnTransferir} onClick={comprarDolares} disabled={comprando || !cuentaARS || montoNumerico <= 0 || totalARS > Number(cuentaARS.saldo)}>{comprando ? 'Comprando...' : 'Comprar dólares'}</button>
-              {cuentaARS && totalARS > Number(cuentaARS.saldo) && <p className={layout.errorMsg}>No contás con saldo suficiente en pesos para esta compra.</p>}
-            </section>
-          )}
         </div>
       </main>
     </div>

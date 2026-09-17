@@ -244,17 +244,45 @@
 
 /* ── Page content ── */
 .pageContent {
-  padding: 36px 42px;
+  padding: 36px 42px 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.pageWrapper {
+  width: 100%;
+  max-width: 980px;
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Content grid (form + contacts sidebar) ── */
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 28px;
-  max-width: 600px;
+  align-items: start;
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pageHeader {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  text-align: center;
 }
 
 .pageTitle {
@@ -268,6 +296,72 @@
   margin: 0;
   font-size: 15px;
   color: var(--muted);
+}
+
+/* ── Steps indicator ── */
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px 0 6px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  opacity: 0.45;
+  transition: opacity 0.2s ease;
+}
+
+.stepActive,
+.stepDone {
+  opacity: 1;
+}
+
+.stepPending {
+  opacity: 0.45;
+}
+
+.stepNumber {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(53, 18, 24, 0.08);
+  color: var(--muted);
+  border: 1.5px solid var(--line);
+}
+
+.stepActive .stepNumber {
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine) 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.stepDone .stepNumber {
+  background: var(--wine-3);
+  border-color: transparent;
+  color: #fff;
+}
+
+.stepLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.stepDivider {
+  width: 30px;
+  height: 1.5px;
+  background: var(--line);
+  flex-shrink: 0;
 }
 
 /* ── Form card ── */
@@ -346,29 +440,154 @@
 .btnBuscar:hover:not(:disabled) { opacity: 0.88; }
 .btnBuscar:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* ── Contactos guardados (sidebar) ── */
+.contactsSidebar {
+  background: rgba(248, 249, 244, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 24px;
+}
+
+.contactsSidebarTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--wine-3);
+}
+
+.contactsSidebarEmpty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* Muestra ~6 contactos y scrollea el resto */
+.contactsSidebarList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 336px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--silver) transparent;
+}
+
+.contactsSidebarList::-webkit-scrollbar { width: 6px; }
+.contactsSidebarList::-webkit-scrollbar-track { background: transparent; }
+.contactsSidebarList::-webkit-scrollbar-thumb {
+  background: var(--silver);
+  border-radius: 4px;
+}
+
+.contactoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.contactoRow:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.contactoRowAvatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine-3) 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.contactoRowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.contactoRowNombre {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contactoRowDato {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Checkbox ── */
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.checkboxRow input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--wine);
+  cursor: pointer;
+}
+
 /* ── Destinatario card ── */
 .destinatarioCard {
   display: flex;
-  align-items: stretch;
-  gap: 0;
+  align-items: center;
+  gap: 14px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--line);
   border-radius: 10px;
-  overflow: hidden;
+  padding: 14px 18px;
   box-shadow: 0 4px 12px rgba(43, 22, 24, 0.07);
 }
 
-.destinatarioAccent {
-  width: 5px;
-  background: linear-gradient(180deg, var(--wine-2) 0%, var(--wine-3) 100%);
+.destinatarioAvatar {
+  width: 44px;
+  height: 44px;
   flex-shrink: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine-3) 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .destinatarioInfo {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 14px 18px;
 }
 
 .destinatarioNombre {
@@ -399,6 +618,96 @@
 .input:focus {
   border-color: var(--wine);
   background: #fff;
+}
+
+/* ── Currency toggle ── */
+.currencyToggle {
+  display: flex;
+  gap: 8px;
+  padding: 4px;
+  background: rgba(53, 18, 24, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+}
+
+.currencyOption {
+  flex: 1;
+  min-height: 40px;
+  border: none;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.currencyOption:hover {
+  color: var(--ink);
+}
+
+.currencyOptionActive {
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(90, 0, 21, 0.3);
+}
+
+.currencyOptionActive:hover {
+  color: #fff;
+}
+
+/* ── Summary card ── */
+.summaryCard {
+  background: rgba(248, 249, 244, 0.92);
+  border: 1.5px solid var(--wine-2);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summaryLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.summaryValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: right;
+}
+
+.summaryValueMono {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  text-align: right;
+}
+
+.summaryDivider {
+  height: 1px;
+  background: var(--line);
+}
+
+.summaryAmount {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--wine-3);
 }
 
 /* ── Confirm button ── */

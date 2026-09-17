@@ -135,6 +135,52 @@
   font-size: 17px;
 }
 
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(53, 18, 24, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+
+.filterButton {
+  min-height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.filterButton:hover {
+  color: var(--ink);
+}
+
+.filterButtonActive {
+  background: linear-gradient(135deg, var(--wine-2) 0%, var(--wine) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(90, 0, 21, 0.3);
+}
+
+.filterButtonActive:hover {
+  color: #fff;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -188,9 +234,15 @@
   font-family: monospace;
 }
 
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .badge {
   display: inline-block;
-  margin-top: 8px;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.4px;
@@ -206,4 +258,14 @@
 .badgeRechazada {
   background-color: rgba(128, 0, 28, 0.1);
   color: #8b001f;
+}
+
+.badgeArs {
+  background-color: rgba(53, 18, 24, 0.1);
+  color: var(--wine-3);
+}
+
+.badgeUsd {
+  background-color: rgba(9, 90, 90, 0.12);
+  color: #0a6b6b;
 }

@@ -1,26 +1,26 @@
-.pageContent { max-width: 740px; }
+.pageWrapper { max-width: 820px; }
 
-.summaryCard { gap: 16px; }
+.summaryCard { gap: 18px; }
 
 .summaryGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .summaryGrid > div {
   display: flex;
-  min-height: 82px;
+  min-height: 96px;
   flex-direction: column;
   justify-content: space-between;
-  gap: 8px;
-  padding: 14px;
+  gap: 10px;
+  padding: 18px;
   border: 1px solid rgba(53, 18, 24, 0.16);
-  border-radius: 9px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.66);
 }
 
-.summaryGrid strong { color: #3b000d; font-size: 16px; }
+.summaryGrid strong { color: #3b000d; font-size: 19px; }
 
 .metricLabel {
   color: #6c6662;

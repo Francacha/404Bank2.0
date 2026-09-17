@@ -4,9 +4,11 @@ const centralBank = require('../services/centralBankService');
 // Función helper local para resolver un Alias o CBU localmente primero
 const resolverCuentaLocal = async (identificador) => {
     const query = `
-        SELECT cbu, alias, moneda 
-        FROM Cuentas_Bancarias 
-        WHERE (alias = $1 OR cbu = $1) AND estado = 'Activa'
+        SELECT cb.cbu, cb.alias, cb.moneda, p.nombre, p.apellido
+        FROM Cuentas_Bancarias cb
+        JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+        JOIN Personas p ON tit.id_persona = p.id
+        WHERE (cb.alias = $1 OR cb.cbu = $1) AND cb.estado = 'Activa'
         LIMIT 1;
     `;
     const res = await pool.query(query, [identificador]);

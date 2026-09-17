@@ -20,6 +20,7 @@ const prestamosRoutes = require('./src/routes/prestamosRoutes');
 const tarjetasRoutes = require('./src/routes/tarjetasRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
 const divisasRoutes = require('./src/routes/divisasRoutes');
+const contactosRoutes = require('./src/routes/contactosRoutes');
 
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/prestamos', authMiddleware, prestamosRoutes);
 app.use('/api/tarjetas', authMiddleware, tarjetasRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/divisas', authMiddleware, divisasRoutes);
+app.use('/api/contactos', authMiddleware, contactosRoutes);
 
 
 app.use((err, req, res, next) => {
