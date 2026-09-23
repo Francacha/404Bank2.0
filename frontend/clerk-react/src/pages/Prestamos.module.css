@@ -244,17 +244,20 @@
 
 /* ── Page content ── */
 .pageContent {
-  padding: 36px 42px;
+  padding: 36px 42px 60px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  max-width: 720px;
+  gap: 28px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .pageHeader {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  text-align: center;
 }
 
 .pageTitle {
