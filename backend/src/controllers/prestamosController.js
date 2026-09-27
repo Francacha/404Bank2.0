@@ -1,4 +1,24 @@
 const { pool } = require('../config/db');
+const { obtenerSituacionCrediticia } = require('../services/centralBankService');
+
+// Agrega a cada préstamo la situación crediticia del cliente según el Banco Central.
+// Si la consulta falla para un DNI, el préstamo se devuelve igual con situacion_crediticia = null.
+const agregarSituacionCrediticia = async (prestamos) => {
+  const consultas = new Map();
+  for (const { dni } of prestamos) {
+    if (!consultas.has(dni)) {
+      consultas.set(dni, obtenerSituacionCrediticia(dni).catch((error) => {
+        console.error(`Error consultando situación crediticia del DNI ${dni}:`, error.message);
+        return null;
+      }));
+    }
+  }
+
+  return Promise.all(prestamos.map(async (prestamo) => ({
+    ...prestamo,
+    situacion_crediticia: await consultas.get(prestamo.dni)
+  })));
+};
 
 // CLIENTE: solicitar un préstamo
 const solicitarPrestamo = async (req, res) => {
@@ -10,8 +30,9 @@ const solicitarPrestamo = async (req, res) => {
   }
 
   try {
+    // 1. Obtener la cuenta y el DNI del usuario
     const cuentaResult = await pool.query(
-      `SELECT cb.id_cuenta FROM cuentas_bancarias cb
+      `SELECT cb.id_cuenta, p.dni FROM cuentas_bancarias cb
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
        WHERE p.clerk_id = $1 AND cb.estado = 'Activa'
@@ -23,8 +44,20 @@ const solicitarPrestamo = async (req, res) => {
       return res.status(404).json({ error: 'No tenés una cuenta activa' });
     }
 
-    const id_cuenta = cuentaResult.rows[0].id_cuenta;
+    const { id_cuenta, dni } = cuentaResult.rows[0];
 
+    // 2. Consultar al Banco Central antes de dar el crédito
+    const datosCrediticios = await obtenerSituacionCrediticia(dni);
+    
+    // Si la situación es 3 (Riesgo medio), 4 (Riesgo alto) o 5 (Irrecuperable), denegamos.
+    if (datosCrediticios.situacion > 2) {
+        return res.status(403).json({ 
+            error: 'Préstamo denegado por situación crediticia desfavorable en el Banco Central.',
+            situacion: datosCrediticios.situacion
+        });
+    }
+
+    // 3. Si todo está bien, se registra el préstamo
     const result = await pool.query(
       `INSERT INTO prestamos (id_cuenta, monto) VALUES ($1, $2) RETURNING *`,
       [id_cuenta, monto]
@@ -71,7 +104,7 @@ const getPendientes = async (req, res) => {
        WHERE pr.estado = 'pendiente'
        ORDER BY pr.fecha_solicitud ASC`
     );
-    res.json({ prestamos: result.rows });
+    res.json({ prestamos: await agregarSituacionCrediticia(result.rows) });
   } catch (error) {
     console.error('Error obteniendo pendientes:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -139,7 +172,7 @@ const getPreAprobados = async (req, res) => {
        WHERE pr.estado = 'pre_aprobado'
        ORDER BY pr.fecha_solicitud ASC`
     );
-    res.json({ prestamos: result.rows });
+    res.json({ prestamos: await agregarSituacionCrediticia(result.rows) });
   } catch (error) {
     console.error('Error obteniendo pre-aprobados:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

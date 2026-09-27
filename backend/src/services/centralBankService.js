@@ -59,6 +59,34 @@ const obtenerTransacciones = async (minutos = 30) => {
     return res.data;
 };
 
+const obtenerSituacionCrediticia = async (dni) => {
+    try {
+        const res = await axios.get(`${BASE_URL}/central-deudores/${dni}`, {
+            headers: headers()
+        });
+        return res.data; // Devuelve { dni, situacion, deudas: [...] }
+    } catch (error) {
+        // Si responde 404, significa que el DNI no registra deudas (Situación 1: Normal)
+        if (error.response && error.response.status === 404) {
+            return { dni, situacion: 1, deudas: [] };
+        }
+        throw error;
+    }
+};
+
+const informarDeuda = async (dni, monto, situacion) => {
+    const res = await axios.post(
+        `${BASE_URL}/central-deudores`,
+        { 
+            dni: String(dni), 
+            monto: Number(monto), 
+            situacion: Number(situacion) 
+        },
+        { headers: headers() }
+    );
+    return res.data; // Devuelve 200 (actualización) o 201 (primera vez)
+};
+
 module.exports = {
     registrarPersona,
     abrirCajaAhorro,
@@ -66,5 +94,8 @@ module.exports = {
     buscarPorCbu,
     buscarPorAlias,
     realizarTransferencia,
-    obtenerTransacciones
+    obtenerTransacciones,
+    // Exportamos las dos nuevas funciones
+    obtenerSituacionCrediticia,
+    informarDeuda
 };
