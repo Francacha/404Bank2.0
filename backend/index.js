@@ -56,6 +56,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 
 const { iniciarPolling } = require('./src/services/pollingService');
+const { iniciarCronCobros } = require('./src/cron/cobroPrestamosCron');
 
 const startServer = async () => {
   try {
@@ -66,6 +67,7 @@ const startServer = async () => {
         console.log('BYPASS_CLERK_AUTH=true: autenticacion desactivada para pruebas locales.');
       }
       iniciarPolling();
+      iniciarCronCobros();
     });
   } catch (error) {
     console.error('No se pudo conectar a PostgreSQL al iniciar el backend:', error.message);

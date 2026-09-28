@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   solicitarPrestamo,
   getMisPrestamos,
+  getMiSituacionCrediticia,
   getPendientes,
   preAprobar,
   rechazar,
@@ -13,6 +14,7 @@ const {
 // Cliente
 router.post('/solicitar', solicitarPrestamo);
 router.get('/mis-prestamos', getMisPrestamos);
+router.get('/mi-situacion-crediticia', getMiSituacionCrediticia);
 
 // Empleado
 router.get('/pendientes', getPendientes);

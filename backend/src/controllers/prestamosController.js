@@ -76,7 +76,13 @@ const getMisPrestamos = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT pr.* FROM prestamos pr
+      `SELECT pr.*,
+              COALESCE(
+                (SELECT json_agg(cp ORDER BY cp.numero_cuota)
+                 FROM cuotas_prestamo cp WHERE cp.id_prestamo = pr.id),
+                '[]'
+              ) AS cuotas
+       FROM prestamos pr
        JOIN cuentas_bancarias cb ON pr.id_cuenta = cb.id_cuenta
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
@@ -89,6 +95,28 @@ const getMisPrestamos = async (req, res) => {
   } catch (error) {
     console.error('Error obteniendo préstamos:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// CLIENTE: ver su situación crediticia en el Banco Central
+const getMiSituacionCrediticia = async (req, res) => {
+  const clerkId = req.auth.userId;
+
+  try {
+    const personaResult = await pool.query(
+      'SELECT dni FROM personas WHERE clerk_id = $1',
+      [clerkId]
+    );
+
+    if (personaResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No se encontró el cliente' });
+    }
+
+    const situacion = await obtenerSituacionCrediticia(personaResult.rows[0].dni);
+    res.json({ situacion_crediticia: situacion });
+  } catch (error) {
+    console.error('Error consultando situación crediticia:', error);
+    res.status(502).json({ error: 'No se pudo consultar al Banco Central' });
   }
 };
 
@@ -179,40 +207,74 @@ const getPreAprobados = async (req, res) => {
   }
 };
 
-// GERENTE: aprobar definitivamente y acreditar saldo
+// Divide el monto en cuotas iguales (en centavos para evitar errores de redondeo).
+// La diferencia de centavos se suma a la última cuota para que el total coincida exacto.
+const calcularCuotas = (monto, cantCuotas) => {
+  const totalCentavos = Math.round(Number(monto) * 100);
+  const cuotaCentavos = Math.floor(totalCentavos / cantCuotas);
+  const ultimaCentavos = totalCentavos - cuotaCentavos * (cantCuotas - 1);
+
+  return Array.from({ length: cantCuotas }, (_, i) => ({
+    numero_cuota: i + 1,
+    monto: (i === cantCuotas - 1 ? ultimaCentavos : cuotaCentavos) / 100
+  }));
+};
+
+// GERENTE: aprobar definitivamente, acreditar saldo y generar las cuotas
 const aprobar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
 
+  const client = await pool.connect();
   try {
-    const prestamoResult = await pool.query(
-      `SELECT * FROM prestamos WHERE id = $1 AND estado = 'pre_aprobado'`,
+    await client.query('BEGIN');
+
+    // FOR UPDATE evita que dos aprobaciones simultáneas acrediten el préstamo dos veces
+    const prestamoResult = await client.query(
+      `SELECT * FROM prestamos WHERE id = $1 AND estado = 'pre_aprobado' FOR UPDATE`,
       [id]
     );
 
     if (prestamoResult.rows.length === 0) {
+      await client.query('ROLLBACK');
       return res.status(404).json({ error: 'Préstamo no encontrado o no está pre-aprobado' });
     }
 
     const prestamo = prestamoResult.rows[0];
+    const cantCuotas = Math.max(1, Number(prestamo.cant_cuotas) || 1);
+    const cuotas = calcularCuotas(prestamo.monto, cantCuotas);
 
-    await pool.query(
+    await client.query(
       `UPDATE cuentas_bancarias SET saldo = saldo + $1 WHERE id_cuenta = $2`,
       [prestamo.monto, prestamo.id_cuenta]
     );
 
-    const result = await pool.query(
+    // Vencimientos mensuales consecutivos a partir de hoy: cuota 1 vence en 1 mes, cuota 2 en 2 meses, etc.
+    for (const cuota of cuotas) {
+      await client.query(
+        `INSERT INTO cuotas_prestamo (id_prestamo, numero_cuota, monto, fecha_vencimiento, estado)
+         VALUES ($1, $2, $3, (CURRENT_DATE + make_interval(months => $2))::date, 'pendiente')`,
+        [prestamo.id, cuota.numero_cuota, cuota.monto]
+      );
+    }
+
+    const result = await client.query(
       `UPDATE prestamos
-       SET estado = 'aprobado', clerk_id_gerente = $1, fecha_resolucion = NOW()
-       WHERE id = $2 RETURNING *`,
-      [clerkId, id]
+       SET estado = 'aprobado', clerk_id_gerente = $1, fecha_resolucion = NOW(),
+           cant_cuotas = $2, monto_cuota = $3
+       WHERE id = $4 RETURNING *`,
+      [clerkId, cantCuotas, cuotas[0].monto, id]
     );
 
-    res.json({ prestamo: result.rows[0] });
+    await client.query('COMMIT');
+    res.json({ prestamo: result.rows[0], cuotas });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Error aprobando préstamo:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
+  } finally {
+    client.release();
   }
 };
 
-module.exports = { solicitarPrestamo, getMisPrestamos, getPendientes, preAprobar, rechazar, getPreAprobados, aprobar };
+module.exports = { solicitarPrestamo, getMisPrestamos, getMiSituacionCrediticia, getPendientes, preAprobar, rechazar, getPreAprobados, aprobar };
