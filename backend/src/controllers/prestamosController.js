@@ -20,13 +20,20 @@ const agregarSituacionCrediticia = async (prestamos) => {
   })));
 };
 
+const CUOTAS_PERMITIDAS = [1, 3, 6, 12];
+
 // CLIENTE: solicitar un préstamo
 const solicitarPrestamo = async (req, res) => {
   const clerkId = req.auth.userId;
-  const { monto } = req.body;
+  const { monto, cant_cuotas } = req.body;
+  const cantCuotas = Number(cant_cuotas) || 1;
 
   if (!monto || monto <= 0) {
     return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
+  }
+
+  if (!CUOTAS_PERMITIDAS.includes(cantCuotas)) {
+    return res.status(400).json({ error: `La cantidad de cuotas debe ser una de: ${CUOTAS_PERMITIDAS.join(', ')}` });
   }
 
   try {
@@ -57,10 +64,10 @@ const solicitarPrestamo = async (req, res) => {
         });
     }
 
-    // 3. Si todo está bien, se registra el préstamo
+    // 3. Si todo está bien, se registra el préstamo con la cantidad de cuotas elegida
     const result = await pool.query(
-      `INSERT INTO prestamos (id_cuenta, monto) VALUES ($1, $2) RETURNING *`,
-      [id_cuenta, monto]
+      `INSERT INTO prestamos (id_cuenta, monto, cant_cuotas) VALUES ($1, $2, $3) RETURNING *`,
+      [id_cuenta, monto, cantCuotas]
     );
 
     res.status(201).json({ prestamo: result.rows[0] });

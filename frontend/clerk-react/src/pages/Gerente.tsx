@@ -40,6 +40,12 @@ interface Movimiento {
   fecha_hora: string;
 }
 
+interface SituacionCrediticia {
+  dni: string;
+  situacion: number;
+  deudas: unknown[];
+}
+
 interface SolicitudPrestamo {
   id: number;
   monto: number;
@@ -49,7 +55,16 @@ interface SolicitudPrestamo {
   apellido: string;
   dni: string;
   cbu: string;
+  situacion_crediticia: SituacionCrediticia | null;
 }
+
+const SITUACION_INFO: Record<number, { etiqueta: string; icono: string }> = {
+  1: { etiqueta: 'Normal', icono: '🟢' },
+  2: { etiqueta: 'Riesgo bajo', icono: '🟡' },
+  3: { etiqueta: 'Riesgo medio', icono: '🟠' },
+  4: { etiqueta: 'Riesgo alto', icono: '🔴' },
+  5: { etiqueta: 'Irrecuperable', icono: '⚫' },
+};
 
 interface SolicitudTarjeta {
   id: number;
@@ -166,6 +181,14 @@ function Gerente() {
       if (err instanceof Error) setMensajeRevocar(err.message);
       else setMensajeRevocar('Error inesperado');
     }
+  };
+
+  const situacionClass = (situacion: number) => {
+    if (situacion <= 1) return styles.situacion1;
+    if (situacion === 2) return styles.situacion2;
+    if (situacion === 3) return styles.situacion3;
+    if (situacion === 4) return styles.situacion4;
+    return styles.situacion5;
   };
 
   const accionPrestamo = async (id: number, accion: 'aprobar' | 'rechazar') => {
@@ -495,7 +518,7 @@ function Gerente() {
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
                   <thead>
-                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
+                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Situación BCRA</th><th>Acciones</th></tr>
                   </thead>
                   <tbody>
                     {prestamos.map(p => (
@@ -504,6 +527,16 @@ function Gerente() {
                         <td>{p.dni}</td>
                         <td>$ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                         <td>{new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}</td>
+                        <td>
+                          {p.situacion_crediticia ? (
+                            <span className={`${styles.situacionChip} ${situacionClass(p.situacion_crediticia.situacion)}`}>
+                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.icono ?? '⚪'}{' '}
+                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.etiqueta ?? 'Desconocida'}
+                            </span>
+                          ) : (
+                            <span className={styles.situacionDesconocida}>Sin datos</span>
+                          )}
+                        </td>
                         <td>
                           <div className={styles.accionesRow}>
                             <button className={styles.btnActivar} onClick={() => accionPrestamo(p.id, 'aprobar')}>

@@ -11,107 +11,254 @@
   --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
 }
 
-.page {
+.dashboardContainer {
   min-height: 100vh;
+  display: flex;
   color: var(--ink);
   background:
     radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
     linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  overflow-x: hidden;
 }
 
-.navbar {
-  padding: 0 32px;
-  min-height: 72px;
+/* ── Sidebar ── */
+.sidebar {
+  width: 264px;
+  min-height: 100vh;
+  position: fixed;
+  inset: 0 auto 0 0;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0, rgba(255, 255, 255, 0) 100px),
+    linear-gradient(180deg, #690016 0%, #4d0010 100%);
+  box-shadow: 8px 0 22px rgba(25, 0, 6, 0.28);
+  z-index: 10;
+}
+
+.sidebarBrand {
+  height: 72px;
+  display: flex;
   align-items: center;
+  padding: 0 26px;
+  background: rgba(248, 249, 244, 0.96);
+  white-space: nowrap;
+}
+
+.brand404 {
+  color: var(--wine);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
+}
+
+.brandBank {
+  color: var(--silver);
+  font-weight: 900;
+  font-size: 52px;
+  line-height: 1;
+  text-shadow: 0 1px 0 #fff, 0 2px 5px rgba(0, 0, 0, 0.22);
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 16px 0 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) rgba(255, 255, 255, 0.07);
+}
+
+.sidebarNav::-webkit-scrollbar { width: 6px; }
+.sidebarNav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+}
+.sidebarNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+}
+.sidebarNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navGroup:last-child { border-bottom: 0; }
+
+.navGroupTitle {
+  padding: 12px 22px 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+}
+
+.navSubItem {
+  width: 100%;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 22px 0 28px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navSubItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.navSubItemActive {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: 600;
+}
+
+.sidebarFooter {
+  padding: 18px 0 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.btnVolverPanel {
+  margin: 0 18px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--wine);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 22px;
+  color: #fff;
+  width: 100%;
+  border: 0;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+}
+
+.userSection:hover { background: rgba(255, 255, 255, 0.18); }
+
+.userAvatarSidebar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--wine);
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.userAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.userNameSidebar {
+  font-size: 15px;
+  line-height: 1;
+  text-align: left;
+}
+
+/* ── Main ── */
+.mainContent {
+  margin-left: 264px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.topBar {
+  min-height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px 0 42px;
   background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
+  color: #fff;
   box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
 }
 
-.navLeft {
+.topBarTitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.topBarActions {
   display: flex;
   align-items: center;
   gap: 24px;
 }
 
-.brand {
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: 0.5px;
+.topUserName {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.88);
 }
 
-.btnInicio {
-  min-height: 38px;
-  background-color: transparent;
-  color: #ffffff;
+.btnSignOut {
+  min-height: 45px;
+  padding: 0 24px;
   border: 2px solid rgba(255, 255, 255, 0.75);
-  padding: 0 16px;
-  border-radius: 22px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-  transition: background 0.2s ease;
-}
-
-.btnInicio:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.btnTransferir {
-  min-height: 38px;
-  border: 0;
-  padding: 0 18px;
-  border-radius: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
   color: #fff;
-  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
-  cursor: pointer;
+  font-size: 17px;
   font-weight: 800;
-  font-size: 13px;
+  cursor: pointer;
+  background-color: transparent;
   transition: background 0.2s ease;
 }
 
-.btnTransferir:hover {
-  background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%);
-}
-
-.navRight {
-  display: flex;
-  align-items: center;
-}
-
-.btnVolverPanel {
-  min-height: 38px;
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 22px;
-  padding: 0 18px;
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--wine);
-  font-weight: 800;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.btnVolverPanel:hover {
-  background: #ffffff;
-  transform: translateY(-1px);
+.btnSignOut:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .content {
   padding: 40px 32px 56px;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.title {
-  color: var(--wine-3);
-  font-size: 28px;
-  font-weight: 900;
-  margin-bottom: 32px;
+  width: 100%;
 }
 
 .loadingText {

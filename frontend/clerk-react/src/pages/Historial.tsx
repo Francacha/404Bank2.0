@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth, useUser } from '@clerk/react';
+import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Historial.module.css';
@@ -34,6 +34,8 @@ function Historial() {
   const role = user?.publicMetadata?.role as string | undefined;
   const esLaboral = role === 'empleado' || role === 'gerente';
   const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
+  const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
+  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
   const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,34 +76,79 @@ function Historial() {
   }, [transferencias, filtroMoneda, filtroFecha]);
 
   return (
-    <div className={styles.page}>
-      {/* Navbar */}
-      <div className={styles.navbar}>
-        <div className={styles.navLeft}>
-          <span className={styles.brand}>404Bank</span>
-          <button onClick={() => navigate('/home')} className={styles.btnInicio}>
-            Inicio
-          </button>
-          <button onClick={() => navigate('/transferir')} className={styles.btnTransferir}>
-            Transferir
-          </button>
+    <div className={styles.dashboardContainer}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarBrand} aria-label="404Bank">
+          <span className={styles.brand404}>404</span>
+          <span className={styles.brandBank}>Bank</span>
         </div>
-        {esLaboral && (
-          <div className={styles.navRight}>
+
+        <nav className={styles.sidebarNav}>
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Productos</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/home')}>Cuentas</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
+            <button className={styles.navSubItem} onClick={() => navigate('/inversiones')}>Inversiones</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Transacciones</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
+            <button className={styles.navSubItem}>Recargas</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Seguridad</span>
+            <button className={styles.navSubItem}>Cambio de Contraseña</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Atención al cliente</span>
+            <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
+          </div>
+
+          <div className={styles.navGroup}>
+            <span className={styles.navGroupTitle}>Documentos</span>
+            <button className={`${styles.navSubItem} ${styles.navSubItemActive}`}>Historial</button>
+            <button className={styles.navSubItem}>Comprobantes</button>
+          </div>
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          {esLaboral && (
             <button
               className={styles.btnVolverPanel}
               onClick={() => { setViewMode('work'); navigate(panelUrl); }}
             >
               Volver al panel
             </button>
+          )}
+          <button className={styles.userSection} onClick={() => navigate('/perfil')}>
+            <div className={styles.userAvatarSidebar}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
+                : (initials || 'U')
+              }
+            </div>
+            <span className={styles.userNameSidebar}>{displayName}</span>
+          </button>
+        </div>
+      </aside>
+
+      <main className={styles.mainContent}>
+        <header className={styles.topBar}>
+          
+          <div className={styles.topBarActions}>
+            <span className={styles.topUserName}>{displayName}</span>
+            <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
+              <button className={styles.btnSignOut}>Cerrar sesion</button>
+            </SignOutButton>
           </div>
-        )}
-      </div>
+        </header>
 
       {/* Contenido */}
       <div className={styles.content}>
-        <h1 className={styles.title}>Historial de transferencias</h1>
-
         {loading && <p className={styles.loadingText}>Cargando historial...</p>}
 
         {error && <div className={styles.errorBox}>{error}</div>}
@@ -177,6 +224,7 @@ function Historial() {
           ))}
         </div>
       </div>
+      </main>
     </div>
   );
 }

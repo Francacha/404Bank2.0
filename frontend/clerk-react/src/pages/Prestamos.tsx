@@ -6,13 +6,40 @@ import styles from './Prestamos.module.css';
 
 const API_URL = 'http://localhost:3000';
 
+const OPCIONES_CUOTAS = [1, 3, 6, 12] as const;
+
+interface Cuota {
+  id: number;
+  numero_cuota: number;
+  monto: number;
+  fecha_vencimiento: string;
+  estado: 'pendiente' | 'vencida' | 'pagada';
+  fecha_pago: string | null;
+}
+
 interface Prestamo {
   id: number;
   monto: number;
   estado: string;
   fecha_solicitud: string;
   fecha_resolucion: string | null;
+  cant_cuotas: number | null;
+  cuotas: Cuota[];
 }
+
+interface SituacionCrediticia {
+  dni: string;
+  situacion: number;
+  deudas: unknown[];
+}
+
+const SITUACION_INFO: Record<number, { etiqueta: string; icono: string; claseColor: string }> = {
+  1: { etiqueta: 'Normal', icono: '🟢', claseColor: 'situacionVerde' },
+  2: { etiqueta: 'Riesgo bajo', icono: '🟡', claseColor: 'situacionAmarilla' },
+  3: { etiqueta: 'Riesgo medio', icono: '🟠', claseColor: 'situacionNaranja' },
+  4: { etiqueta: 'Riesgo alto', icono: '🔴', claseColor: 'situacionRoja' },
+  5: { etiqueta: 'Irrecuperable', icono: '⚫', claseColor: 'situacionNegra' },
+};
 
 function Prestamos() {
   const { getToken } = useAuth();
@@ -25,7 +52,13 @@ function Prestamos() {
   const [error, setError] = useState('');
 
   const [monto, setMonto] = useState('');
+  const [cantCuotas, setCantCuotas] = useState<number>(1);
+  const [expandidos, setExpandidos] = useState<Set<number>>(new Set());
   const [enviando, setEnviando] = useState(false);
+
+  const [situacionCrediticia, setSituacionCrediticia] = useState<SituacionCrediticia | null>(null);
+  const [loadingSituacion, setLoadingSituacion] = useState(true);
+  const [errorSituacion, setErrorSituacion] = useState('');
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
   const [errorSolicitud, setErrorSolicitud] = useState('');
 
@@ -58,6 +91,28 @@ function Prestamos() {
     cargarPrestamos();
   }, [cargarPrestamos]);
 
+  useEffect(() => {
+    const cargarSituacion = async () => {
+      setLoadingSituacion(true);
+      setErrorSituacion('');
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/prestamos/mi-situacion-crediticia`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'No se pudo consultar la situación crediticia');
+        setSituacionCrediticia(data.situacion_crediticia);
+      } catch (err: unknown) {
+        if (err instanceof Error) setErrorSituacion(err.message);
+        else setErrorSituacion('Error inesperado');
+      } finally {
+        setLoadingSituacion(false);
+      }
+    };
+    cargarSituacion();
+  }, [getToken]);
+
   const handleSolicitar = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensajeSolicitud('');
@@ -71,12 +126,13 @@ function Prestamos() {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ monto: Number(monto) }),
+        body: JSON.stringify({ monto: Number(monto), cant_cuotas: cantCuotas }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al solicitar');
       setMensajeSolicitud('Solicitud enviada correctamente. Quedará pendiente de revisión.');
       setMonto('');
+      setCantCuotas(1);
       cargarPrestamos();
     } catch (err: unknown) {
       if (err instanceof Error) setErrorSolicitud(err.message);
@@ -91,6 +147,21 @@ function Prestamos() {
     if (estado === 'rechazado') return styles.badgeRechazado;
     if (estado === 'pre_aprobado') return styles.badgePreAprobado;
     return styles.badgePendiente;
+  };
+
+  const badgeCuotaClass = (estado: Cuota['estado']) => {
+    if (estado === 'pagada') return styles.badgeCuotaPagada;
+    if (estado === 'vencida') return styles.badgeCuotaVencida;
+    return styles.badgeCuotaPendiente;
+  };
+
+  const toggleExpandido = (id: number) => {
+    setExpandidos(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -108,44 +179,28 @@ function Prestamos() {
             <button className={styles.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
             <button className={`${styles.navSubItem} ${styles.navSubItemActive}`}>Préstamos</button>
             <button className={styles.navSubItem} onClick={() => navigate('/inversiones')}>Inversiones</button>
-            <button className={styles.navSubItem}>Comercio Exterior</button>
-            <button className={styles.navSubItem}>Seguros</button>
-            <button className={styles.navSubItem}>Caja de seguridad</button>
-            <button className={styles.navSubItem}>Transporte</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Transacciones</span>
             <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
-            <button className={styles.navSubItem}>Pago de Servicios</button>
-            <button className={styles.navSubItem}>Echeq</button>
             <button className={styles.navSubItem}>Recargas</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Seguridad</span>
-            <button className={styles.navSubItem}>Gestión de Token</button>
-            <button className={styles.navSubItem}>Seguridad Biométrica</button>
             <button className={styles.navSubItem}>Cambio de Contraseña</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Atención al cliente</span>
             <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
-            <button className={styles.navSubItem}>Turnos</button>
-            <button className={styles.navSubItem}>Cajeros y sucursales</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Documentos</span>
             <button className={styles.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
             <button className={styles.navSubItem}>Comprobantes</button>
-            <button className={styles.navSubItem}>Informes ARCA</button>
-          </div>
-
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Beneficios</span>
-            <button className={styles.navSubItem}>Promociones</button>
           </div>
         </nav>
 
@@ -172,7 +227,7 @@ function Prestamos() {
 
       <main className={styles.mainContent}>
         <header className={styles.topBar}>
-          <h1 className={styles.topBarTitle}>PRÉSTAMOS</h1>
+          
           <div className={styles.topBarActions}>
             <span className={styles.topUserName}>{displayName}</span>
             <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
@@ -186,6 +241,27 @@ function Prestamos() {
             <h2 className={styles.pageTitle}>Solicitá un préstamo</h2>
             <p className={styles.pageSubtitle}>Completá el formulario y seguí el estado de tus solicitudes.</p>
           </div>
+
+          {!loadingSituacion && !errorSituacion && situacionCrediticia && (
+            <div className={`${styles.situacionCard} ${styles[SITUACION_INFO[situacionCrediticia.situacion]?.claseColor ?? 'situacionVerde']}`}>
+              <span className={styles.situacionIcono}>
+                {SITUACION_INFO[situacionCrediticia.situacion]?.icono ?? '⚪'}
+              </span>
+              <div className={styles.situacionTexto}>
+                <span className={styles.situacionTitulo}>
+                  Tu situación crediticia: {SITUACION_INFO[situacionCrediticia.situacion]?.etiqueta ?? 'Desconocida'}
+                </span>
+                <span className={styles.situacionSubtitulo}>
+                  {situacionCrediticia.deudas.length === 0
+                    ? 'Sin deudas registradas en el BCRA'
+                    : `${situacionCrediticia.deudas.length} deuda(s) registrada(s) en el BCRA`}
+                </span>
+              </div>
+            </div>
+          )}
+          {!loadingSituacion && errorSituacion && (
+            <p className={styles.errorMsg}>{errorSituacion}</p>
+          )}
 
           <div className={styles.formCard}>
             <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
@@ -201,6 +277,20 @@ function Prestamos() {
                   className={styles.input}
                   required
                 />
+              </div>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Cantidad de cuotas</label>
+                <select
+                  value={cantCuotas}
+                  onChange={e => setCantCuotas(Number(e.target.value))}
+                  className={styles.input}
+                >
+                  {OPCIONES_CUOTAS.map(opcion => (
+                    <option key={opcion} value={opcion}>
+                      {opcion === 1 ? 'Pago único (1 cuota)' : `${opcion} cuotas`}
+                    </option>
+                  ))}
+                </select>
               </div>
               <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
                 {enviando ? 'Enviando...' : 'Solicitar préstamo'}
@@ -218,24 +308,62 @@ function Prestamos() {
               <p className={styles.emptyText}>No tenés solicitudes de préstamos todavía.</p>
             )}
             <div className={styles.lista}>
-              {prestamos.map(p => (
-                <div key={p.id} className={styles.prestamoCard}>
-                  <div className={styles.prestamoInfo}>
-                    <span className={styles.prestamoMonto}>
-                      $ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </span>
-                    <span className={styles.prestamoFecha}>
-                      Solicitado: {new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}
-                    </span>
-                    {p.fecha_resolucion && (
-                      <span className={styles.prestamoFecha}>
-                        Resuelto: {new Date(p.fecha_resolucion).toLocaleDateString('es-AR')}
-                      </span>
+              {prestamos.map(p => {
+                const tieneCuotas = p.estado === 'aprobado' && p.cuotas?.length > 0;
+                const abierto = expandidos.has(p.id);
+                return (
+                  <div key={p.id} className={styles.prestamoCard}>
+                    <button
+                      type="button"
+                      className={`${styles.prestamoCardHeader} ${tieneCuotas ? styles.clickable : ''}`}
+                      onClick={() => tieneCuotas && toggleExpandido(p.id)}
+                    >
+                      <div className={styles.prestamoInfo}>
+                        <span className={styles.prestamoMonto}>
+                          $ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className={styles.prestamoFecha}>
+                          Solicitado: {new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}
+                        </span>
+                        {p.cant_cuotas && (
+                          <span className={styles.prestamoFecha}>
+                            {p.cant_cuotas === 1 ? 'Pago único' : `${p.cant_cuotas} cuotas`}
+                          </span>
+                        )}
+                        {p.fecha_resolucion && (
+                          <span className={styles.prestamoFecha}>
+                            Resuelto: {new Date(p.fecha_resolucion).toLocaleDateString('es-AR')}
+                          </span>
+                        )}
+                      </div>
+                      <div className={styles.prestamoHeaderRight}>
+                        <span className={badgeClass(p.estado)}>{p.estado.replace('_', ' ')}</span>
+                        {tieneCuotas && (
+                          <span className={`${styles.cuotasToggleIcon} ${abierto ? styles.open : ''}`}>▾</span>
+                        )}
+                      </div>
+                    </button>
+
+                    {tieneCuotas && abierto && (
+                      <div className={styles.cuotasList}>
+                        <p className={styles.cuotasListTitle}>Plan de cuotas</p>
+                        {p.cuotas.map(c => (
+                          <div key={c.id} className={styles.cuotaRow}>
+                            <span className={styles.cuotaNumero}>Cuota {c.numero_cuota}</span>
+                            <span className={styles.cuotaVencimiento}>
+                              Vence: {new Date(c.fecha_vencimiento).toLocaleDateString('es-AR')}
+                            </span>
+                            <span className={styles.cuotaMonto}>
+                              $ {Number(c.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                            </span>
+                            <span className={badgeCuotaClass(c.estado)}>{c.estado}</span>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  <span className={badgeClass(p.estado)}>{p.estado.replace('_', ' ')}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

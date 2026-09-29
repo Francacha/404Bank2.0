@@ -113,44 +113,28 @@ function Tarjetas() {
             <button className={`${styles.navSubItem} ${styles.navSubItemActive}`}>Tarjetas</button>
             <button className={styles.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
             <button className={styles.navSubItem} onClick={() => navigate('/inversiones')}>Inversiones</button>
-            <button className={styles.navSubItem}>Comercio Exterior</button>
-            <button className={styles.navSubItem}>Seguros</button>
-            <button className={styles.navSubItem}>Caja de seguridad</button>
-            <button className={styles.navSubItem}>Transporte</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Transacciones</span>
             <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
-            <button className={styles.navSubItem}>Pago de Servicios</button>
-            <button className={styles.navSubItem}>Echeq</button>
             <button className={styles.navSubItem}>Recargas</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Seguridad</span>
-            <button className={styles.navSubItem}>Gestión de Token</button>
-            <button className={styles.navSubItem}>Seguridad Biométrica</button>
             <button className={styles.navSubItem}>Cambio de Contraseña</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Atención al cliente</span>
             <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
-            <button className={styles.navSubItem}>Turnos</button>
-            <button className={styles.navSubItem}>Cajeros y sucursales</button>
           </div>
 
           <div className={styles.navGroup}>
             <span className={styles.navGroupTitle}>Documentos</span>
             <button className={styles.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
             <button className={styles.navSubItem}>Comprobantes</button>
-            <button className={styles.navSubItem}>Informes ARCA</button>
-          </div>
-
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Beneficios</span>
-            <button className={styles.navSubItem}>Promociones</button>
           </div>
         </nav>
 
@@ -177,7 +161,7 @@ function Tarjetas() {
 
       <main className={styles.mainContent}>
         <header className={styles.topBar}>
-          <h1 className={styles.topBarTitle}>TARJETAS</h1>
+          
           <div className={styles.topBarActions}>
             <span className={styles.topUserName}>{displayName}</span>
             <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>

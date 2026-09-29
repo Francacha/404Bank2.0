@@ -165,7 +165,7 @@ function Inversiones() {
 
       <main className={layout.mainContent}>
         <header className={layout.topBar}>
-          <h1 className={layout.topBarTitle}>INVERSIONES</h1>
+          
           <div className={layout.topBarActions}><span className={layout.topUserName}>{displayName}</span><SignOutButton signOutOptions={{ redirectUrl: '/login' }}><button className={layout.btnSignOut}>Cerrar sesión</button></SignOutButton></div>
         </header>
         <div className={layout.pageContent}>
