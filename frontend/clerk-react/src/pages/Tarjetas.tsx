@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Tarjetas.module.css';
 
@@ -17,10 +17,58 @@ interface Tarjeta {
   fecha_resolucion: string | null;
 }
 
+const IconHome = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></svg>
+);
+const IconCard = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5" /><path d="M2 10h20" /></svg>
+);
+const IconLoan = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 12h6l2-3 2 6 2-3h4" /></svg>
+);
+const IconTrending = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
+);
+const IconSend = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h13" /><path d="m13 6 6 6-6 6" /></svg>
+);
+const IconRefresh = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h3" /></svg>
+);
+const IconLock = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
+);
+const IconChat = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.5 8.5 0 0 1-3.1-.6L3 21l1.8-5.5A8.4 8.4 0 1 1 21 11.5Z" /></svg>
+);
+const IconHistory = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
+);
+const IconReceipt = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6" /></svg>
+);
+
+const NAV_ITEMS = [
+  { label: 'Cuentas', path: '/home', icon: <IconHome /> },
+  { label: 'Tarjetas', path: '/tarjetas', icon: <IconCard /> },
+  { label: 'Préstamos', path: '/prestamos', icon: <IconLoan /> },
+  { label: 'Inversiones', path: '/inversiones', icon: <IconTrending /> },
+];
+
+const NAV_ITEMS_2 = [
+  { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
+  { label: 'Recargas', path: null, icon: <IconRefresh /> },
+  { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
+  { label: 'Chat', path: '/chat', icon: <IconChat /> },
+  { label: 'Historial', path: '/historial', icon: <IconHistory /> },
+  { label: 'Comprobantes', path: null, icon: <IconReceipt /> },
+];
+
 function Tarjetas() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const { setViewMode } = useViewMode();
 
   const [tarjetas, setTarjetas] = useState<Tarjeta[]>([]);
@@ -99,43 +147,43 @@ function Tarjetas() {
     numero.replace(/(.{4})/g, '$1 ').trim();
 
   return (
-    <div className={styles.dashboardContainer}>
+    <div className={styles.page}>
       <aside className={styles.sidebar}>
         <div className={styles.sidebarBrand} aria-label="404Bank">
           <span className={styles.brand404}>404</span>
           <span className={styles.brandBank}>Bank</span>
         </div>
 
-        <nav className={styles.sidebarNav}>
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Productos</span>
-            <button className={styles.navSubItem} onClick={() => navigate('/home')}>Cuentas</button>
-            <button className={`${styles.navSubItem} ${styles.navSubItemActive}`}>Tarjetas</button>
-            <button className={styles.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
-            <button className={styles.navSubItem} onClick={() => navigate('/inversiones')}>Inversiones</button>
-          </div>
+        <nav className={styles.nav}>
+          {NAV_ITEMS.map(item => {
+            const active = item.path === location.pathname;
+            return (
+              <button
+                key={item.label}
+                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+                onClick={() => item.path && navigate(item.path)}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
 
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Transacciones</span>
-            <button className={styles.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
-            <button className={styles.navSubItem}>Recargas</button>
-          </div>
+          <div className={styles.navDivider} />
 
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Seguridad</span>
-            <button className={styles.navSubItem}>Cambio de Contraseña</button>
-          </div>
-
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Atención al cliente</span>
-            <button className={styles.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
-          </div>
-
-          <div className={styles.navGroup}>
-            <span className={styles.navGroupTitle}>Documentos</span>
-            <button className={styles.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
-            <button className={styles.navSubItem}>Comprobantes</button>
-          </div>
+          {NAV_ITEMS_2.map(item => {
+            const active = item.path === location.pathname;
+            return (
+              <button
+                key={item.label}
+                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+                onClick={() => item.path && navigate(item.path)}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -159,11 +207,22 @@ function Tarjetas() {
         </div>
       </aside>
 
-      <main className={styles.mainContent}>
-        <header className={styles.topBar}>
-          
-          <div className={styles.topBarActions}>
-            <span className={styles.topUserName}>{displayName}</span>
+      <main className={styles.main}>
+        <header className={styles.topbar}>
+          <div>
+            <h1 className={styles.topbarTitle}>Solicitá una tarjeta</h1>
+            <p className={styles.topbarSubtitle}>Elegí el tipo y seguí el estado de tus solicitudes.</p>
+          </div>
+          <div className={styles.topbarActions}>
+            <button className={styles.userChip} onClick={() => navigate('/perfil')}>
+              <div className={styles.userChipAvatar}>
+                {user?.hasImage
+                  ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
+                  : (initials || 'U')
+                }
+              </div>
+              <span>{displayName}</span>
+            </button>
             <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
               <button className={styles.btnSignOut}>Cerrar sesion</button>
             </SignOutButton>
@@ -171,80 +230,77 @@ function Tarjetas() {
         </header>
 
         <div className={styles.pageContent}>
-          <div className={styles.pageHeader}>
-            <h2 className={styles.pageTitle}>Solicitá una tarjeta</h2>
-            <p className={styles.pageSubtitle}>Elegí el tipo y seguí el estado de tus solicitudes.</p>
-          </div>
-
-          <div className={styles.formCard}>
-            <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
-            <form onSubmit={handleSolicitar} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Tipo de tarjeta</label>
-                <div className={styles.tipoRow}>
-                  <button
-                    type="button"
-                    className={`${styles.tipoBtn} ${tipo === 'debito' ? styles.tipoBtnActive : ''}`}
-                    onClick={() => setTipo('debito')}
-                  >
-                    Débito
-                  </button>
-                  <button
-                    type="button"
-                    className={`${styles.tipoBtn} ${tipo === 'credito' ? styles.tipoBtnActive : ''}`}
-                    onClick={() => setTipo('credito')}
-                  >
-                    Crédito
-                  </button>
-                </div>
-              </div>
-              <button type="submit" disabled={enviando} className={styles.btnSolicitar}>
-                {enviando ? 'Enviando...' : 'Solicitar tarjeta'}
-              </button>
-            </form>
-            {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
-            {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
-          </div>
-
-          <div className={styles.listSection}>
-            <h3 className={styles.listTitle}>Mis tarjetas</h3>
-            {loading && <p className={styles.loadingText}>Cargando...</p>}
-            {error && <p className={styles.errorMsg}>{error}</p>}
-            {!loading && !error && tarjetas.length === 0 && (
-              <p className={styles.emptyText}>No tenés solicitudes de tarjetas todavía.</p>
-            )}
-            <div className={styles.lista}>
-              {tarjetas.map(t => (
-                <div key={t.id} className={`${styles.tarjetaCard} ${t.estado === 'activa' ? styles.tarjetaCardActiva : ''}`}>
-                  <div className={styles.cardTop}>
-                    <span className={styles.cardTipo}>{t.tipo.toUpperCase()}</span>
-                    <span className={badgeClass(t.estado)}>{t.estado.replace('_', ' ')}</span>
+          <div className={styles.pageWrapper}>
+            <div className={styles.formCard}>
+              <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
+              <form onSubmit={handleSolicitar} className={styles.form}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Tipo de tarjeta</label>
+                  <div className={styles.tipoRow}>
+                    <button
+                      type="button"
+                      className={`${styles.tipoBtn} ${tipo === 'debito' ? styles.tipoBtnActive : ''}`}
+                      onClick={() => setTipo('debito')}
+                    >
+                      Débito
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.tipoBtn} ${tipo === 'credito' ? styles.tipoBtnActive : ''}`}
+                      onClick={() => setTipo('credito')}
+                    >
+                      Crédito
+                    </button>
                   </div>
-                  {t.estado === 'activa' && t.numero ? (
-                    <div className={styles.cardDatos}>
-                      <p className={styles.cardNumero}>{formatNumero(t.numero)}</p>
-                      <div className={styles.cardRow}>
-                        <div>
-                          <p className={styles.cardDatoLabel}>Vencimiento</p>
-                          <p className={styles.cardDatoValor}>
-                            {t.fecha_vencimiento
-                              ? new Date(t.fecha_vencimiento).toLocaleDateString('es-AR', { month: '2-digit', year: '2-digit' })
-                              : '—'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className={styles.cardDatoLabel}>CVV</p>
-                          <p className={styles.cardDatoValor}>{t.cvv}</p>
+                </div>
+                <button type="submit" disabled={enviando} className={styles.btnSolicitar}>
+                  {enviando ? 'Enviando...' : 'Solicitar tarjeta'}
+                </button>
+              </form>
+              {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
+              {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
+            </div>
+
+            <div className={styles.listSection}>
+              <h3 className={styles.listTitle}>Mis tarjetas</h3>
+              {loading && <p className={styles.loadingText}>Cargando...</p>}
+              {error && <p className={styles.errorMsg}>{error}</p>}
+              {!loading && !error && tarjetas.length === 0 && (
+                <p className={styles.emptyText}>No tenés solicitudes de tarjetas todavía.</p>
+              )}
+              <div className={styles.lista}>
+                {tarjetas.map(t => (
+                  <div key={t.id} className={`${styles.tarjetaCard} ${t.estado === 'activa' ? styles.tarjetaCardActiva : ''}`}>
+                    <div className={styles.cardTop}>
+                      <span className={styles.cardTipo}>{t.tipo.toUpperCase()}</span>
+                      <span className={badgeClass(t.estado)}>{t.estado.replace('_', ' ')}</span>
+                    </div>
+                    {t.estado === 'activa' && t.numero ? (
+                      <div className={styles.cardDatos}>
+                        <p className={styles.cardNumero}>{formatNumero(t.numero)}</p>
+                        <div className={styles.cardRow}>
+                          <div>
+                            <p className={styles.cardDatoLabel}>Vencimiento</p>
+                            <p className={styles.cardDatoValor}>
+                              {t.fecha_vencimiento
+                                ? new Date(t.fecha_vencimiento).toLocaleDateString('es-AR', { month: '2-digit', year: '2-digit' })
+                                : '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className={styles.cardDatoLabel}>CVV</p>
+                            <p className={styles.cardDatoValor}>{t.cvv}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <p className={styles.cardFecha}>
-                      Solicitada: {new Date(t.fecha_solicitud).toLocaleDateString('es-AR')}
-                    </p>
-                  )}
-                </div>
-              ))}
+                    ) : (
+                      <p className={styles.cardFecha}>
+                        Solicitada: {new Date(t.fecha_solicitud).toLocaleDateString('es-AR')}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

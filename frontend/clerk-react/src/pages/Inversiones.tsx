@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { SignOutButton, useAuth, useUser } from '@clerk/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import layout from './Transferir.module.css';
 import styles from './Inversiones.module.css';
@@ -26,10 +26,46 @@ const formatear = (monto: number, moneda: 'ARS' | 'USD') =>
     minimumFractionDigits: 2,
   }).format(monto);
 
+const IconHome = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></svg>
+);
+const IconCard = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5" /><path d="M2 10h20" /></svg>
+);
+const IconLoan = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 12h6l2-3 2 6 2-3h4" /></svg>
+);
+const IconTrending = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
+);
+const IconSend = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h13" /><path d="m13 6 6 6-6 6" /></svg>
+);
+const IconChat = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.5 8.5 0 0 1-3.1-.6L3 21l1.8-5.5A8.4 8.4 0 1 1 21 11.5Z" /></svg>
+);
+const IconHistory = () => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
+);
+
+const NAV_ITEMS = [
+  { label: 'Cuentas', path: '/home', icon: <IconHome /> },
+  { label: 'Tarjetas', path: '/tarjetas', icon: <IconCard /> },
+  { label: 'Préstamos', path: '/prestamos', icon: <IconLoan /> },
+  { label: 'Inversiones', path: '/inversiones', icon: <IconTrending /> },
+];
+
+const NAV_ITEMS_2 = [
+  { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
+  { label: 'Chat', path: '/chat', icon: <IconChat /> },
+  { label: 'Historial', path: '/historial', icon: <IconHistory /> },
+];
+
 function Inversiones() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const { setViewMode } = useViewMode();
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
@@ -130,50 +166,87 @@ function Inversiones() {
   };
 
   return (
-    <div className={layout.dashboardContainer}>
+    <div className={layout.page}>
       <aside className={layout.sidebar}>
-        <div className={layout.sidebarBrand} aria-label="404Bank"><span className={layout.brand404}>404</span><span className={layout.brandBank}>Bank</span></div>
-        <nav className={layout.sidebarNav}>
-          <div className={layout.navGroup}>
-            <span className={layout.navGroupTitle}>Productos</span>
-            <button className={layout.navSubItem} onClick={() => navigate('/home')}>Cuentas</button>
-            <button className={layout.navSubItem} onClick={() => navigate('/tarjetas')}>Tarjetas</button>
-            <button className={layout.navSubItem} onClick={() => navigate('/prestamos')}>Préstamos</button>
-            <button className={`${layout.navSubItem} ${layout.navSubItemActive}`}>Inversiones</button>
-          </div>
-          <div className={layout.navGroup}>
-            <span className={layout.navGroupTitle}>Transacciones</span>
-            <button className={layout.navSubItem} onClick={() => navigate('/transferir')}>Transferir</button>
-          </div>
-          <div className={layout.navGroup}>
-            <span className={layout.navGroupTitle}>Atención al cliente</span>
-            <button className={layout.navSubItem} onClick={() => navigate('/chat')}>Chat</button>
-          </div>
-          <div className={layout.navGroup}>
-            <span className={layout.navGroupTitle}>Documentos</span>
-            <button className={layout.navSubItem} onClick={() => navigate('/historial')}>Historial</button>
-          </div>
+        <div className={layout.sidebarBrand} aria-label="404Bank">
+          <span className={layout.brand404}>404</span>
+          <span className={layout.brandBank}>Bank</span>
+        </div>
+
+        <nav className={layout.nav}>
+          {NAV_ITEMS.map(item => {
+            const active = item.path === location.pathname;
+            return (
+              <button
+                key={item.label}
+                className={`${layout.navItem} ${active ? layout.navItemActive : ''}`}
+                onClick={() => item.path && navigate(item.path)}
+              >
+                <span className={layout.navIcon}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+
+          <div className={layout.navDivider} />
+
+          {NAV_ITEMS_2.map(item => {
+            const active = item.path === location.pathname;
+            return (
+              <button
+                key={item.label}
+                className={`${layout.navItem} ${active ? layout.navItemActive : ''}`}
+                onClick={() => item.path && navigate(item.path)}
+              >
+                <span className={layout.navIcon}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
+
         <div className={layout.sidebarFooter}>
-          {esLaboral && <button className={layout.btnVolverPanel} onClick={() => { setViewMode('work'); navigate(panelUrl); }}>Volver al panel</button>}
+          {esLaboral && (
+            <button className={layout.btnVolverPanel} onClick={() => { setViewMode('work'); navigate(panelUrl); }}>
+              Volver al panel
+            </button>
+          )}
           <button className={layout.userSection} onClick={() => navigate('/perfil')}>
-            <div className={layout.userAvatarSidebar}>{user?.hasImage ? <img src={user.imageUrl} alt={displayName} className={layout.userAvatarImg} /> : (initials || 'U')}</div>
+            <div className={layout.userAvatarSidebar}>
+              {user?.hasImage
+                ? <img src={user.imageUrl} alt={displayName} className={layout.userAvatarImg} />
+                : (initials || 'U')
+              }
+            </div>
             <span className={layout.userNameSidebar}>{displayName}</span>
           </button>
         </div>
       </aside>
 
-      <main className={layout.mainContent}>
-        <header className={layout.topBar}>
-          
-          <div className={layout.topBarActions}><span className={layout.topUserName}>{displayName}</span><SignOutButton signOutOptions={{ redirectUrl: '/login' }}><button className={layout.btnSignOut}>Cerrar sesión</button></SignOutButton></div>
+      <main className={layout.main}>
+        <header className={layout.topbar}>
+          <div>
+            <h1 className={layout.topbarTitle}>Compra de dólares</h1>
+            <p className={layout.topbarSubtitle}>Convertí pesos de tu cuenta en dólares al tipo de cambio oficial vigente.</p>
+          </div>
+          <div className={layout.topbarActions}>
+            <button className={layout.userChip} onClick={() => navigate('/perfil')}>
+              <div className={layout.userChipAvatar}>
+                {user?.hasImage
+                  ? <img src={user.imageUrl} alt={displayName} className={layout.userAvatarImg} />
+                  : (initials || 'U')
+                }
+              </div>
+              <span>{displayName}</span>
+            </button>
+            <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
+              <button className={layout.btnSignOut}>Cerrar sesión</button>
+            </SignOutButton>
+          </div>
         </header>
+
         <div className={layout.pageContent}>
           <div className={`${layout.pageWrapper} ${styles.pageWrapper}`}>
-            <div className={layout.pageHeader}>
-              <h2 className={layout.pageTitle}>Compra de dólares</h2>
-              <p className={layout.pageSubtitle}>Convertí pesos de tu cuenta en dólares al tipo de cambio oficial vigente.</p>
-            </div>
 
             {error && <p className={layout.errorMsg}>{error}</p>}
             {exito && <p className={layout.successMsg}>{exito}</p>}

@@ -1,115 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 :root {
-  --wine: #5a0015;
-  --wine-2: #76051f;
-  --wine-3: #3b000d;
-  --paper: #f7f8f3;
-  --paper-soft: #eef1eb;
-  --ink: #220007;
-  --muted: #6c6662;
-  --line: rgba(53, 18, 24, 0.16);
-  --silver: #c7c7c4;
-  --shadow: 0 16px 34px rgba(43, 22, 24, 0.16);
-  --gold: linear-gradient(135deg, #d4b44a 0%, #c9952a 50%, #b8831f 100%);
+  --ink: #1a1512;
+  --muted: #8a8078;
+  --paper: #f4f2ee;
+  --line: rgba(26, 21, 18, 0.08);
+  --card: #ffffff;
+  --shadow: 0 2px 14px rgba(26, 21, 18, 0.05);
+  --wine: #7a1128;
+  --wine-dark: #2a0410;
+  --wine-darker: #150208;
+  --accent: #e8b84b;
+  --green: #1e8e5a;
+  --red: #991b1b;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 .page {
   min-height: 100vh;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.95), transparent 34%),
-    linear-gradient(135deg, #eef2eb 0%, var(--paper) 42%, #e5e9e2 100%);
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  background: var(--paper);
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
 }
 
 .navbar {
-  background: linear-gradient(90deg, #5a0015 0%, #6c0019 46%, #4d0012 100%);
-  box-shadow: 0 8px 18px rgba(36, 0, 8, 0.22);
-  padding: 0 32px;
-  min-height: 68px;
+  background: linear-gradient(135deg, var(--wine-dark) 0%, var(--wine-darker) 100%);
+  padding: 0 36px;
+  min-height: 72px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .brand {
-  color: rgba(255, 255, 255, 0.94);
-  font-size: 21px;
-  font-weight: 900;
+  font-family: 'Space Grotesk', sans-serif;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
 
 .navRight {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .adminBadge {
-  background: var(--gold);
-  color: var(--wine-3);
+  background: var(--accent);
+  color: var(--wine-dark);
   font-size: 11px;
   font-weight: 800;
-  padding: 3px 10px;
+  padding: 3px 11px;
   border-radius: 999px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .btnSignOut {
-  background-color: transparent;
+  background: transparent;
   color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.65);
-  padding: 6px 14px;
-  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 9px 18px;
+  border-radius: 999px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
+  font-family: inherit;
   transition: background 0.2s ease;
 }
-.btnSignOut:hover { background: rgba(255, 255, 255, 0.12); }
+.btnSignOut:hover { background: rgba(255, 255, 255, 0.1); }
 
 .content {
-  padding: 40px 32px;
-  max-width: 1000px;
+  padding: 36px 32px 60px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 
 .title {
-  color: var(--wine-3);
-  font-size: 28px;
-  font-weight: 900;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 800;
   margin-bottom: 4px;
 }
 
 .subtitle {
   color: var(--muted);
   font-size: 14px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 28px;
-  border-bottom: 2px solid var(--line);
-  padding-bottom: 0;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  padding: 4px;
+  border-radius: 999px;
+  width: fit-content;
 }
 
 .tab {
   background: none;
   border: none;
   padding: 10px 20px;
-  font-size: 14px;
+  border-radius: 999px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--muted);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
+  font-family: inherit;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
+.tab:hover { color: var(--ink); }
+
 .tabActive {
-  color: var(--wine-3);
-  border-bottom: 2px solid var(--wine);
+  color: #fff;
+  background: var(--wine);
 }
 
 .loadingText {
@@ -118,55 +130,59 @@
 }
 
 .errorBox {
-  background-color: rgba(128, 0, 28, 0.08);
-  border: 1px solid rgba(128, 0, 28, 0.28);
-  color: #8b001f;
+  background: rgba(153, 27, 27, 0.08);
+  color: var(--red);
   padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-/* Buscador */
+/* ── Buscador ── */
 .searchBarRow {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .searchInput {
   flex: 1;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
+  padding: 11px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
   color: var(--ink);
   font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
 }
-.searchInput::placeholder { color: var(--silver); }
-.searchInput:focus { outline: none; border-color: var(--wine); }
+.searchInput::placeholder { color: var(--muted); }
+.searchInput:focus { border-color: var(--wine); }
 
 .btnLimpiar {
-  padding: 8px 16px;
-  background: transparent;
-  border: 2px solid var(--wine-3);
-  color: var(--wine-3);
-  border-radius: 20px;
+  padding: 0 18px;
+  min-height: 42px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 999px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 700;
+  font-family: inherit;
   white-space: nowrap;
 }
-.btnLimpiar:hover { background: rgba(90, 0, 21, 0.08); }
+.btnLimpiar:hover { background: var(--paper); }
 
 .searchNote {
-  font-size: 12px;
+  font-size: 12.5px;
   color: var(--muted);
   margin-bottom: 10px;
 }
 
-/* Tabla */
+/* ── Tabla ── */
 .tableWrapper {
   overflow-x: auto;
 }
@@ -175,173 +191,140 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  background: var(--card);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .table th {
-  background-color: var(--wine-3);
-  color: #ffffff;
-  padding: 10px 14px;
+  background: var(--paper);
+  color: var(--muted);
+  padding: 12px 16px;
   text-align: left;
   font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .table td {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
   color: var(--ink);
 }
 
 .table tr:hover td {
-  background-color: rgba(53, 18, 24, 0.05);
+  background: var(--paper);
 }
 
-/* Badges de estado */
-.estadoActiva {
-  display: inline-block;
-  background-color: rgba(30, 112, 58, 0.12);
-  color: #1e703a;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-.estadoBloqueada {
-  display: inline-block;
-  background-color: rgba(128, 0, 28, 0.1);
-  color: #8b001f;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
-/* Botones de acción */
-.btnBloquear {
-  background-color: rgba(128, 0, 28, 0.1);
-  color: #8b001f;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.btnActivar {
-  background-color: rgba(30, 112, 58, 0.12);
-  color: #1e703a;
-  border: none;
-  padding: 4px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* Badge tipo transferencia */
-.tipoEntrante {
-  color: #1e703a;
-  font-weight: 800;
-}
-
-.tipoSaliente {
-  color: var(--wine-3);
-  font-weight: 800;
-}
-
-.estadoAprobada {
-  display: inline-block;
-  background-color: rgba(30, 112, 58, 0.12);
-  color: #1e703a;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-}
-
+/* ── Badges de estado ── */
+.estadoActiva,
+.estadoBloqueada,
+.estadoAprobada,
 .estadoRechazada {
   display: inline-block;
-  background-color: rgba(128, 0, 28, 0.1);
-  color: #8b001f;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 2px 9px;
   border-radius: 999px;
 }
 
-/* Pestaña Roles */
+.estadoActiva,
+.estadoAprobada { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.estadoBloqueada,
+.estadoRechazada { background: rgba(153, 27, 27, 0.1); color: var(--red); }
+
+/* ── Botones de acción ── */
+.btnBloquear,
+.btnActivar {
+  border: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.btnBloquear { background: rgba(153, 27, 27, 0.08); color: var(--red); }
+.btnBloquear:hover { background: rgba(153, 27, 27, 0.15); }
+.btnActivar { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.btnActivar:hover { background: rgba(30, 142, 90, 0.18); }
+
+/* ── Badge tipo transferencia ── */
+.tipoEntrante { color: var(--green); font-weight: 800; }
+.tipoSaliente { color: var(--ink); font-weight: 800; }
+
+/* ── Pestaña Roles ── */
 .rolesSection { display: flex; flex-direction: column; gap: 24px; }
 .rolesForm {
-  background: rgba(248, 249, 244, 0.9);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 22px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
-.rolesTitle { font-size: 18px; font-weight: 800; color: var(--wine-3); margin: 0; }
+.rolesTitle { font-size: 15px; font-weight: 800; color: var(--ink); margin: 0; }
 .rolesInputRow { display: flex; gap: 10px; flex-wrap: wrap; }
 .rolesInput {
   flex: 1;
   min-width: 200px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
   color: var(--ink);
   font-size: 14px;
+  font-family: inherit;
+  outline: none;
 }
-.rolesInput:focus { outline: none; border-color: var(--wine); }
+.rolesInput:focus { border-color: var(--wine); }
 .rolesSelect {
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
   color: var(--ink);
   font-size: 14px;
+  font-family: inherit;
 }
 .btnAsignar {
-  padding: 8px 20px;
+  padding: 0 22px;
+  min-height: 44px;
   border: 0;
-  border-radius: 20px;
+  border-radius: 14px;
   color: #fff;
-  background: linear-gradient(180deg, #720019 0%, #4c0011 100%);
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.18), 0 5px 12px rgba(63, 0, 13, 0.28);
-  font-size: 14px;
-  font-weight: 700;
+  background: var(--wine);
+  font-size: 13.5px;
+  font-weight: 800;
+  font-family: inherit;
   cursor: pointer;
 }
-.btnAsignar:hover { background: linear-gradient(180deg, #8a0825 0%, #5b0014 100%); }
-.rolesSuccess { color: #1e703a; font-size: 14px; margin: 0; }
-.rolesError { color: #8b001f; font-size: 14px; margin: 0; }
-.badgeGerente {
-  background: var(--wine);
-  color: white;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 700;
-}
+.btnAsignar:hover:not(:disabled) { opacity: 0.9; }
+.btnAsignar:disabled { opacity: 0.5; cursor: not-allowed; }
+.rolesSuccess { color: var(--green); font-size: 13.5px; margin: 0; }
+.rolesError { color: var(--red); font-size: 13.5px; margin: 0; }
+.badgeGerente,
 .badgeEmpleado {
-  background: var(--wine-2);
   color: white;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 2px 11px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 700;
 }
+.badgeGerente { background: var(--wine); }
+.badgeEmpleado { background: var(--wine-dark); }
 
-/* Picker de usuario en Roles */
-.pickerContainer { display: flex; flex-direction: column; gap: 4px; }
+/* ── Picker de usuario en Roles ── */
+.pickerContainer { display: flex; flex-direction: column; gap: 6px; }
 .pickerList {
   max-height: 220px;
   overflow-y: auto;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
+  border-radius: 14px;
+  background: var(--paper);
 }
 .pickerItem {
   display: flex;
@@ -353,8 +336,8 @@
   transition: background 0.12s;
 }
 .pickerItem:last-child { border-bottom: none; }
-.pickerItem:hover { background: rgba(53, 18, 24, 0.05); }
-.pickerItemNombre { font-size: 14px; color: var(--ink); font-weight: 600; }
+.pickerItem:hover { background: var(--line); }
+.pickerItemNombre { font-size: 13.5px; color: var(--ink); font-weight: 600; }
 .pickerItemEmail { font-size: 12px; color: var(--muted); }
 .pickerEmpty { color: var(--muted); font-size: 13px; padding: 12px 14px; margin: 0; }
 
@@ -362,22 +345,22 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(90, 0, 21, 0.05);
-  border: 1px solid var(--wine);
-  border-radius: 8px;
+  background: rgba(122, 17, 40, 0.06);
+  border-radius: 14px;
   padding: 10px 14px;
   flex-wrap: wrap;
 }
-.pickerSelectedNombre { font-size: 14px; color: var(--wine-3); font-weight: 700; flex: 1; }
+.pickerSelectedNombre { font-size: 13.5px; color: var(--ink); font-weight: 700; flex: 1; }
 .pickerSelectedEmail { font-size: 12px; color: var(--muted); }
 .btnLimpiarPicker {
-  padding: 4px 12px;
-  background: transparent;
+  padding: 4px 14px;
+  background: var(--card);
   border: 1px solid var(--line);
   color: var(--muted);
-  border-radius: 14px;
+  border-radius: 999px;
   font-size: 12px;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
 }
-.btnLimpiarPicker:hover { background: rgba(53, 18, 24, 0.06); color: var(--wine-3); }
+.btnLimpiarPicker:hover { background: var(--paper); color: var(--ink); }
