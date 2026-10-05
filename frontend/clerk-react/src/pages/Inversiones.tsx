@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import layout from './Transferir.module.css';
 import styles from './Inversiones.module.css';
+import SeccionFrascos from './Frascos';
 
 const API_URL = 'http://localhost:3000';
 
@@ -278,6 +279,8 @@ function Inversiones() {
                 {cuentaARS && totalARS > Number(cuentaARS.saldo) && <p className={layout.errorMsg}>No contás con saldo suficiente en pesos para esta compra.</p>}
               </section>
             )}
+
+            <SeccionFrascos onSaldoCambiado={() => { cargarDatos().catch(() => {}); }} />
           </div>
         </div>
       </main>
