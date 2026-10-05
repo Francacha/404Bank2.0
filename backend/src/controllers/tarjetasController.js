@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { obtenerMoraCliente, obtenerMoraTitularesCuenta, MENSAJE_MORA } = require('../services/moraService');
 
 const generarNumeroTarjeta = () => {
   return Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
@@ -28,7 +29,7 @@ const solicitarTarjeta = async (req, res) => {
       `SELECT cb.id_cuenta FROM cuentas_bancarias cb
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
-       WHERE p.clerk_id = $1 AND cb.estado = 'Activa'
+       WHERE p.clerk_id = $1 AND cb.estado = 'Activa' AND cb.moneda = 'ARS'
        LIMIT 1`,
       [clerkId]
     );
@@ -38,6 +39,11 @@ const solicitarTarjeta = async (req, res) => {
     }
 
     const id_cuenta = cuentaResult.rows[0].id_cuenta;
+
+    const mora = await obtenerMoraCliente(clerkId);
+    if (mora.en_mora) {
+      return res.status(403).json({ error: MENSAJE_MORA, mora });
+    }
 
     const result = await pool.query(
       `INSERT INTO tarjetas (id_cuenta, tipo) VALUES ($1, $2) RETURNING *`,
@@ -173,6 +179,11 @@ const aprobar = async (req, res) => {
 
     if (tarjetaResult.rows.length === 0) {
       return res.status(404).json({ error: 'Tarjeta no encontrada o no está pre-aprobada' });
+    }
+
+    const mora = await obtenerMoraTitularesCuenta(pool, tarjetaResult.rows[0].id_cuenta);
+    if (mora.en_mora) {
+      return res.status(409).json({ error: 'El cliente tiene cuotas impagas; no se puede aprobar la tarjeta.', mora });
     }
 
     const numero = generarNumeroTarjeta();

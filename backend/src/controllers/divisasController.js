@@ -15,58 +15,60 @@ const operarDivisas = async (req, res) => {
         return res.status(400).json({ error: 'Tipo de operación no válido. Use COMPRA o VENTA.' });
     }
 
-    const montoNumUSD = parseFloat(montoUSD);
+    // Las cuentas guardan centavos: se redondea para que lo debitado coincida con lo registrado
+    const montoNumUSD = Math.round(parseFloat(montoUSD) * 100) / 100;
     if (isNaN(montoNumUSD) || montoNumUSD <= 0) {
-        return res.status(400).json({ error: 'El monto en USD debe ser mayor a 0.' });
+        return res.status(400).json({ error: 'El monto en USD debe ser de al menos US$0,01.' });
     }
 
     try {
         // 1. Obtener la cotización actual
         const cotizacion = await dolarApiService.obtenerCotizacionOficial();
         const tasaCambio = tipoOperacion === 'COMPRA' ? cotizacion.venta : cotizacion.compra;
-        const montoARS = montoNumUSD * tasaCambio;
+        const montoARS = Math.round(montoNumUSD * tasaCambio * 100) / 100;
 
-        // 2. Validar saldos según la operación
-        if (tipoOperacion === 'COMPRA') {
-            if (parseFloat(cuentaARS.saldo) < montoARS) {
-                return res.status(400).json({
-                    error: `Saldo insuficiente en pesos. Necesitas $${montoARS.toFixed(2)} ARS a una cotización de $${tasaCambio}.`
-                });
-            }
-        } else if (tipoOperacion === 'VENTA') {
-            if (parseFloat(cuentaUSD.saldo) < montoNumUSD) {
-                return res.status(400).json({
-                    error: `Saldo insuficiente en dólares. Intentas vender US$${montoNumUSD} pero tienes US$${cuentaUSD.saldo}.`
-                });
-            }
-        }
-
-        // 3. Ejecutar actualización en la base de datos local bajo transacción SQL
+        // 2. Validar saldos y mover el dinero dentro de una transacción SQL.
+        // Los saldos se releen con FOR UPDATE (los del middleware pueden estar desactualizados)
+        // y se actualizan con saldo = saldo ± monto, para no pisar un movimiento simultáneo
+        // como una transferencia entrante o el cobro de una cuota de préstamo.
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
-            let nuevoSaldoARS, nuevoSaldoUSD;
+            const saldosResult = await client.query(
+                `SELECT id_cuenta, saldo FROM cuentas_bancarias
+                 WHERE id_cuenta = ANY($1::int[])
+                 ORDER BY id_cuenta
+                 FOR UPDATE`,
+                [[cuentaARS.id_cuenta, cuentaUSD.id_cuenta]]
+            );
+            const saldoActual = (idCuenta) =>
+                Number(saldosResult.rows.find((c) => c.id_cuenta === idCuenta).saldo);
 
-            if (tipoOperacion === 'COMPRA') {
-                nuevoSaldoARS = parseFloat(cuentaARS.saldo) - montoARS;
-                nuevoSaldoUSD = parseFloat(cuentaUSD.saldo) + montoNumUSD;
-            } else {
-                nuevoSaldoARS = parseFloat(cuentaARS.saldo) + montoARS;
-                nuevoSaldoUSD = parseFloat(cuentaUSD.saldo) - montoNumUSD;
+            if (tipoOperacion === 'COMPRA' && saldoActual(cuentaARS.id_cuenta) < montoARS) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({
+                    error: `Saldo insuficiente en pesos. Necesitas $${montoARS.toFixed(2)} ARS a una cotización de $${tasaCambio}.`
+                });
+            }
+            if (tipoOperacion === 'VENTA' && saldoActual(cuentaUSD.id_cuenta) < montoNumUSD) {
+                await client.query('ROLLBACK');
+                return res.status(400).json({
+                    error: `Saldo insuficiente en dólares. Intentas vender US$${montoNumUSD} pero tienes US$${saldoActual(cuentaUSD.id_cuenta)}.`
+                });
             }
 
-            // Descontar/acreditar en cuenta ARS
-            await client.query(
-                'UPDATE cuentas_bancarias SET saldo = $1 WHERE id_cuenta = $2',
-                [nuevoSaldoARS, cuentaARS.id_cuenta]
-            );
-
-            // Descontar/acreditar en cuenta USD
-            await client.query(
-                'UPDATE cuentas_bancarias SET saldo = $1 WHERE id_cuenta = $2',
-                [nuevoSaldoUSD, cuentaUSD.id_cuenta]
-            );
+            // COMPRA: salen pesos y entran dólares. VENTA: al revés.
+            const signo = tipoOperacion === 'COMPRA' ? -1 : 1;
+            const actualizarSaldo = async (idCuenta, delta) => {
+                const result = await client.query(
+                    'UPDATE cuentas_bancarias SET saldo = saldo + $1 WHERE id_cuenta = $2 RETURNING saldo',
+                    [delta, idCuenta]
+                );
+                return Number(result.rows[0].saldo);
+            };
+            const nuevoSaldoARS = await actualizarSaldo(cuentaARS.id_cuenta, signo * montoARS);
+            const nuevoSaldoUSD = await actualizarSaldo(cuentaUSD.id_cuenta, -signo * montoNumUSD);
 
             // Registrar en la tabla transferencias_central usando tus columnas reales:
             // cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda
@@ -75,8 +77,8 @@ const operarDivisas = async (req, res) => {
 
 // Actualizamos la consulta para incluir transaccion_central_id en el INSERT
             const insertQuery = `
-                INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda)
-                VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
+                INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda, cotizacion)
+                VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7, $8)
                 RETURNING *;
             `;
 
@@ -93,7 +95,8 @@ const operarDivisas = async (req, res) => {
                 montoOperacion,     // $4
                 'OK',               // $5
                 tipoTransaccion,    // $6
-                monedaOp            // $7
+                monedaOp,           // $7
+                tasaCambio          // $8: con la cotización se calcula el otro lado en el historial
             ]);
 
             await client.query('COMMIT');

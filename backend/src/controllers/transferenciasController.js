@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
+const { obtenerMovimientos } = require('../services/movimientosService');
 
 // Función helper local para resolver un Alias o CBU localmente primero
 const resolverCuentaLocal = async (identificador) => {
@@ -189,16 +190,10 @@ const obtenerMisTransferencias = async (req, res) => {
 
         const cbus = cuentaResult.rows.map(row => row.cbu);
 
-        const result = await pool.query(`
-            SELECT *
-            FROM transferencias_central
-            WHERE (cbu_origen = ANY($1) AND tipo = 'saliente')
-               OR (cbu_destino = ANY($1) AND tipo = 'entrante')
-            ORDER BY fecha_hora DESC
-            LIMIT 50
-        `, [cbus]);
+        // Transferencias, compra/venta de dólares, préstamos y frascos de todas sus cuentas
+        const transferencias = await obtenerMovimientos(cbus);
 
-        res.json({ transferencias: result.rows });
+        res.json({ transferencias });
     } catch (error) {
         console.error('Error obteniendo transferencias:', error);
         res.status(500).json({ error: 'Error interno del servidor' });

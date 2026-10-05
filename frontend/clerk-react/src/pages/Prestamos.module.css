@@ -434,6 +434,43 @@
   border: 1px solid rgba(153, 27, 27, 0.18);
 }
 
+/* ── Simulación ── */
+.fieldset {
+  display: contents;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.simulacion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(90, 0, 21, 0.04);
+  border: 1px solid var(--line);
+}
+
+.simulacionFila {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.simulacionFila strong {
+  color: var(--wine-3);
+}
+
+.simulacionTasas {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 /* ── List section ── */
 .listSection {
   display: flex;
@@ -623,6 +660,18 @@
 .cuotaVencimiento {
   color: var(--muted);
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cuotaDetalle {
+  font-size: 12px;
+}
+
+.cuotaPunitorios {
+  color: #991b1b;
+  font-weight: 600;
 }
 
 .cuotaMonto {

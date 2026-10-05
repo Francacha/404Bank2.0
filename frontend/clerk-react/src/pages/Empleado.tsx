@@ -6,6 +6,9 @@ import styles from './Empleado.module.css';
 
 const API_URL = 'http://localhost:3000';
 
+// Etiqueta de los movimientos que no son transferencias
+const ETIQUETA_CATEGORIA = { prestamo: 'Préstamo', divisas: 'Dólares', frasco: 'Frasco' } as const;
+
 type Tab = 'clientes' | 'solicitudes';
 
 interface Cliente {
@@ -26,7 +29,7 @@ interface Cliente {
 }
 
 interface Movimiento {
-  id: number;
+  id: number | string;
   transaccion_central_id: string;
   cbu_origen: string;
   cbu_destino: string;
@@ -34,6 +37,10 @@ interface Movimiento {
   estado: string;
   tipo: string;
   fecha_hora: string;
+  // Solo en lo que no es una transferencia: préstamos, compra/venta de dólares y frascos
+  moneda?: 'ARS' | 'USD';
+  categoria?: keyof typeof ETIQUETA_CATEGORIA;
+  concepto?: string;
 }
 
 interface SituacionCrediticia {
@@ -394,20 +401,21 @@ function Empleado() {
                     )}
                     <div className={styles.movimientosList}>
                       {movimientos.map(m => (
-                        <div key={m.id} className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}>
+                        <div key={`${m.categoria ?? 'transferencia'}-${m.id}`} className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}>
                           <div className={styles.movimientoTop}>
                             <span className={`${styles.importe} ${m.tipo === 'entrante' ? styles.importeEntrante : styles.importeSaliente}`}>
                               {m.tipo === 'entrante' ? '+ ' : '- '}
-                              $ {Number(m.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                              {m.moneda === 'USD' ? 'US$' : '$'} {Number(m.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                             </span>
                             <span className={styles.fecha}>{new Date(m.fecha_hora).toLocaleString('es-AR')}</span>
                           </div>
                           <p className={styles.cbuInfo}>
-                            {m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`}
+                            {m.concepto ?? (m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`)}
                           </p>
                           <span className={m.estado === 'aprobada' ? styles.badgeAprobada : styles.badgeRechazada}>
                             {m.estado}
                           </span>
+                          {m.categoria && <span className={styles.badgeCategoria}>{ETIQUETA_CATEGORIA[m.categoria]}</span>}
                         </div>
                       ))}
                     </div>

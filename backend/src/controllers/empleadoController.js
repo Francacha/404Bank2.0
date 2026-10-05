@@ -1,4 +1,5 @@
 const { pool } = require('../config/db');
+const { obtenerMovimientos } = require('../services/movimientosService');
 
 const QUERY_CLIENTES = `
   SELECT
@@ -38,20 +39,13 @@ const buscarUsuarios = async (req, res) => {
   }
 };
 
-// Ver movimientos de una cuenta por CBU
+// Ver movimientos de una cuenta por CBU: transferencias, compra/venta de dólares y préstamos
 const getMovimientosPorCbu = async (req, res) => {
   const { cbu } = req.params;
 
   try {
-    const result = await pool.query(`
-      SELECT *
-      FROM Transferencias_Central
-      WHERE cbu_origen = $1 OR cbu_destino = $1
-      ORDER BY fecha_hora DESC
-      LIMIT 50
-    `, [cbu]);
-
-    res.json({ movimientos: result.rows });
+    const movimientos = await obtenerMovimientos([cbu]);
+    res.json({ movimientos });
   } catch (error) {
     console.error('Error obteniendo movimientos:', error);
     res.status(500).json({ error: 'Error interno del servidor' });

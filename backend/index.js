@@ -21,6 +21,7 @@ const tarjetasRoutes = require('./src/routes/tarjetasRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
 const divisasRoutes = require('./src/routes/divisasRoutes');
 const contactosRoutes = require('./src/routes/contactosRoutes');
+const frascosRoutes = require('./src/routes/frascosRoutes');
 
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/tarjetas', authMiddleware, tarjetasRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/divisas', authMiddleware, divisasRoutes);
 app.use('/api/contactos', authMiddleware, contactosRoutes);
+app.use('/api/frascos', authMiddleware, frascosRoutes);
 
 
 app.use((err, req, res, next) => {
@@ -57,6 +59,7 @@ const PORT = process.env.PORT || 3000;
 
 const { iniciarPolling } = require('./src/services/pollingService');
 const { iniciarCronCobros } = require('./src/cron/cobroPrestamosCron');
+const { iniciarCronFrascos } = require('./src/cron/frascosCron');
 
 const startServer = async () => {
   try {
@@ -68,6 +71,7 @@ const startServer = async () => {
       }
       iniciarPolling();
       iniciarCronCobros();
+      iniciarCronFrascos();
     });
   } catch (error) {
     console.error('No se pudo conectar a PostgreSQL al iniciar el backend:', error.message);

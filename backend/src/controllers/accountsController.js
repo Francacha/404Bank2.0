@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
+const { asignarAliasPesos, asignarAliasDolares } = require('../services/aliasService');
 
 const asegurarColumnaMoneda = async (db = pool) => {
     await db.query(`
@@ -35,7 +36,7 @@ const getCuentasByCliente = async (req, res) => {
 
     try {
         const query = `
-            SELECT cb.cbu, cb.saldo, cb.moneda
+            SELECT cb.cbu, cb.alias, cb.saldo, cb.moneda
             FROM Cuentas_Bancarias cb
             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
             WHERE tit.id_persona = $1 AND cb.estado = 'Activa';
@@ -60,7 +61,7 @@ const getMisCuentas = async (req, res) => {
     try {
         // Buscamos las cuentas haciendo un JOIN con Personas usando el clerk_id
         const query = `
-            SELECT cb.cbu, cb.saldo, cb.moneda
+            SELECT cb.cbu, cb.alias, cb.saldo, cb.moneda
             FROM Cuentas_Bancarias cb
             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
             JOIN Personas p ON tit.id_persona = p.id
@@ -91,7 +92,7 @@ const abrirCajaAhorro = async (req, res) => {
         // La identidad siempre se obtiene del token autenticado. El DNI no se
         // acepta desde el body para evitar vincular cuentas de otra persona.
         const personaResult = await pool.query(
-            'SELECT id, dni FROM Personas WHERE clerk_id = $1',
+            'SELECT id, dni, nombre, apellido FROM Personas WHERE clerk_id = $1',
             [clerkId]
         );
 
@@ -107,15 +108,34 @@ const abrirCajaAhorro = async (req, res) => {
         const cuenta = respuestaBancoCentral.cuenta || respuestaBancoCentral;
         const cbu = cuenta.cbu;
 
-        const aliasBase = cuenta.alias || body.alias || `cuenta.${dni}`;
-        const alias = generarAliasFormateado(aliasBase, moneda);
-        
         const saldo = cuenta.saldo ?? 0;
         const monedaCuenta = (cuenta.moneda || moneda).toUpperCase();
 
         if (!cbu) {
             console.error('Banco Central no devolvió CBU para caja de ahorro:', respuestaBancoCentral);
             return res.status(502).json({ error: 'Banco Central no devolvió los datos necesarios de la cuenta.' });
+        }
+
+        // Alias: el que la cuenta ya tenga (en la base local o en el Banco Central) o uno nuevo
+        // registrado en el Banco Central. En dólares se usa el alias de la cuenta en pesos + .usd
+        const aliasLocalResult = await pool.query(
+            'SELECT alias FROM Cuentas_Bancarias WHERE cbu = $1 AND alias IS NOT NULL',
+            [cbu]
+        );
+        let alias = aliasLocalResult.rows[0]?.alias
+            || (cuenta.alias ? generarAliasFormateado(cuenta.alias, monedaCuenta) : null);
+
+        if (!alias) {
+            const aliasPesosResult = await pool.query(
+                `SELECT cb.alias FROM Cuentas_Bancarias cb
+                 JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+                 WHERE tit.id_persona = $1 AND cb.moneda = 'ARS' AND cb.alias IS NOT NULL
+                 LIMIT 1`,
+                [persona.id]
+            );
+            ({ alias } = monedaCuenta === 'USD'
+                ? await asignarAliasDolares(cbu, aliasPesosResult.rows[0]?.alias, persona.nombre, persona.apellido)
+                : await asignarAliasPesos(cbu, persona.nombre, persona.apellido));
         }
 
         const client = await pool.connect();

@@ -6,12 +6,16 @@ import styles from './Prestamos.module.css';
 
 const API_URL = 'http://localhost:3000';
 
-const OPCIONES_CUOTAS = [1, 3, 6, 12] as const;
+const CUOTAS_POR_DEFECTO = [1, 3, 6, 12, 24, 36];
 
 interface Cuota {
   id: number;
   numero_cuota: number;
   monto: number;
+  capital: number | null;
+  interes: number;
+  iva: number;
+  punitorios: number;
   fecha_vencimiento: string;
   estado: 'pendiente' | 'vencida' | 'pagada';
   fecha_pago: string | null;
@@ -24,8 +28,35 @@ interface Prestamo {
   fecha_solicitud: string;
   fecha_resolucion: string | null;
   cant_cuotas: number | null;
+  tna: number;
+  monto_total: number | null;
   cuotas: Cuota[];
 }
+
+interface Mora {
+  en_mora: boolean;
+  deuda: number;
+  punitorios: number;
+}
+
+interface OpcionSimulada {
+  cant_cuotas: number;
+  monto_cuota: number;
+  monto_total: number;
+  recargo_porcentaje: number;
+  tea: number;
+  cftea: number;
+}
+
+interface Simulacion {
+  tna: number;
+  iva_intereses: number;
+  cuotas_permitidas: number[];
+  opciones: OpcionSimulada[];
+}
+
+const pesos = (valor: number) =>
+  `$ ${Number(valor).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 interface SituacionCrediticia {
   dni: string;
@@ -55,6 +86,8 @@ function Prestamos() {
   const [cantCuotas, setCantCuotas] = useState<number>(1);
   const [expandidos, setExpandidos] = useState<Set<number>>(new Set());
   const [enviando, setEnviando] = useState(false);
+  const [mora, setMora] = useState<Mora | null>(null);
+  const [simulacion, setSimulacion] = useState<Simulacion | null>(null);
 
   const [situacionCrediticia, setSituacionCrediticia] = useState<SituacionCrediticia | null>(null);
   const [loadingSituacion, setLoadingSituacion] = useState(true);
@@ -79,6 +112,7 @@ function Prestamos() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al cargar préstamos');
       setPrestamos(data.prestamos);
+      setMora(data.mora ?? null);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError('Error inesperado');
@@ -90,6 +124,25 @@ function Prestamos() {
   useEffect(() => {
     cargarPrestamos();
   }, [cargarPrestamos]);
+
+  // Simula el préstamo mientras el cliente escribe el monto (con una pequeña espera entre teclas)
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/prestamos/simular?monto=${Number(monto) || 0}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) setSimulacion(await res.json());
+      } catch {
+        setSimulacion(null);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [monto, getToken]);
+
+  const opcionesCuotas = simulacion?.cuotas_permitidas ?? CUOTAS_POR_DEFECTO;
+  const opcionElegida = simulacion?.opciones.find(o => o.cant_cuotas === cantCuotas);
 
   useEffect(() => {
     const cargarSituacion = async () => {
@@ -143,7 +196,7 @@ function Prestamos() {
   };
 
   const badgeClass = (estado: string) => {
-    if (estado === 'aprobado') return styles.badgeAprobado;
+    if (estado === 'aprobado' || estado === 'finalizado') return styles.badgeAprobado;
     if (estado === 'rechazado') return styles.badgeRechazado;
     if (estado === 'pre_aprobado') return styles.badgePreAprobado;
     return styles.badgePendiente;
@@ -263,38 +316,77 @@ function Prestamos() {
             <p className={styles.errorMsg}>{errorSituacion}</p>
           )}
 
+          {mora?.en_mora && (
+            <div className={`${styles.situacionCard} ${styles.situacionRoja}`}>
+              <span className={styles.situacionIcono}>⚠️</span>
+              <div className={styles.situacionTexto}>
+                <span className={styles.situacionTitulo}>
+                  Tenés cuotas impagas: debés {pesos(mora.deuda)}
+                </span>
+                <span className={styles.situacionSubtitulo}>
+                  La deuda está en el saldo negativo de tu cuenta y se descuenta sola cuando ingresa dinero.
+                  {mora.punitorios > 0 && ` Incluye ${pesos(mora.punitorios)} de intereses punitorios, que siguen aumentando mientras no la canceles.`}
+                  {' '}Hasta regularizarla no podés pedir préstamos ni tarjetas.
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className={styles.formCard}>
             <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
             <form onSubmit={handleSolicitar} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Monto solicitado ($)</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={monto}
-                  onChange={e => setMonto(e.target.value)}
-                  placeholder="Ej: 50000"
-                  className={styles.input}
-                  required
-                />
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Cantidad de cuotas</label>
-                <select
-                  value={cantCuotas}
-                  onChange={e => setCantCuotas(Number(e.target.value))}
-                  className={styles.input}
-                >
-                  {OPCIONES_CUOTAS.map(opcion => (
-                    <option key={opcion} value={opcion}>
-                      {opcion === 1 ? 'Pago único (1 cuota)' : `${opcion} cuotas`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
-                {enviando ? 'Enviando...' : 'Solicitar préstamo'}
-              </button>
+              <fieldset disabled={mora?.en_mora} className={styles.fieldset}>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Monto solicitado ($)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={monto}
+                    onChange={e => setMonto(e.target.value)}
+                    placeholder="Ej: 50000"
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.inputGroup}>
+                  <label className={styles.label}>Cantidad de cuotas</label>
+                  <select
+                    value={cantCuotas}
+                    onChange={e => setCantCuotas(Number(e.target.value))}
+                    className={styles.input}
+                  >
+                    {opcionesCuotas.map(opcion => (
+                      <option key={opcion} value={opcion}>
+                        {opcion === 1 ? 'Pago único (1 cuota)' : `${opcion} cuotas`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {opcionElegida && (
+                  <div className={styles.simulacion}>
+                    <div className={styles.simulacionFila}>
+                      <span>{cantCuotas === 1 ? 'Pago único' : `${cantCuotas} cuotas fijas de`}</span>
+                      <strong>{pesos(opcionElegida.monto_cuota)}</strong>
+                    </div>
+                    <div className={styles.simulacionFila}>
+                      <span>Total a devolver</span>
+                      <strong>{pesos(opcionElegida.monto_total)}</strong>
+                    </div>
+                    <div className={styles.simulacionFila}>
+                      <span>Intereses + IVA</span>
+                      <strong>+{opcionElegida.recargo_porcentaje.toLocaleString('es-AR')}%</strong>
+                    </div>
+                    <p className={styles.simulacionTasas}>
+                      TNA {simulacion?.tna}% · TEA {opcionElegida.tea.toLocaleString('es-AR')}% ·
+                      CFTEA {opcionElegida.cftea.toLocaleString('es-AR')}% (con IVA {simulacion?.iva_intereses}%).
+                      Sistema francés: la cuota es fija y el interés se calcula sobre el capital que queda por pagar.
+                    </p>
+                  </div>
+                )}
+                <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
+                  {enviando ? 'Enviando...' : 'Solicitar préstamo'}
+                </button>
+              </fieldset>
             </form>
             {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
             {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
@@ -309,7 +401,7 @@ function Prestamos() {
             )}
             <div className={styles.lista}>
               {prestamos.map(p => {
-                const tieneCuotas = p.estado === 'aprobado' && p.cuotas?.length > 0;
+                const tieneCuotas = (p.estado === 'aprobado' || p.estado === 'finalizado') && p.cuotas?.length > 0;
                 const abierto = expandidos.has(p.id);
                 return (
                   <div key={p.id} className={styles.prestamoCard}>
@@ -328,6 +420,12 @@ function Prestamos() {
                         {p.cant_cuotas && (
                           <span className={styles.prestamoFecha}>
                             {p.cant_cuotas === 1 ? 'Pago único' : `${p.cant_cuotas} cuotas`}
+                            {Number(p.tna) > 0 && ` · TNA ${Number(p.tna)}%`}
+                          </span>
+                        )}
+                        {p.monto_total && Number(p.monto_total) !== Number(p.monto) && (
+                          <span className={styles.prestamoFecha}>
+                            Total a devolver: {pesos(p.monto_total)}
                           </span>
                         )}
                         {p.fecha_resolucion && (
@@ -351,12 +449,24 @@ function Prestamos() {
                           <div key={c.id} className={styles.cuotaRow}>
                             <span className={styles.cuotaNumero}>Cuota {c.numero_cuota}</span>
                             <span className={styles.cuotaVencimiento}>
-                              Vence: {new Date(c.fecha_vencimiento).toLocaleDateString('es-AR')}
+                              Vence: {new Date(c.fecha_vencimiento).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                              {Number(c.interes) > 0 && (
+                                <span className={styles.cuotaDetalle}>
+                                  Capital {pesos(Number(c.capital))} · Interés {pesos(c.interes)} · IVA {pesos(c.iva)}
+                                </span>
+                              )}
+                              {Number(c.punitorios) > 0 && (
+                                <span className={`${styles.cuotaDetalle} ${styles.cuotaPunitorios}`}>
+                                  + {pesos(c.punitorios)} de intereses punitorios
+                                </span>
+                              )}
                             </span>
                             <span className={styles.cuotaMonto}>
                               $ {Number(c.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                             </span>
-                            <span className={badgeCuotaClass(c.estado)}>{c.estado}</span>
+                            <span className={badgeCuotaClass(c.estado)}>
+                              {c.estado === 'vencida' ? 'en mora' : c.estado}
+                            </span>
                           </div>
                         ))}
                       </div>

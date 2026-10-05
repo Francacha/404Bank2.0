@@ -6,8 +6,11 @@ import styles from './Historial.module.css';
 
 const API_URL = 'http://localhost:3000';
 
+// Etiqueta de los movimientos que no son transferencias
+const ETIQUETA_CATEGORIA = { prestamo: 'Préstamo', divisas: 'Dólares', frasco: 'Frasco' } as const;
+
 interface Transferencia {
-  id: number;
+  id: number | string;
   transaccion_central_id: string;
   cbu_origen: string;
   cbu_destino: string;
@@ -16,6 +19,9 @@ interface Transferencia {
   tipo: string;
   fecha_hora: string;
   moneda: 'ARS' | 'USD';
+  // Solo en lo que no es una transferencia: préstamos, compra/venta de dólares y frascos
+  categoria?: keyof typeof ETIQUETA_CATEGORIA;
+  concepto?: string;
 }
 
 const formatearImporte = (monto: number, moneda: 'ARS' | 'USD') =>
@@ -197,7 +203,7 @@ function Historial() {
         <div className={styles.list}>
           {transferenciasFiltradas.map((t) => (
             <div
-              key={t.id}
+              key={t.transaccion_central_id}
               className={`${styles.card} ${t.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}
             >
               <div className={styles.cardTop}>
@@ -210,7 +216,7 @@ function Historial() {
                 </span>
               </div>
               <p className={styles.fromTo}>
-                {t.tipo === 'entrante' ? `De: ${t.cbu_origen}` : `Para: ${t.cbu_destino}`}
+                {t.concepto ?? (t.tipo === 'entrante' ? `De: ${t.cbu_origen}` : `Para: ${t.cbu_destino}`)}
               </p>
               <div className={styles.badgeRow}>
                 <span className={`${styles.badge} ${t.estado === 'aprobada' ? styles.badgeAprobada : styles.badgeRechazada}`}>
@@ -219,6 +225,9 @@ function Historial() {
                 <span className={`${styles.badge} ${t.moneda === 'USD' ? styles.badgeUsd : styles.badgeArs}`}>
                   {t.moneda}
                 </span>
+                {t.categoria && (
+                  <span className={`${styles.badge} ${styles.badgeCategoria}`}>{ETIQUETA_CATEGORIA[t.categoria]}</span>
+                )}
               </div>
             </div>
           ))}

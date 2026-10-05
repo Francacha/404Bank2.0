@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
+const { asignarAliasPesos } = require('../services/aliasService');
 
 const verificarPerfil = async (req, res) => {
     const clerkId = req.auth?.userId;
@@ -42,15 +43,10 @@ const completarPerfil = async (req, res) => {
         return res.status(502).json({ error: 'No se pudo registrar la persona en el Banco Central. Intentá más tarde.' });
     }
 
-    // 2. Generar alias y sincronizarlo con el Banco Central
-    alias = `${nombre.toLowerCase()}.${apellido.toLowerCase()}.${Math.floor(Math.random() * 9000) + 1000}`;
-    try {
-        await centralBank.asignarAlias(cbu, alias);
-    } catch (err) {
-        // El alias es opcional, si falla se continúa sin él
-        console.warn('No se pudo asignar alias en Banco Central:', err.response?.data || err.message);
-        alias = null;
-    }
+    // 2. Generar alias y sincronizarlo con el Banco Central.
+    // El alias es opcional: si el Banco Central no acepta ninguno, se continúa sin él.
+    const aliasAsignado = await asignarAliasPesos(cbu, nombre, apellido);
+    alias = aliasAsignado.registrado ? aliasAsignado.alias : null;
 
     // 3. Guardar en la base de datos local
     const client = await pool.connect();

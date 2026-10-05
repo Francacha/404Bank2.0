@@ -45,6 +45,58 @@
 .estimate strong { font-size: 23px; }
 .estimate small { color: #6c6662; }
 
+/* ── Frascos ── */
+.frascoForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.frascoLista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.frascoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid rgba(53, 18, 24, 0.16);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.frascoCobrado { opacity: 0.7; }
+
+.frascoFila {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #6c6662;
+  font-size: 14px;
+}
+
+.frascoFila strong { color: #3b000d; font-size: 16px; }
+
+.ganancia { color: #065f46; font-weight: 700; }
+
+.progreso {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(53, 18, 24, 0.08);
+  overflow: hidden;
+}
+
+.progresoBarra {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #76051f 0%, #5a0015 100%);
+}
+
+.frascoDetalle { color: #6c6662; font-size: 12px; }
+
 @media (max-width: 720px) {
   .summaryGrid { grid-template-columns: 1fr; }
 }
