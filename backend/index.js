@@ -21,6 +21,7 @@ const tarjetasRoutes = require('./src/routes/tarjetasRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
 const divisasRoutes = require('./src/routes/divisasRoutes');
 const contactosRoutes = require('./src/routes/contactosRoutes');
+const comprobantesRoutes = require('./src/routes/comprobantesRoutes');
 
 
 const app = express();
@@ -44,6 +45,7 @@ app.use('/api/tarjetas', authMiddleware, tarjetasRoutes);
 app.use('/api/chat', authMiddleware, chatRoutes);
 app.use('/api/divisas', authMiddleware, divisasRoutes);
 app.use('/api/contactos', authMiddleware, contactosRoutes);
+app.use('/api/comprobantes', authMiddleware, comprobantesRoutes);
 
 
 app.use((err, req, res, next) => {

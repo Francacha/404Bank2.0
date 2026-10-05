@@ -18,6 +18,7 @@ import Tarjetas from './pages/Tarjetas';
 import Perfil from './pages/Perfil';
 import Chat from './pages/Chat';
 import Inversiones from './pages/Inversiones';
+import Comprobantes from './pages/Comprobantes';
 import { ViewModeProvider } from './context/ViewModeContext';
 
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/perfil" element={<PrivateRoute><OnboardingGuard><Perfil /></OnboardingGuard></PrivateRoute>} />
         <Route path="/chat" element={<PrivateRoute><OnboardingGuard><Chat /></OnboardingGuard></PrivateRoute>} />
         <Route path="/inversiones" element={<PrivateRoute><OnboardingGuard><Inversiones /></OnboardingGuard></PrivateRoute>} />
+        <Route path="/comprobantes" element={<PrivateRoute><OnboardingGuard><Comprobantes /></OnboardingGuard></PrivateRoute>} />
         <Route path="/admin" element={<PrivateRoute><RoleGuard role="admin"><Admin /></RoleGuard></PrivateRoute>} />
         <Route path="/empleado" element={<PrivateRoute><RoleGuard role="empleado"><Empleado /></RoleGuard></PrivateRoute>} />
         <Route path="/gerente" element={<PrivateRoute><RoleGuard role="gerente"><Gerente /></RoleGuard></PrivateRoute>} />

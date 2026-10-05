@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
-import styles from './Historial.module.css';
+import styles from './Comprobantes.module.css';
 
 const API_URL = 'http://localhost:3000';
 
@@ -55,8 +55,8 @@ const IconHistory = () => (
 const IconReceipt = () => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6" /></svg>
 );
-const IconArrowUp = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></svg>
+const IconDownload = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
 );
 
 const NAV_ITEMS = [
@@ -75,7 +75,7 @@ const NAV_ITEMS_2 = [
   { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
 ];
 
-function Historial() {
+function Comprobantes() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
@@ -87,11 +87,12 @@ function Historial() {
   const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
   const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
+
   const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [filtroMoneda, setFiltroMoneda] = useState<'TODAS' | 'ARS' | 'USD'>('TODAS');
-  const [filtroFecha, setFiltroFecha] = useState<'TODAS' | '7D' | '30D'>('TODAS');
+  const [descargandoId, setDescargandoId] = useState<number | null>(null);
+  const [errorDescarga, setErrorDescarga] = useState('');
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -101,7 +102,7 @@ function Historial() {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al cargar el historial');
+        if (!res.ok) throw new Error(data.error || 'Error al cargar los comprobantes');
         setTransferencias(data.transferencias);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
@@ -113,18 +114,34 @@ function Historial() {
     cargarHistorial();
   }, [getToken]);
 
-  const transferenciasFiltradas = useMemo(() => {
-    const ahora = Date.now();
-    const limiteMs = filtroFecha === '7D' ? 7 * 24 * 60 * 60 * 1000
-      : filtroFecha === '30D' ? 30 * 24 * 60 * 60 * 1000
-      : null;
-
-    return transferencias.filter(t => {
-      if (filtroMoneda !== 'TODAS' && t.moneda !== filtroMoneda) return false;
-      if (limiteMs !== null && ahora - new Date(t.fecha_hora).getTime() > limiteMs) return false;
-      return true;
-    });
-  }, [transferencias, filtroMoneda, filtroFecha]);
+  const descargarComprobante = async (t: Transferencia) => {
+    setErrorDescarga('');
+    setDescargandoId(t.id);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/comprobantes/${t.transaccion_central_id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || 'No se pudo generar el comprobante');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comprobante-${t.transaccion_central_id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      if (err instanceof Error) setErrorDescarga(err.message);
+      else setErrorDescarga('No se pudo descargar el comprobante');
+    } finally {
+      setDescargandoId(null);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -190,8 +207,8 @@ function Historial() {
       <main className={styles.main}>
         <header className={styles.topbar}>
           <div>
-            <h1 className={styles.topbarTitle}>Historial</h1>
-            <p className={styles.topbarSubtitle}>Todas tus transferencias, entrantes y salientes.</p>
+            <h1 className={styles.topbarTitle}>Comprobantes</h1>
+            <p className={styles.topbarSubtitle}>Descargá el comprobante en PDF de cualquiera de tus transferencias.</p>
           </div>
           <div className={styles.topbarActions}>
             <button className={styles.userChip} onClick={() => navigate('/perfil')}>
@@ -211,77 +228,36 @@ function Historial() {
 
         <div className={styles.pageContent}>
           <div className={styles.pageWrapper}>
-            {loading && <p className={styles.loadingText}>Cargando historial...</p>}
-
+            {loading && <p className={styles.loadingText}>Cargando comprobantes...</p>}
             {error && <div className={styles.errorBox}>{error}</div>}
-
-            {!loading && !error && transferencias.length > 0 && (
-              <div className={styles.filters}>
-                <div className={styles.filterGroup}>
-                  {(['TODAS', 'ARS', 'USD'] as const).map(opcion => (
-                    <button
-                      key={opcion}
-                      type="button"
-                      onClick={() => setFiltroMoneda(opcion)}
-                      className={`${styles.filterButton} ${filtroMoneda === opcion ? styles.filterButtonActive : ''}`}
-                    >
-                      {opcion === 'TODAS' ? 'Todas' : opcion}
-                    </button>
-                  ))}
-                </div>
-                <div className={styles.filterGroup}>
-                  {([
-                    { valor: 'TODAS', etiqueta: 'Todo' },
-                    { valor: '7D', etiqueta: 'Últimos 7 días' },
-                    { valor: '30D', etiqueta: 'Últimos 30 días' },
-                  ] as const).map(({ valor, etiqueta }) => (
-                    <button
-                      key={valor}
-                      type="button"
-                      onClick={() => setFiltroFecha(valor)}
-                      className={`${styles.filterButton} ${filtroFecha === valor ? styles.filterButtonActive : ''}`}
-                    >
-                      {etiqueta}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {errorDescarga && <div className={styles.errorBox}>{errorDescarga}</div>}
 
             {!loading && !error && transferencias.length === 0 && (
-              <p className={styles.emptyText}>No tenés transferencias registradas.</p>
-            )}
-
-            {!loading && !error && transferencias.length > 0 && transferenciasFiltradas.length === 0 && (
-              <p className={styles.emptyText}>No hay transferencias que coincidan con los filtros elegidos.</p>
+              <p className={styles.emptyText}>Todavía no tenés transferencias para generar comprobantes.</p>
             )}
 
             <div className={styles.list}>
-              {transferenciasFiltradas.map((t) => (
+              {transferencias.map((t) => (
                 <div key={t.id} className={styles.card}>
-                  <span className={`${styles.cardIconWrap} ${t.tipo === 'entrante' ? styles.cardIconEntrante : styles.cardIconSaliente}`}>
-                    {t.tipo === 'entrante' ? <IconArrowUp /> : <IconSend />}
+                  <span className={styles.cardIconWrap}>
+                    <IconReceipt />
                   </span>
                   <div className={styles.cardInfo}>
                     <span className={styles.cardTitle}>
                       {t.tipo === 'entrante' ? `De: ${t.cbu_origen}` : `Para: ${t.cbu_destino}`}
                     </span>
                     <span className={styles.cardDate}>
-                      {new Date(t.fecha_hora).toLocaleString('es-AR')}
+                      {new Date(t.fecha_hora).toLocaleString('es-AR')} · {formatearImporte(Number(t.importe), t.moneda)}
                     </span>
-                    <div className={styles.badgeRow}>
-                      <span className={`${styles.badge} ${t.estado === 'aprobada' ? styles.badgeAprobada : styles.badgeRechazada}`}>
-                        {t.estado}
-                      </span>
-                      <span className={`${styles.badge} ${t.moneda === 'USD' ? styles.badgeUsd : styles.badgeArs}`}>
-                        {t.moneda}
-                      </span>
-                    </div>
                   </div>
-                  <span className={`${styles.amount} ${t.tipo === 'entrante' ? styles.amountEntrante : styles.amountSaliente}`}>
-                    {t.tipo === 'entrante' ? '+ ' : '− '}
-                    {formatearImporte(Number(t.importe), t.moneda)}
-                  </span>
+                  <button
+                    className={styles.btnDescargar}
+                    onClick={() => descargarComprobante(t)}
+                    disabled={descargandoId === t.id}
+                  >
+                    <IconDownload />
+                    {descargandoId === t.id ? 'Generando...' : 'Descargar'}
+                  </button>
                 </div>
               ))}
             </div>
@@ -292,4 +268,4 @@ function Historial() {
   );
 }
 
-export default Historial;
+export default Comprobantes;

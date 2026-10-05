@@ -119,7 +119,7 @@ const NAV_ITEMS_2 = [
   { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
   { label: 'Chat', path: '/chat', icon: <IconChat /> },
   { label: 'Historial', path: '/historial', icon: <IconHistory /> },
-  { label: 'Comprobantes', path: null, icon: <IconReceipt /> },
+  { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
 ];
 
 function Chat() {
