@@ -1,0 +1,5 @@
+Es el archivo encargado en verificar si estas logeado o no dentro del sistema.
+En las primeras lineas se importan las herramientas a utilizar, luego en la linea 6 se trae define la URL del backend. 
+Linea 9 Pregunta con el isLoeaded si el clerk ya cargo o no, luego con el isSingedIn si el usuario ya esta logeado dentro de clerk y por ultimo trae el token de clerk.
+Linea de la 13 a la 40:
+El isSignedIn se ejecuta cuando el usuario esta autentificado, luego se verifica la obtencion del token de usuario de clerk. Con el fetch llama a la Api para saber si el usuario ya existe dentro de la tabla de personas de postgresSQL, para al final de todo redirrecionar al home o, en caso de que el usuario no este logeado dentro del sistema (tabla de personas), redirrecionarlo dentro del path /completar-perfil, o la pages de UserForm

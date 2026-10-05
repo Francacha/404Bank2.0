@@ -6,9 +6,12 @@ import styles from './Gerente.module.css';
 
 const API_URL = 'http://localhost:3000';
 
+<<<<<<< HEAD
 // Etiqueta de los movimientos que no son transferencias
 const ETIQUETA_CATEGORIA = { prestamo: 'Préstamo', divisas: 'Dólares', frasco: 'Frasco' } as const;
 
+=======
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
 type Tab = 'empleados' | 'clientes' | 'solicitudes';
 
 interface Empleado {
@@ -34,13 +37,18 @@ interface Cliente {
 }
 
 interface Movimiento {
+<<<<<<< HEAD
   id: number | string;
+=======
+  id: number;
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
   cbu_origen: string;
   cbu_destino: string;
   importe: number;
   estado: string;
   tipo: string;
   fecha_hora: string;
+<<<<<<< HEAD
   // Solo en lo que no es una transferencia: préstamos, compra/venta de dólares y frascos
   moneda?: 'ARS' | 'USD';
   categoria?: keyof typeof ETIQUETA_CATEGORIA;
@@ -51,6 +59,8 @@ interface SituacionCrediticia {
   dni: string;
   situacion: number;
   deudas: unknown[];
+=======
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
 }
 
 interface SolicitudPrestamo {
@@ -62,6 +72,7 @@ interface SolicitudPrestamo {
   apellido: string;
   dni: string;
   cbu: string;
+<<<<<<< HEAD
   situacion_crediticia: SituacionCrediticia | null;
 }
 
@@ -73,6 +84,10 @@ const SITUACION_INFO: Record<number, { etiqueta: string; icono: string }> = {
   5: { etiqueta: 'Irrecuperable', icono: '⚫' },
 };
 
+=======
+}
+
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
 interface SolicitudTarjeta {
   id: number;
   tipo: string;
@@ -118,7 +133,11 @@ function Gerente() {
   const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
 
+<<<<<<< HEAD
   const authHeader = useCallback(async () => {
+=======
+  const authHeader = useCallback(async (): Promise<Record<string, string>> => {
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
     const token = await getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [getToken]);
@@ -190,6 +209,7 @@ function Gerente() {
     }
   };
 
+<<<<<<< HEAD
   const situacionClass = (situacion: number) => {
     if (situacion <= 1) return styles.situacion1;
     if (situacion === 2) return styles.situacion2;
@@ -198,6 +218,8 @@ function Gerente() {
     return styles.situacion5;
   };
 
+=======
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
   const accionPrestamo = async (id: number, accion: 'aprobar' | 'rechazar') => {
     setMensajeSolicitud('');
     try {
@@ -483,21 +505,36 @@ function Gerente() {
                     )}
                     <div className={styles.movimientosList}>
                       {movimientos.map(m => (
+<<<<<<< HEAD
                         <div key={`${m.categoria ?? 'transferencia'}-${m.id}`} className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}>
                           <div className={styles.movimientoTop}>
                             <span className={`${styles.importe} ${m.tipo === 'entrante' ? styles.importeEntrante : styles.importeSaliente}`}>
                               {m.tipo === 'entrante' ? '+ ' : '- '}
                               {m.moneda === 'USD' ? 'US$' : '$'} {Number(m.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+=======
+                        <div key={m.id} className={`${styles.movimientoCard} ${m.tipo === 'entrante' ? styles.cardEntrante : styles.cardSaliente}`}>
+                          <div className={styles.movimientoTop}>
+                            <span className={`${styles.importe} ${m.tipo === 'entrante' ? styles.importeEntrante : styles.importeSaliente}`}>
+                              {m.tipo === 'entrante' ? '+ ' : '- '}
+                              $ {Number(m.importe).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
                             </span>
                             <span className={styles.fecha}>{new Date(m.fecha_hora).toLocaleString('es-AR')}</span>
                           </div>
                           <p className={styles.cbuInfo}>
+<<<<<<< HEAD
                             {m.concepto ?? (m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`)}
+=======
+                            {m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`}
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
                           </p>
                           <span className={m.estado === 'aprobada' ? styles.badgeAprobada : styles.badgeRechazada}>
                             {m.estado}
                           </span>
+<<<<<<< HEAD
                           {m.categoria && <span className={styles.badgeCategoria}>{ETIQUETA_CATEGORIA[m.categoria]}</span>}
+=======
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
                         </div>
                       ))}
                     </div>
@@ -526,7 +563,11 @@ function Gerente() {
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
                   <thead>
+<<<<<<< HEAD
                     <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Situación BCRA</th><th>Acciones</th></tr>
+=======
+                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Acciones</th></tr>
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
                   </thead>
                   <tbody>
                     {prestamos.map(p => (
@@ -536,6 +577,7 @@ function Gerente() {
                         <td>$ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                         <td>{new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}</td>
                         <td>
+<<<<<<< HEAD
                           {p.situacion_crediticia ? (
                             <span className={`${styles.situacionChip} ${situacionClass(p.situacion_crediticia.situacion)}`}>
                               {SITUACION_INFO[p.situacion_crediticia.situacion]?.icono ?? '⚪'}{' '}
@@ -546,6 +588,8 @@ function Gerente() {
                           )}
                         </td>
                         <td>
+=======
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
                           <div className={styles.accionesRow}>
                             <button className={styles.btnActivar} onClick={() => accionPrestamo(p.id, 'aprobar')}>
                               Aprobar

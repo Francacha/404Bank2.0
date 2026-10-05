@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react"
 import { ClerkDegraded, ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, useAuth } from "@clerk/react"
 import { Navigate } from "react-router-dom"
@@ -9,12 +10,20 @@ import banSImg from '../assets/banS.png'
 function Login() {
   const { isLoaded, isSignedIn } = useAuth()
   const [banHabla, setBanHabla] = useState(false)
+=======
+import { ClerkDegraded, ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, useAuth } from "@clerk/react";
+import AuthRedirect from "../components/AuthRedirect";
+
+function Login() {
+  const { isLoaded, isSignedIn } = useAuth();
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
 
   if (isLoaded && isSignedIn) {
-    return <Navigate to="/home" replace />
+    return <AuthRedirect />;
   }
 
   return (
+<<<<<<< HEAD
     <div className={styles.container}>
 
       {/* ── PANEL IZQUIERDO ── */}
@@ -49,6 +58,19 @@ function Login() {
           <h2 className={styles.rightTitle}>¡Bienvenido 404User!</h2>
           <p className={styles.rightSubtitle}>
             Ingresá tus datos para acceder a tu cuenta.
+=======
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: "24px" }}>
+      <ClerkLoading>
+        <div>Cargando Clerk...</div>
+      </ClerkLoading>
+
+      <ClerkFailed>
+        <div style={{ maxWidth: "520px", textAlign: "center" }}>
+          <h2>Clerk no pudo iniciar</h2>
+          <p>
+            Si la pantalla se queda en blanco o recarga sola, el problema suele estar en la
+            clave publishable, el dominio permitido o la inicializacion de Clerk.
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
           </p>
         </div>
 
@@ -57,6 +79,7 @@ function Login() {
             <div />
           </ClerkLoading>
 
+<<<<<<< HEAD
           <ClerkFailed>
             <div className={styles.clerkFailedBox}>
               <h2>Clerk no pudo iniciar</h2>
@@ -121,8 +144,19 @@ function Login() {
         </div>
 
       </div>
+=======
+      <ClerkLoaded>
+        <SignIn
+          routing="path"
+          path="/login"
+          signUpUrl="/register"
+          forceRedirectUrl="/"
+          fallbackRedirectUrl="/"
+        />
+      </ClerkLoaded>
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

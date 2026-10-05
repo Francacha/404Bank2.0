@@ -6,8 +6,13 @@ dns.setDefaultResultOrder('ipv4first');
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
+const { clerkMiddleware, getAuth } = require('@clerk/express');
 const { verifyDbConnection } = require('./src/config/db');
+
+// VITE_ es una convención del frontend. El SDK de Express usa esta variable.
+if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  process.env.CLERK_PUBLISHABLE_KEY = process.env.VITE_CLERK_PUBLISHABLE_KEY;
+}
 
 const accountsRoutes = require('./src/routes/accountsRoutes');
 const personasRoutes = require('./src/routes/personasRoutes');
@@ -26,9 +31,44 @@ const frascosRoutes = require('./src/routes/frascosRoutes');
 
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
+
+if (!bypassClerkAuth && !process.env.CLERK_SECRET_KEY) {
+  throw new Error('Falta CLERK_SECRET_KEY en backend/.env');
+}
+
+if (!bypassClerkAuth) {
+  // Solo interpreta y valida la sesión; la respuesta 401 se define abajo.
+  app.use(clerkMiddleware({
+    secretKey: process.env.CLERK_SECRET_KEY,
+    publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+  }));
+}
+
 const authMiddleware = bypassClerkAuth
+<<<<<<< HEAD
   ? (req, res, next) => { req.auth = { userId: 'dev_bypass_user' }; next(); }
+=======
+<<<<<<< Updated upstream
+  ? (req, res, next) => next()
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
   : ClerkExpressRequireAuth({ strict: true });
+=======
+  ? (req, res, next) => { req.auth = { userId: 'dev_bypass_user' }; next(); }
+  : (req, res, next) => {
+      const auth = getAuth(req);
+      if (!auth.userId) {
+        return res.status(401).json({
+          error: 'Sesión no válida o vencida. Cerrá sesión e ingresá nuevamente.',
+          code: 'UNAUTHENTICATED',
+        });
+      }
+
+      // El código existente consume req.auth.userId. El SDK actual lo expone
+      // mediante getAuth(), por lo que mantenemos ese contrato internamente.
+      req.auth = auth;
+      next();
+    };
+>>>>>>> Stashed changes
 
 app.use(cors());
 app.use(express.json());
@@ -49,10 +89,13 @@ app.use('/api/frascos', authMiddleware, frascosRoutes);
 
 
 app.use((err, req, res, next) => {
-  if (err.message === 'Unauthenticated') {
-    return res.status(401).json({ error: 'No estas autenticado en 404Bank.' });
-  }
-  next(err);
+  console.error('Error no controlado en la API:', err);
+  if (res.headersSent) return next(err);
+
+  const status = err.statusCode || err.status || 500;
+  res.status(status).json({
+    error: status === 401 ? 'Sesión no válida o vencida. Cerrá sesión e ingresá nuevamente.' : 'Error interno del servidor.',
+  });
 });
 
 const PORT = process.env.PORT || 3000;

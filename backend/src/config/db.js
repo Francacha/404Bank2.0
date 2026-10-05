@@ -11,8 +11,12 @@ const pool = new Pool({
 });
 
 const verifyDbConnection = async () => {
+<<<<<<< HEAD
     const client = await pool.connect();
     client.release();
+=======
+    await pool.query('SELECT 1');
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
 };
 
 module.exports = { pool, verifyDbConnection };

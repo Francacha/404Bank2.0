@@ -12,9 +12,19 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.13.23",
+<<<<<<< HEAD
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.107.0",
     "axios": "^1.16.1",
+=======
+<<<<<<< Updated upstream
+=======
+    "@clerk/express": "^2.1.55",
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.107.0",
+    "axios": "^1.16.1",
+>>>>>>> Stashed changes
+>>>>>>> 5c981e31c9be347b589c8fe476ccdda89e3bb55d
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
