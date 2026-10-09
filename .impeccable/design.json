@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T01:45:35.562897+00:00",
+  "generatedAt": "2026-10-09T19:52:27.070217+00:00",
   "title": "Design System: 404Bank",
   "extensions": {
     "colorMeta": {
@@ -139,6 +139,18 @@
       "wine-hero": {
         "role": "primary",
         "displayName": "Vino Hero"
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Línea Fuerte"
+      },
+      "green-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte Verde"
+      },
+      "red-tint": {
+        "role": "tertiary",
+        "displayName": "Tinte Rojo"
       }
     },
     "typographyMeta": {
@@ -152,7 +164,7 @@
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Títulos de tarjeta."
+        "purpose": "Títulos de tarjeta; los títulos de sección en la app suben a 15–16px 800."
       },
       "body": {
         "displayName": "Body",
@@ -182,6 +194,16 @@
         "name": "focus-ring",
         "value": "0 0 0 3px rgba(126, 8, 39, 0.14)",
         "purpose": "Foco en controles."
+      },
+      {
+        "name": "chip-active",
+        "value": "0 1px 4px rgba(26, 21, 18, 0.12)",
+        "purpose": "Opción elegida de un control segmentado."
+      },
+      {
+        "name": "card-physical",
+        "value": "0 10px 28px rgba(42, 4, 16, 0.18)",
+        "purpose": "Solo la tarjeta física de débito/crédito."
       }
     ],
     "motion": [
@@ -194,6 +216,16 @@
         "name": "figure-enter",
         "value": "0.35s cubic-bezier(0.16, 1, 0.3, 1)",
         "purpose": "Cifras recalculadas del simulador entran 6px hacia arriba; desactivado con prefers-reduced-motion."
+      },
+      {
+        "name": "skeleton-pulse",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "Esqueletos de carga (opacidad a 0.45); quietos con prefers-reduced-motion."
+      },
+      {
+        "name": "disclosure",
+        "value": "0.2s ease",
+        "purpose": "Giro del chevron al abrir el detalle de una fila."
       }
     ],
     "breakpoints": [
@@ -220,9 +252,9 @@
       "name": "Secondary Button on Wine",
       "kind": "button",
       "refersTo": "button-secondary-on-wine",
-      "description": "Acciones secundarias dentro del hero vino.",
-      "html": "<div class=\"ds-wine2\"><button class=\"ds-btn-sec\">Historial</button></div>",
-      "css": ".ds-wine2{background:#2a0410;padding:24px;border-radius:26px}.ds-btn-sec{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s ease}.ds-btn-sec:hover{background:rgba(255,255,255,.14)}.ds-btn-sec:focus-visible{outline:2px solid #e8b84b;outline-offset:2px}"
+      "description": "Acción secundaria dentro del hero vino, junto al único oro.",
+      "html": "<div class=\"ds-wine2\"><button class=\"ds-btn-sec\">Apartar en un frasco</button></div>",
+      "css": ".ds-wine2{background:#2a0410;padding:24px;border-radius:26px}.ds-btn-sec{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:16px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s ease}.ds-btn-sec:hover{background:rgba(255,255,255,.18)}.ds-btn-sec:focus-visible{outline:2px solid #e8b84b;outline-offset:2px}"
     },
     {
       "name": "Ghost Button",
@@ -262,7 +294,7 @@
       "refersTo": "card",
       "description": "Tarjeta blanca sobre papel con título y link vino.",
       "html": "<div class=\"ds-paper\"><div class=\"ds-card\"><div class=\"ds-card-h\"><span class=\"ds-card-t\">Últimos movimientos</span><a class=\"ds-card-l\">Ver todo</a></div><div class=\"ds-row\"><span>Transferencia recibida</span><b class=\"ds-in\">+$ 25.000</b></div><div class=\"ds-row\"><span>Cuota préstamo</span><b class=\"ds-out\">−$ 8.430</b></div></div></div>",
-      "css": ".ds-paper{background:#f4f2ee;padding:24px}.ds-card{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#fff;border-radius:22px;padding:24px;box-shadow:0 2px 14px rgba(26,21,18,.05);display:flex;flex-direction:column;gap:14px;color:#1a1512}.ds-card-h{display:flex;justify-content:space-between}.ds-card-t{font-size:14px;font-weight:800}.ds-card-l{font-size:12.5px;font-weight:700;color:#7a1128;cursor:pointer}.ds-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}.ds-row b{font-family:'Space Grotesk',sans-serif}.ds-in{color:#187a4c}.ds-out{color:#a3312c}"
+      "css": ".ds-paper{background:#f4f2ee;padding:24px}.ds-card{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#fff;border-radius:22px;padding:24px;box-shadow:0 2px 14px rgba(26,21,18,.05);display:flex;flex-direction:column;gap:14px;color:#1a1512}.ds-card-h{display:flex;justify-content:space-between}.ds-card-t{font-size:14px;font-weight:800}.ds-card-l{font-size:12.5px;font-weight:700;color:#7a1128;cursor:pointer}.ds-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}.ds-row b{font-family:'Space Grotesk',sans-serif}.ds-in{color:#187a4c}.ds-out{color:#1a1512}"
     },
     {
       "name": "Balance Hero",
@@ -293,11 +325,51 @@
       "description": "Franja del dólar en vivo al pie del hero vino de la landing.",
       "html": "<div class=\"ds-usd\"><div class=\"ds-usd-h\"><b>Dólar hoy</b><small>Actualizado 8/10, 03:00 p. m.</small></div><div class=\"ds-usd-row\"><div class=\"ds-usd-i\"><span class=\"ds-usd-c\">Oficial</span><span class=\"ds-usd-v\"><span><small>Compra</small>$ 1.490</span><span><small>Venta</small>$ 1.540</span></span></div><div class=\"ds-usd-i\"><span class=\"ds-usd-c\">Blue</span><span class=\"ds-usd-v\"><span><small>Compra</small>$ 1.520</span><span><small>Venta</small>$ 1.540</span></span></div></div></div>",
       "css": ".ds-usd{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#2a0410;color:#fff;padding:22px 24px 28px;border-radius:22px;display:grid;grid-template-columns:170px minmax(0,1fr);gap:24px;align-items:center}.ds-usd-h{display:flex;flex-direction:column;gap:2px}.ds-usd-h b{font-size:15px;font-weight:800}.ds-usd-h small{font-size:12px;color:rgba(255,255,255,.6)}.ds-usd-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ds-usd-i{display:flex;flex-direction:column;gap:4px;padding-left:14px;border-left:1px solid rgba(255,255,255,.14)}.ds-usd-c{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.62)}.ds-usd-v{display:flex;flex-wrap:wrap;gap:2px 14px;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}.ds-usd-v small{margin-right:4px;font-family:'Manrope','Segoe UI',Arial,sans-serif;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.62)}"
+    },
+    {
+      "name": "Physical Card",
+      "kind": "custom",
+      "refersTo": "card-physical",
+      "description": "Tarjeta física (TarjetaVisual): débito en negro cálido, crédito en vino; número enmascarado y chip oro.",
+      "html": "<div class=\"ds-tv-wrap\"><div class=\"ds-tv ds-tv-cred\"><div class=\"ds-tv-top\"><span class=\"ds-tv-m\">404<span>Bank</span></span><span class=\"ds-tv-t\">Crédito</span></div><span class=\"ds-tv-chip\"></span><p class=\"ds-tv-n\"><span>•••• •••• ••••</span> 4821</p><div class=\"ds-tv-bot\"><div class=\"ds-tv-d\"><small>Titular</small><b>MARÍA GÓMEZ</b></div><div class=\"ds-tv-d\"><small>Vence</small><b class=\"ds-tv-c\">09/30</b></div></div></div><div class=\"ds-tv ds-tv-deb\"><div class=\"ds-tv-top\"><span class=\"ds-tv-m\">404<span>Bank</span></span><span class=\"ds-tv-t\">Débito</span></div><span class=\"ds-tv-chip\"></span><p class=\"ds-tv-n\"><span>•••• •••• ••••</span> 1207</p><div class=\"ds-tv-bot\"><div class=\"ds-tv-d\"><small>Titular</small><b>MARÍA GÓMEZ</b></div><div class=\"ds-tv-d\"><small>Vence</small><b class=\"ds-tv-c\">03/29</b></div></div></div></div>",
+      "css": ".ds-tv-wrap{background:#f4f2ee;padding:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}.ds-tv{font-family:'Manrope','Segoe UI',Arial,sans-serif;position:relative;width:100%;aspect-ratio:1.586/1;container-type:inline-size;border-radius:18px;padding:7% 7.5%;display:grid;grid-template-rows:auto 1fr auto auto;overflow:hidden;color:#fff;box-shadow:0 10px 28px rgba(42,4,16,.18)}.ds-tv::after{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 100% 0%,rgba(255,255,255,.1) 0%,rgba(255,255,255,0) 55%);pointer-events:none}.ds-tv-deb{background:linear-gradient(135deg,#2b231d 0%,#1a1512 55%,#0f0c0a 100%)}.ds-tv-cred{background:linear-gradient(135deg,#4a0817 0%,#2a0410 60%,#150208 100%)}.ds-tv-top{display:flex;justify-content:space-between;align-items:flex-start}.ds-tv-m{font-family:'Space Grotesk',sans-serif;font-size:clamp(15px,6.4cqi,22px);font-weight:700;line-height:1}.ds-tv-m span{color:#e8b84b;font-family:'Manrope',sans-serif}.ds-tv-t{padding:4px 10px;border:1px solid rgba(255,255,255,.28);border-radius:999px;font-size:clamp(11px,3.6cqi,13px);font-weight:800;color:rgba(255,255,255,.85)}.ds-tv-chip{align-self:center;width:clamp(30px,12cqi,44px);aspect-ratio:4/3;border-radius:6px;background:linear-gradient(135deg,#f0c862 0%,#e8b84b 50%,#b98a2a 100%)}.ds-tv-n{margin:0 0 6%;font-family:'Space Grotesk',sans-serif;font-size:clamp(15px,6.6cqi,24px);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.06em;white-space:nowrap}.ds-tv-n span{letter-spacing:.12em;color:rgba(255,255,255,.72)}.ds-tv-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}.ds-tv-d{display:flex;flex-direction:column;gap:2px}.ds-tv-d small{font-size:clamp(11px,3.2cqi,12px);font-weight:700;color:rgba(255,255,255,.72)}.ds-tv-d b{font-size:clamp(12px,4cqi,15px);font-weight:800}.ds-tv-d b.ds-tv-c{font-family:'Space Grotesk',sans-serif;font-weight:700;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Day Ledger",
+      "kind": "card",
+      "refersTo": "ledger-row",
+      "description": "Historial: filtros segmentados sobre papel, título del día y filas expandibles con ícono, meta y monto.",
+      "html": "<div class=\"ds-dl\"><div class=\"ds-dl-seg\" role=\"group\" aria-label=\"Tipo\"><button class=\"ds-dl-o\" aria-pressed=\"true\">Todos</button><button class=\"ds-dl-o\" aria-pressed=\"false\">Transferencias</button><button class=\"ds-dl-o\" aria-pressed=\"false\">Dólares</button></div><h3 class=\"ds-dl-day\">Hoy, 9 de octubre</h3><ul class=\"ds-dl-book\"><li><button class=\"ds-dl-row\" aria-expanded=\"true\"><span class=\"ds-dl-ic ds-dl-in\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14M19 12l-7 7-7-7\"/></svg></span><span class=\"ds-dl-info\"><b>Transferencia de Juan Pérez</b><small>Alias juan.perez · 14:32</small></span><span class=\"ds-dl-amt ds-dl-pos\">+ $ 25.000,00</span></button><dl class=\"ds-dl-det\"><div><dt>Cuenta origen</dt><dd class=\"ds-dl-mono\">0000003100098765432101</dd></div><div><dt>N.º de operación</dt><dd class=\"ds-dl-mono\">8f3a-21c0</dd></div></dl></li><li><button class=\"ds-dl-row\" aria-expanded=\"false\"><span class=\"ds-dl-ic ds-dl-out\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 19V5M5 12l7-7 7 7\"/></svg></span><span class=\"ds-dl-info\"><b>Transferencia a Ana Ruiz</b><small>Alias ana.ruiz · 10:05</small></span><span class=\"ds-dl-amt\">− $ 8.430,00</span></button></li></ul></div>",
+      "css": ".ds-dl{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#f4f2ee;padding:24px;display:flex;flex-direction:column;gap:10px;color:#1a1512}.ds-dl-seg{align-self:flex-start;display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:rgba(26,21,18,.06)}.ds-dl-o{min-height:36px;padding:0 16px;border:0;border-radius:999px;background:transparent;color:#6f665e;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .15s ease,color .15s ease}.ds-dl-o:hover{color:#1a1512}.ds-dl-o:focus-visible{outline:2px solid #7a1128;outline-offset:2px}.ds-dl-o[aria-pressed='true']{background:#fff;color:#2a0410;font-weight:800;box-shadow:0 1px 4px rgba(26,21,18,.12)}.ds-dl-day{margin:12px 0 0;padding-left:4px;font-size:13px;font-weight:800;color:#6f665e}.ds-dl-book{margin:0;padding:6px 12px;list-style:none;background:#fff;border-radius:22px;box-shadow:0 2px 14px rgba(26,21,18,.05)}.ds-dl-book li+li{border-top:1px solid rgba(26,21,18,.08)}.ds-dl-row{width:100%;display:flex;align-items:center;gap:14px;padding:13px 8px;margin:2px 0;border:0;border-radius:14px;background:transparent;color:inherit;font-family:inherit;text-align:left;cursor:pointer;transition:background .15s ease}.ds-dl-row:hover,.ds-dl-row[aria-expanded='true']{background:#f4f2ee}.ds-dl-row:focus-visible{outline:2px solid #7a1128;outline-offset:2px}.ds-dl-ic{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}.ds-dl-in{background:rgba(24,122,76,.12);color:#187a4c}.ds-dl-out{background:rgba(26,21,18,.06);color:#6f665e}.ds-dl-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.ds-dl-info b{font-size:14.5px;font-weight:700}.ds-dl-info small{font-size:12.5px;font-weight:600;color:#6f665e}.ds-dl-amt{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}.ds-dl-pos{color:#187a4c}.ds-dl-det{margin:0;padding:4px 8px 16px 62px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}.ds-dl-det dt{font-size:12px;font-weight:700;color:#6f665e}.ds-dl-det dd{margin:2px 0 0;font-size:13.5px;font-weight:600;overflow-wrap:anywhere}.ds-dl-mono{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;letter-spacing:.02em}"
+    },
+    {
+      "name": "Option Cards",
+      "kind": "input",
+      "refersTo": "option-card",
+      "description": "Opciones visibles como radios (tipo de tarjeta, plazo de frasco); la bloqueada dice por qué.",
+      "html": "<fieldset class=\"ds-oc\"><legend class=\"ds-oc-lg\">¿Qué tarjeta querés?</legend><label class=\"ds-oc-o ds-oc-on\"><input type=\"radio\" name=\"ds-oc\" class=\"ds-oc-r\" checked><b>Débito</b><span>Pagás con la plata de tu cuenta.</span></label><label class=\"ds-oc-o ds-oc-off\"><input type=\"radio\" name=\"ds-oc\" class=\"ds-oc-r\" disabled><b>Crédito</b><span>Ya tenés una solicitud en revisión.</span></label></fieldset>",
+      "css": ".ds-oc{font-family:'Manrope','Segoe UI',Arial,sans-serif;margin:0;padding:24px;border:0;background:#fff;border-radius:22px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;color:#1a1512}.ds-oc-lg{grid-column:1/-1;padding:0;margin-bottom:12px;font-size:15px;font-weight:800}.ds-oc-o{position:relative;display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:16px;border:1.5px solid rgba(26,21,18,.16);background:#fff;cursor:pointer;transition:border-color .15s ease,background .15s ease}.ds-oc-o:hover{border-color:#7a1128}.ds-oc-o b{font-size:15px;font-weight:800}.ds-oc-o span{font-size:13.5px;font-weight:600;line-height:1.45;color:#6f665e}.ds-oc-r{position:absolute;opacity:0;width:1px;height:1px}.ds-oc-o:has(.ds-oc-r:focus-visible){outline:3px solid #7a1128;outline-offset:2px}.ds-oc-on{border-color:#7a1128;background:rgba(122,17,40,.04);box-shadow:inset 0 0 0 1px #7a1128}.ds-oc-off,.ds-oc-off:hover{cursor:not-allowed;background:#f4f2ee;border-style:dashed;border-color:rgba(26,21,18,.16)}"
+    },
+    {
+      "name": "Staff Worklist",
+      "kind": "custom",
+      "refersTo": "button-decision",
+      "description": "Bandeja de solicitudes del personal: fila expandible, chip BCRA, detalle en Papel y decisión en vino.",
+      "html": "<div class=\"ds-bj\"><h3 class=\"ds-bj-h\">Préstamos <span class=\"ds-bj-n\">2</span></h3><ul class=\"ds-bj-l\"><li><button class=\"ds-bj-row\" aria-expanded=\"true\"><span class=\"ds-bj-who\"><b>María Gómez</b><small>DNI 30.123.456 · hace 2 días</small></span><span class=\"ds-bj-que\">$ 500.000 en 12 cuotas</span><span class=\"ds-bj-chip ds-bj-ok\">BCRA 1: Normal</span><span class=\"ds-bj-rev\">Cerrar</span></button><div class=\"ds-bj-det\"><dl class=\"ds-bj-dl\"><div><dt>Monto</dt><dd class=\"ds-bj-c\">$ 500.000,00</dd></div><div><dt>Total a devolver</dt><dd class=\"ds-bj-c\">$ 701.864,35</dd></div><div><dt>Saldo de la cuenta</dt><dd class=\"ds-bj-c\">$ 84.200,00</dd></div></dl><div class=\"ds-bj-act\"><button class=\"ds-bj-ap\">Aprobar préstamo</button><button class=\"ds-bj-re\">Rechazar</button></div></div></li><li><button class=\"ds-bj-row\" aria-expanded=\"false\"><span class=\"ds-bj-who\"><b>Luis Sosa</b><small>DNI 28.555.010 · hace 5 h</small></span><span class=\"ds-bj-que\">$ 150.000 en 6 cuotas</span><span class=\"ds-bj-chip ds-bj-risk\">BCRA 4: Con alto riesgo</span><span class=\"ds-bj-rev\">Revisar</span></button></li></ul></div>",
+      "css": ".ds-bj{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#f4f2ee;padding:24px;display:flex;flex-direction:column;gap:10px;color:#1a1512}.ds-bj-h{margin:0;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800}.ds-bj-n{min-width:26px;padding:2px 8px;border-radius:999px;background:rgba(26,21,18,.07);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;text-align:center}.ds-bj-l{margin:0;padding:4px 8px;list-style:none;background:#fff;border-radius:22px;box-shadow:0 2px 14px rgba(26,21,18,.05)}.ds-bj-l li+li{border-top:1px solid rgba(26,21,18,.08)}.ds-bj-row{width:100%;display:grid;grid-template-columns:minmax(150px,1.1fr) minmax(130px,1fr) auto auto;align-items:center;gap:8px 14px;padding:14px 12px;margin:2px 0;border:0;border-radius:14px;background:transparent;color:inherit;font-family:inherit;text-align:left;cursor:pointer}.ds-bj-row:hover,.ds-bj-row[aria-expanded='true']{background:#f4f2ee}.ds-bj-row:focus-visible{outline:2px solid #7a1128;outline-offset:2px}.ds-bj-who{display:flex;flex-direction:column;gap:2px}.ds-bj-who b{font-size:15px;font-weight:800}.ds-bj-who small{font-size:13px;font-weight:600;color:#6f665e}.ds-bj-que{font-size:14px;font-weight:700}.ds-bj-chip{padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:800;white-space:nowrap}.ds-bj-ok{background:rgba(24,122,76,.12);color:#187a4c}.ds-bj-risk{background:rgba(163,49,44,.08);color:#a3312c}.ds-bj-rev{font-size:13.5px;font-weight:800;color:#7a1128;text-decoration:underline;text-underline-offset:3px}.ds-bj-det{display:flex;flex-direction:column;gap:16px;padding:6px 12px 18px}.ds-bj-dl{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px 20px;padding:16px 18px;border-radius:16px;background:#f4f2ee}.ds-bj-dl dt{font-size:12.5px;font-weight:700;color:#6f665e}.ds-bj-dl dd{margin:2px 0 0;font-size:14.5px;font-weight:700}.ds-bj-c{font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums}.ds-bj-act{display:flex;flex-wrap:wrap;gap:10px}.ds-bj-ap,.ds-bj-re{min-height:44px;padding:0 18px;border-radius:14px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:background .15s ease,border-color .15s ease}.ds-bj-ap{border:0;background:#7a1128;color:#fff}.ds-bj-ap:hover{background:#2a0410}.ds-bj-re{border:1.5px solid rgba(26,21,18,.16);background:#fff;color:#a3312c}.ds-bj-re:hover{border-color:#a3312c}.ds-bj-ap:focus-visible,.ds-bj-re:focus-visible{outline:2px solid #7a1128;outline-offset:2px}"
+    },
+    {
+      "name": "Chat Bubbles",
+      "kind": "custom",
+      "refersTo": "chat-bubble-ban",
+      "description": "Chat con Ban: burbuja vino del usuario, burbuja blanca de Ban con avatar, link de sección y error con Reintentar.",
+      "html": "<ul class=\"ds-ch\"><li class=\"ds-ch-u\"><p class=\"ds-ch-bu\">¿Cómo compro dólares?</p></li><li class=\"ds-ch-b\"><span class=\"ds-ch-av\" aria-hidden=\"true\"></span><div class=\"ds-ch-bb\"><p>Entrá a <a class=\"ds-ch-lk\" href=\"#\">Inversiones</a>, elegí <b>Dólares</b> y escribí cuánto querés. Antes de confirmar te muestro cuánto pagás.</p></div></li><li class=\"ds-ch-b\"><span class=\"ds-ch-av\" aria-hidden=\"true\"></span><div class=\"ds-ch-be\"><span>No pude responderte. Probá de nuevo.</span><button class=\"ds-ch-rt\">Reintentar</button></div></li></ul>",
+      "css": ".ds-ch{font-family:'Manrope','Segoe UI',Arial,sans-serif;margin:0;padding:24px;list-style:none;background:#f4f2ee;display:flex;flex-direction:column;gap:14px}.ds-ch-u,.ds-ch-b{display:flex;align-items:flex-end;gap:10px}.ds-ch-u{justify-content:flex-end}.ds-ch-av{flex-shrink:0;width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#f0c862 0 30%,#fff 31%);box-shadow:0 0 0 1.5px rgba(26,21,18,.16)}.ds-ch-bu,.ds-ch-bb,.ds-ch-be{margin:0;max-width:min(72%,62ch);padding:12px 16px;font-size:14.5px;line-height:1.55}.ds-ch-bb p{margin:0}.ds-ch-bu{border-radius:18px 18px 4px 18px;background:#7a1128;color:#fff}.ds-ch-bb{border-radius:18px 18px 18px 4px;background:#fff;color:#1a1512;box-shadow:0 2px 14px rgba(26,21,18,.05)}.ds-ch-be{border-radius:18px 18px 18px 4px;background:rgba(163,49,44,.08);color:#a3312c;font-weight:600;display:flex;flex-direction:column;align-items:flex-start;gap:10px}.ds-ch-lk{color:#7a1128;font-weight:800;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}.ds-ch-lk:hover{color:#2a0410}.ds-ch-rt{min-height:36px;padding:0 14px;border:1px solid currentColor;border-radius:999px;background:#fff;color:#a3312c;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}.ds-ch-rt:focus-visible,.ds-ch-lk:focus-visible{outline:2px solid #7a1128;outline-offset:2px}"
     }
   ],
   "narrative": {
     "northStar": "El Libro Mayor Cálido",
-    "overview": "404Bank se ve como un libro mayor bancario moderno: cifras claras sobre papel cálido, con el vino como firma institucional. La app es un shell de dos zonas — una barra lateral vino profundo que da peso y confianza, y un área de trabajo color papel donde viven tarjetas blancas con los datos. El oro aparece solo donde está la acción principal; el resto es tinta cálida, gris piedra y blanco.\n\nLa densidad es cómoda, no aireada: tipografía chica pero pesada (13–15px en 600–800), números grandes en Space Grotesk para saldos y montos. Las formas son suaves y seguras de sí — esquinas generosas, píldoras para chips y toggles, avatares circulares. La personalidad (Ban, el \"404\") vive en la marca y el copy; la interfaz de tareas se mantiene directa.\n\nEl sistema normativo es el de la app autenticada (`AppLayout`). La landing pública (`/`, `Landing.module.css`) vive en el mismo mundo: hero en gradiente vino (#4a0817 → Vino Bodega → Vino Noche), fondo Papel, tarjetas blancas, oro solo para el CTA primario, texto en Manrope y cifras en Space Grotesk. Como no usa AppLayout, redefine los mismos tokens en su propio `.page` (mismos valores, nunca en `:root`). Su única diferencia sancionada es tipográfica: ver The Persuade Display Rule.",
+    "overview": "404Bank se ve como un libro mayor bancario moderno: cifras claras sobre papel cálido, con el vino como firma institucional. La app es un shell de dos zonas — una barra lateral vino profundo que da peso y confianza, y un área de trabajo color papel donde viven tarjetas blancas con los datos. El oro aparece solo donde está la acción principal; el resto es tinta cálida, gris piedra y blanco.\n\nLa densidad es cómoda, no aireada: tipografía chica pero pesada (13–15px en 600–800), números grandes en Space Grotesk para saldos y montos. Las formas son suaves y seguras de sí — esquinas generosas, píldoras para chips y toggles, avatares circulares. La personalidad (Ban, el \"404\") vive en la marca y el copy; la interfaz de tareas se mantiene directa.\n\nEl sistema normativo es el de la app autenticada (`AppLayout`). La landing pública (`/`, `Landing.module.css`) vive en el mismo mundo: hero en gradiente vino (#4a0817 → Vino Bodega → Vino Noche), fondo Papel, tarjetas blancas, oro solo para el CTA primario, texto en Manrope y cifras en Space Grotesk. Como no usa AppLayout, redefine los mismos tokens en su propio `.page` (mismos valores, nunca en `:root`). Su única diferencia sancionada es tipográfica: ver The Persuade Display Rule.\n\nLas otras superficies sin AppLayout siguen la misma receta de tokens en su propio `.page`: el shell de ingreso y alta (`AuthShell`, panel vino a la izquierda y tarjeta blanca sobre papel), y los paneles del personal (Empleado, Gerente, Admin), que suman una barra superior vino y bandejas de trabajo sobre papel. El comprobante PDF que genera el backend lleva la misma identidad fuera de la pantalla.",
     "keyCharacteristics": [
       "Shell vino oscuro + lienzo papel cálido (#f4f2ee), nunca gris frío.",
       "Saldos y montos en Space Grotesk 700; todo lo demás en Manrope.",
@@ -323,7 +395,7 @@
       },
       {
         "name": "The Money Color Rule",
-        "body": "Verde y rojo solo significan dinero que entra o sale (o estado sano/en problema). Nunca decorativos.",
+        "body": "Verde y rojo solo significan dinero o estado, nunca decoración. Verde es dinero que entra o estado sano; rojo es problema (mora, error, rechazo, riesgo). En listas de movimientos los egresos van en Tinta con el ícono en Piedra Legible sobre tinte neutro: gastar no es un error.",
         "section": "colors"
       },
       {
@@ -340,6 +412,21 @@
         "name": "The Paper-Not-Plastic Rule",
         "body": "Nada de sombras negras pesadas sobre papel; si algo necesita destacarse, usa vino o blanco, no oscuridad.",
         "section": "elevation"
+      },
+      {
+        "name": "The Review-Then-Receipt Rule",
+        "body": "Ningún movimiento de plata se confirma con un toast. Antes de confirmar se ve lo que va a pasar (cuánto sale, cuánto llega, cuánto queda) y la acción repite el monto; después, un recibo con la cifra confirmada y el camino al comprobante.",
+        "section": "components"
+      },
+      {
+        "name": "The Staff Wine Rule",
+        "body": "En los paneles del personal la decisión principal es vino lleno, no oro; el oro queda como insignia de rol. Toda aprobación irreversible se confirma en línea con la consecuencia escrita, y todo rechazo lleva motivo.",
+        "section": "components"
+      },
+      {
+        "name": "The Honest State Rule",
+        "body": "Cargando, error y vacío son estados diseñados: esqueletos con la forma real, error en tinte rojo con \"Reintentar\" y vacío que dice qué pasa y qué hacer.",
+        "section": "components"
       }
     ],
     "dos": [
@@ -349,14 +436,20 @@
       "**Do** usar verde/rojo solo para sentido del dinero y estado.",
       "**Do** mantener a Ban y los logos de `src/assets` como portadores de la personalidad.",
       "**Do** en una superficie sin AppLayout (como la landing), repetir los tokens en su propio `.page` con los mismos valores; nunca en `:root` ni con valores nuevos.",
-      "**Do** presentar servicios o pasos como libro mayor: una tarjeta blanca con filas divididas por Línea y el dato en chip Papel, no una grilla de íconos."
+      "**Do** presentar servicios o pasos como libro mayor: una tarjeta blanca con filas divididas por Línea y el dato en chip Papel, no una grilla de íconos.",
+      "**Do** pasar todo movimiento de plata por revisión y recibo (The Review-Then-Receipt Rule).",
+      "**Do** mostrar pocas opciones con consecuencia como tarjetas elegibles visibles, no como un select.",
+      "**Do** dibujar la tarjeta de débito o crédito siempre con `TarjetaVisual`, nunca una versión propia por página."
     ],
     "donts": [
       "**Don't** introducir grises fríos (#6b7280, #111827, #f9fafb) ni Segoe UI como fuente de trabajo nuevo; son deriva heredada (la landing ya se alineó).",
       "**Don't** usar el violeta de plantilla de `index.css` (#aa3bff); es residuo de Vite.",
       "**Don't** usar sombras negras pesadas sobre papel.",
       "**Don't** usar esquinas rectas o radios menores a 10px en superficies.",
-      "**Don't** llevar los títulos en Space Grotesk de la landing a vistas autenticadas; ahí los títulos son Manrope 800."
+      "**Don't** llevar los títulos en Space Grotesk de la landing a vistas autenticadas; ahí los títulos son Manrope 800.",
+      "**Don't** pintar de rojo un egreso común; el rojo es para problemas.",
+      "**Don't** dejar una vista en blanco o con un spinner suelto mientras carga, ni un error sin \"Reintentar\".",
+      "**Don't** usar oro para aprobar o rechazar en los paneles del personal."
     ]
   }
 }

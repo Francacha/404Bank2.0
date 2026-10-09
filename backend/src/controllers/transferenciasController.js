@@ -191,12 +191,13 @@ const obtenerMisTransferencias = async (req, res) => {
 
         const cbus = cuentaResult.rows.map(row => row.cbu);
 
+        // fecha_hora se guarda en UTC sin zona horaria: se marca como UTC para que el navegador la muestre en hora argentina.
         const result = await pool.query(`
-            SELECT *
+            SELECT *, fecha_hora AT TIME ZONE 'UTC' AS fecha_hora
             FROM transferencias_central
             WHERE (cbu_origen = ANY($1) AND tipo = 'saliente')
                OR (cbu_destino = ANY($1) AND tipo = 'entrante')
-            ORDER BY fecha_hora DESC
+            ORDER BY transferencias_central.fecha_hora DESC
             LIMIT 50
         `, [cbus]);
 

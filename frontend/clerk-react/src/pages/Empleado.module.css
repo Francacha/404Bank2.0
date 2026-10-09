@@ -319,7 +319,7 @@
   margin-top: 4px;
 }
 
-.estadoActiva { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.estadoActiva { background: rgba(24, 122, 76, 0.1); color: var(--green); }
 .estadoBloqueada { background: rgba(153, 27, 27, 0.1); color: var(--red); }
 
 .accionesRow {
@@ -342,8 +342,8 @@
 
 .btnBloquear { background: rgba(153, 27, 27, 0.08); color: var(--red); }
 .btnBloquear:hover { background: rgba(153, 27, 27, 0.15); }
-.btnActivar { background: rgba(30, 142, 90, 0.1); color: var(--green); }
-.btnActivar:hover { background: rgba(30, 142, 90, 0.18); }
+.btnActivar { background: rgba(24, 122, 76, 0.1); color: var(--green); }
+.btnActivar:hover { background: rgba(24, 122, 76, 0.18); }
 .btnMovimientos { background: var(--wine); color: #fff; }
 .btnMovimientos:hover { opacity: 0.9; }
 
@@ -420,7 +420,7 @@
   border-radius: 999px;
 }
 
-.badgeAprobada { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.badgeAprobada { background: rgba(24, 122, 76, 0.1); color: var(--green); }
 .badgeRechazada { background: rgba(153, 27, 27, 0.1); color: var(--red); }
 
 /* ── Situación crediticia (BCRA) ── */
@@ -439,7 +439,7 @@
   font-style: italic;
 }
 
-.situacion1 { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.situacion1 { background: rgba(24, 122, 76, 0.1); color: var(--green); }
 .situacion2 { background: rgba(180, 150, 0, 0.14); color: #7a5d00; }
 .situacion3 { background: rgba(200, 100, 0, 0.14); color: #9a4c00; }
 .situacion4 { background: rgba(153, 27, 27, 0.12); color: var(--red); }
@@ -478,7 +478,7 @@
 
 .successMsg {
   color: var(--green);
-  background: rgba(30, 142, 90, 0.1);
+  background: rgba(24, 122, 76, 0.1);
   padding: 10px 16px;
   border-radius: 12px;
   font-size: 13.5px;

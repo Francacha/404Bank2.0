@@ -59,8 +59,9 @@ function AuthShell({ title, subtitle, paso, mensajeBan, ancho = false, children 
 
       <main className={styles.contenido} id="formulario" tabIndex={-1}>
         <div className={`${styles.tarjeta} ${ancho ? styles.tarjetaAncha : ''}`}>
-          {paso && <p className={styles.pasoMovil}>Paso {paso} de {PASOS.length}</p>}
           <h1 className={styles.titulo}>{title}</h1>
+          {/* En celular el recorrido del panel vino no se ve: el paso se dice debajo del título, no como etiqueta encima. */}
+          {paso && <p className={styles.pasoMovil}>Paso {paso} de {PASOS.length}: {PASOS[paso - 1].toLowerCase()}</p>}
           {subtitle && <p className={styles.subtitulo}>{subtitle}</p>}
           {children}
         </div>

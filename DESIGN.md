@@ -18,6 +18,8 @@ colors:
   wine-hero: "#4a0817"
   green: "#187a4c"
   red: "#a3312c"
+  green-tint: "rgba(24, 122, 76, 0.12)"
+  red-tint: "rgba(163, 49, 44, 0.08)"
 typography:
   display:
     fontFamily: "'Space Grotesk', sans-serif"
@@ -66,10 +68,22 @@ components:
     rounded: "{rounded.lg}"
     padding: "12px 22px"
   button-secondary-on-wine:
-    backgroundColor: "rgba(255, 255, 255, 0.08)"
+    backgroundColor: "rgba(255, 255, 255, 0.1)"
     textColor: "#ffffff"
     rounded: "{rounded.lg}"
-    padding: "12px 22px"
+    padding: "12px 20px"
+  button-secondary-paper:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    padding: "0 16px"
+    height: "38px"
+  button-decision:
+    backgroundColor: "{colors.wine}"
+    textColor: "#ffffff"
+    rounded: "{rounded.md}"
+    padding: "0 18px"
+    height: "44px"
   button-ghost:
     backgroundColor: "{colors.card}"
     textColor: "{colors.ink}"
@@ -108,6 +122,39 @@ components:
     textColor: "{colors.wine}"
     rounded: "{rounded.pill}"
     padding: "4px 12px"
+  segmented-on-paper-active:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.wine-dark}"
+    rounded: "{rounded.pill}"
+    padding: "0 16px"
+    height: "36px"
+  option-card:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.lg}"
+    padding: "16px 18px"
+  ledger-row:
+    backgroundColor: "transparent"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: "13px 8px"
+  card-physical:
+    textColor: "#ffffff"
+    rounded: "18px"
+    padding: "7% 7.5%"
+  chat-bubble-user:
+    backgroundColor: "{colors.wine}"
+    textColor: "#ffffff"
+    padding: "12px 16px"
+  chat-bubble-ban:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.ink}"
+    padding: "12px 16px"
+  alert-error:
+    backgroundColor: "{colors.red-tint}"
+    textColor: "{colors.red}"
+    rounded: "{rounded.card}"
+    padding: "18px 20px"
 ---
 
 # Design System: 404Bank
@@ -121,6 +168,8 @@ components:
 La densidad es cómoda, no aireada: tipografía chica pero pesada (13–15px en 600–800), números grandes en Space Grotesk para saldos y montos. Las formas son suaves y seguras de sí — esquinas generosas, píldoras para chips y toggles, avatares circulares. La personalidad (Ban, el "404") vive en la marca y el copy; la interfaz de tareas se mantiene directa.
 
 El sistema normativo es el de la app autenticada (`AppLayout`). La landing pública (`/`, `Landing.module.css`) vive en el mismo mundo: hero en gradiente vino (#4a0817 → Vino Bodega → Vino Noche), fondo Papel, tarjetas blancas, oro solo para el CTA primario, texto en Manrope y cifras en Space Grotesk. Como no usa AppLayout, redefine los mismos tokens en su propio `.page` (mismos valores, nunca en `:root`). Su única diferencia sancionada es tipográfica: ver The Persuade Display Rule.
+
+Las otras superficies sin AppLayout siguen la misma receta de tokens en su propio `.page`: el shell de ingreso y alta (`AuthShell`, panel vino a la izquierda y tarjeta blanca sobre papel), y los paneles del personal (Empleado, Gerente, Admin), que suman una barra superior vino y bandejas de trabajo sobre papel. El comprobante PDF que genera el backend lleva la misma identidad fuera de la pantalla.
 
 **Key Characteristics:**
 - Shell vino oscuro + lienzo papel cálido (#f4f2ee), nunca gris frío.
@@ -143,7 +192,8 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 
 ### Tertiary
 - **Verde Acreditado** (#187a4c): ingresos, éxito, estados activos. Oscurecido desde #1e8e5a para llegar a 5.3:1 sobre blanco (AA en texto chico).
-- **Rojo Débito** (#a3312c): egresos, mora, errores, cuentas bloqueadas.
+- **Rojo Débito** (#a3312c): mora, errores, rechazos, riesgo y cuentas bloqueadas. Ver The Money Color Rule: los egresos comunes no van en rojo.
+- **Tintes de estado** (`--green-tint` y `--red-tint`): fondos suaves para íconos de ingreso, avisos de éxito, alertas de error y chips de estado. Siempre con el texto en su verde o rojo pleno encima.
 
 ### Neutral
 - **Tinta Cálida** (#1a1512): texto principal y títulos.
@@ -160,7 +210,7 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 
 **The Readable Stone Rule.** Todo texto secundario de lectura usa Piedra Legible (`--muted-text`). Piedra (`--muted`) queda para íconos, bordes y texto grande.
 
-**The Money Color Rule.** Verde y rojo solo significan dinero que entra o sale (o estado sano/en problema). Nunca decorativos.
+**The Money Color Rule.** Verde y rojo solo significan dinero o estado, nunca decoración. Verde es dinero que entra o estado sano; rojo es problema (mora, error, rechazo, riesgo). En listas de movimientos los egresos van en Tinta con el ícono en Piedra Legible sobre tinte neutro: gastar no es un error.
 
 ## Typography
 
@@ -177,6 +227,8 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 - **Body** (600, 13.5–14.5px): ítems de navegación, contenido de tarjetas, inputs.
 - **Label** (600, 13.5px, 0.6px, MAYÚSCULAS): etiquetas sobre cifras ("SALDO DISPONIBLE").
 - **Mono** (12.5px): CBU, alias técnicos, números de cuenta, dentro de una píldora translúcida.
+- **Título de sección en la app** (Manrope 800, 15–16px, tracking 0): encabeza cada bloque sobre papel (secciones de Perfil, pasos de Inversiones, grupos de la bandeja del personal). El título de día del historial baja a 13px 800 en Piedra Legible.
+- **Cifras en filas** (Space Grotesk 700, 15px, tabular): montos de cada movimiento; en recibos, el monto confirmado sube a 34px.
 - **Display Persuade** (solo landing; Space Grotesk 700): titular del hero en clamp(38px, 5.2vw, 64px), line-height 1.04, -0.03em (36px en celular); títulos de sección en clamp(28px, 3.4vw, 40px), line-height 1.1, -0.02em.
 
 ### Named Rules
@@ -190,6 +242,8 @@ Shell de dos columnas: sidebar fija de 264px (sticky, alto completo) y main flui
 
 La landing (sin shell) usa un contenedor de 1240px centrado con padding lateral clamp(20px, 5vw, 72px). El hero es una grilla `5fr 6fr` (texto | simulador, gap clamp(32px, 5vw, 72px)) que colapsa a una columna en 980px; las secciones sobre papel abren con padding superior clamp(56px, 8vw, 96px) y 28px entre cabecera y contenido.
 
+Las vistas de lectura en columna (Historial, Perfil) usan un ancho máximo de 820px alineado a la izquierda con el título, padding 28px 44px 60px y 22–30px entre bloques. El shell de ingreso (`AuthShell`) es una grilla de panel vino fijo (minmax(300px, 400px)) y contenido sobre papel con una tarjeta blanca de 480px (680px en pasos anchos); en 980px el panel vino pasa arriba. Los paneles del personal centran su contenido en 820px bajo una barra superior de 72px.
+
 Breakpoints observados: 980px (grillas colapsan) y 640px (móvil; la sidebar deja de ser lateral). Valores puntuales en 720/860/900/1220px existen por página y no forman escala.
 
 ## Elevation & Depth
@@ -202,6 +256,8 @@ La tarjeta del simulador de la landing, única tarjeta blanca apoyada sobre vino
 - **Ambiental** (`box-shadow: 0 2px 14px rgba(26, 21, 18, 0.05)`): tarjetas y paneles en reposo.
 - **Elevada vino** (`box-shadow: 0 12px 32px rgba(79, 9, 25, 0.13)`): elementos destacados que flotan sobre papel.
 - **Anillo de foco** (`box-shadow: 0 0 0 3px rgba(126, 8, 39, 0.14)`): foco en controles.
+- **Chip activo** (`box-shadow: 0 1px 4px rgba(26, 21, 18, 0.12)`): la opción elegida de un control segmentado se levanta apenas de su pista (simulador, filtros de Historial, pestañas de Inversiones).
+- **Tarjeta física** (`box-shadow: 0 10px 28px rgba(42, 4, 16, 0.18)`): solo la tarjeta de débito/crédito, teñida de vino; es un objeto, no un panel.
 
 ### Named Rules
 **The Paper-Not-Plastic Rule.** Nada de sombras negras pesadas sobre papel; si algo necesita destacarse, usa vino o blanco, no oscuridad.
@@ -210,12 +266,17 @@ La tarjeta del simulador de la landing, única tarjeta blanca apoyada sobre vino
 
 Esquinas suaves y escalonadas por tamaño: 10–12px en inputs y alertas, 14px en ítems de nav y botones chicos, 16px en botones de acción, 22px en tarjetas, 26px en el hero. Píldoras (999px) para chips, tabs segmentados, CBU y botones fantasma de topbar. Avatares siempre circulares.
 
+Tres formas propias del mundo bajan de 10px a propósito y no son superficies: la punta de las burbujas de chat (18px 18px 18px 4px, del lado de quien habla), el chip dorado de la tarjeta física (6px) y las líneas de esqueleto (6px). La tarjeta física mantiene la proporción ISO 7810 (1.586:1) y 18px de radio.
+
 ## Components
 
 ### Buttons
 - **Shape:** esquinas suaves (16px) en acciones; píldora (999px) en botones de topbar.
 - **Primary:** fondo Oro Sello, texto Vino Bodega, 800, padding 12px 22px, ícono a la izquierda con gap 9px.
-- **Secondary sobre vino:** blanco translúcido 8% con borde blanco 25%, texto blanco 700.
+- **Secondary sobre vino:** blanco translúcido 10% con borde blanco 28%, texto blanco 700, padding 12px 20px; hover a blanco 18%. En el hero de Inicio acompaña al oro como única acción secundaria.
+- **Secundario sobre papel:** píldora blanca de 38px, borde Línea fuerte, Tinta 13.5px 700; hover pasa borde y texto a Vino Institucional. Es el botón de "Reintentar", "Descargar comprobante" y "Ver todos".
+- **Primary sobre papel:** la misma receta oro de 50px de alto, padding 0 26px, 15px 800, alineado al inicio (Transferir, Inversiones, Tarjetas, formularios de Clerk vía `clerkAppearance`).
+- **Decisión del personal:** vino lleno (Vino Institucional, texto blanco 800, 44px, radio 14px; hover Vino Bodega). Rechazar va en contorno (borde 1.5px Línea fuerte, texto Rojo Débito) y solo se vuelve rojo lleno en la confirmación del rechazo. Ver The Staff Wine Rule.
 - **Ghost (sobre papel):** blanco, borde Línea, píldora, 42px de alto, texto Tinta 700.
 - **Hover / Focus:** transiciones de fondo/color de 0.15s ease; disabled baja a 0.7 de opacidad.
 - **Primary en la landing:** misma receta a mayor escala (52px de alto, padding 0 28px, 15.5px 800); ocupa todo el ancho en celular.
@@ -223,6 +284,8 @@ Esquinas suaves y escalonadas por tamaño: 10–12px en inputs y alertas, 14px e
 ### Chips / Segmented controls
 - **Style:** contenedor píldora translúcido (blanco 10% sobre vino, Papel sobre blanco), padding 4px.
 - **State:** opción activa en blanco con texto Vino Bodega 800; inactivas en blanco 70%.
+- **Sobre papel:** pista en tinta 6% (rgba(26, 21, 18, 0.06)), padding 4px; opciones de 32–40px en Piedra Legible 700 (13–14px); la activa es chip blanco con texto Vino Bodega 800 y sombra Chip activo. Filtros con `aria-pressed` (Historial, Tarjetas); pestañas con `role="tab"` y `aria-selected` (Inversiones: Dólares | Frascos). En celular la pista de filtros scrollea horizontal sin barra.
+- **Chips de estado:** píldora 12.5px 800 sobre tinte: verde (sano), oro 22% con texto vino (aviso), rojo (riesgo), tinta 7% con Piedra Legible (sin datos).
 
 ### Cards / Containers
 - **Corner Style:** 22px (paneles), 26px (hero).
@@ -233,7 +296,9 @@ Esquinas suaves y escalonadas por tamaño: 10–12px en inputs y alertas, 14px e
 
 ### Inputs / Fields
 - **Style:** relleno Papel, borde 1.5px Línea, 12px de radio, padding 12px 16px, 14.5px.
-- **Focus:** el borde pasa a Vino Institucional.
+- **Focus:** el borde pasa a Vino Institucional (con anillo de foco en campos sobre tarjeta blanca).
+- **Montos:** se escriben en formato argentino (punto de miles, coma decimal) y se leen con `parsearMonto`; nunca se rechaza "1.500,50".
+- **Opciones visibles como radios:** cuando las opciones son pocas y tienen consecuencia (tipo de tarjeta, plazo de un frasco), se muestran como tarjetas elegibles: blanco, borde 1.5px Línea fuerte, radio 16px (14px en la grilla de plazos); hover borde vino; elegida con borde vino, contorno interior de 1px vino y tinte vino 4%. El radio real queda oculto pero accesible y el foco se dibuja sobre toda la opción. Una opción no disponible queda en Papel con borde discontinuo y dice por qué.
 
 ### Navigation
 - **Style:** sidebar con gradiente vertical Vino Bodega → Vino Noche; marca "404Bank" en Space Grotesk 26px (404 en 700, Bank en 500).
@@ -243,11 +308,41 @@ Esquinas suaves y escalonadas por tamaño: 10–12px en inputs y alertas, 14px e
 - **Tablet (≤980px):** rail de 84px solo con íconos; el texto queda oculto a la vista pero accesible (tooltip con `title`).
 - **Celular (≤640px):** la marca queda arriba y la navegación pasa a una barra inferior al pulgar (Inicio, Transferir, Tarjetas, Historial, Más). "Más" abre un panel blanco con el resto de las secciones; el ítem activo lleva el ícono en oro.
 - **Nav de la landing:** sobre el gradiente vino, sin sidebar. Marca "404Bank" como link (Space Grotesk 26px, 22px en celular); links en blanco 72% Manrope 14.5px 600 (ocultos ≤640px); "Iniciar sesión" como texto blanco 85%; "Abrir cuenta" en píldora translúcida (blanco 8%, borde blanco 35%, hover 16%). Secundario a propósito: el único oro del primer viewport es el CTA del titular.
-- **Secciones sin implementar** (Recargas, Cambio de Contraseña) se muestran deshabilitadas con "(próximamente)", nunca como botones que no hacen nada.
-- **Tokens:** `.page` del shell (`AppLayout.module.css`) es la única fuente de los tokens de color en las páginas de cliente; ningún CSS de página redefine `:root`. Además de los colores de arriba expone `--red-tint`, `--green-tint` (fondos suaves de error/éxito), `--shadow-lift` (sombra Elevada vino) y `--focus-ring`.
+- **Secciones sin implementar** se muestran deshabilitadas (opacidad 0.55) con una etiqueta visible "Pronto": píldora con borde blanco 30%, 11px 800, blanco 85%, alineada a la derecha del ítem; el `title` repite "(próximamente)". Nunca como botones que no hacen nada.
+- **Paneles del personal:** sin sidebar. Barra superior de 72px con gradiente 135° Vino Bodega → Vino Noche, marca en Space Grotesk 20px, insignia de rol en píldora oro (11px 800 en mayúsculas, texto Vino Bodega) y botones de cuenta en píldora translúcida. Debajo, una barra blanca de pestañas en píldora (Piedra Legible 700; activa en vino lleno con texto blanco).
+- **Tokens:** `.page` del shell (`AppLayout.module.css`) es la única fuente de los tokens de color en las páginas de cliente; ningún CSS de página redefine `:root`. Las superficies sin shell (landing, `AuthShell`, paneles Empleado/Gerente/Admin) repiten los mismos valores en su propio `.page`. Además de los colores de arriba expone `--red-tint`, `--green-tint` (fondos suaves de error/éxito), `--shadow-lift` (sombra Elevada vino) y `--focus-ring`.
 
 ### Hero de saldo (signature)
-Bloque vino a ancho completo: etiqueta en mayúsculas blanco 60%, saldo en Display, CBU en píldora mono, tabs ARS/USD segmentados y fila de acciones (oro primaria + secundarias translúcidas).
+Bloque vino a ancho completo: etiqueta en mayúsculas blanco 60%, saldo en Display, CBU en píldora mono, tabs ARS/USD segmentados y fila de acciones (una oro primaria + una secundaria translúcida).
+
+### Tarjeta física (signature, `TarjetaVisual`)
+La misma tarjeta en Inicio y en Tarjetas. Proporción 1.586:1, radio 18px, padding 7% 7.5%, sombra Tarjeta física y un brillo radial blanco 10% desde la esquina superior derecha. Débito en negro cálido (gradiente 135° de #2b231d por Tinta a #0f0c0a); crédito en el gradiente del hero (#4a0817 → Vino Bodega → Vino Noche). Marca "404" blanca + "Bank" oro, tipo en píldora con borde blanco 28%, chip en gradiente oro, número enmascarado "•••• •••• ••••" + últimos 4 en Space Grotesk 500 tabular (0.06em), titular en mayúsculas 800 y vencimiento en Space Grotesk. Todo escala con container queries (`cqi`), así que sirve a cualquier ancho; el texto para lector de pantalla va en una sola frase oculta.
+
+### Libro mayor por día (Historial; la misma fila en Inicio)
+Un grupo por día: título del día (13px 800 Piedra Legible) y debajo una tarjeta blanca de radio 22px con filas divididas por Línea. Cada fila es un botón expandible (radio 14px, padding 13px 8px; hover y abierta en Papel): ícono circular de 40px (ingreso en tinte verde, egreso en tinta 6% con Piedra Legible), título 14.5px 700 (máximo dos líneas), meta 12.5px Piedra Legible ("detalle · hora"), monto Space Grotesk 15px 700 (verde si entra, Tinta si sale) y chevron que gira 0.2s. El detalle abre un `dl` de dos columnas (dt 12px 700 Piedra Legible, CBU y n.º de operación en Space Grotesk tabular) y la descarga del comprobante. Los filtros viven arriba como control segmentado sobre papel. Comprobantes no tiene página propia: se descargan desde el movimiento.
+
+### Revisión y recibo (flujos de plata)
+Toda operación de plata muestra lo que va a pasar antes de confirmar y termina en un recibo. En Transferir la revisión es la tarjeta "Resumen de la operación", viva junto al formulario, y el botón oro repite monto y destinatario ("Enviar $ … a …"); en la compra de dólares de Inversiones es un paso aparte (monto → revisión → recibo). La revisión en paso aparte es una tarjeta blanca titulada "Revisá …" con un `dl` sobre Papel (radio 16px, filas de 13px 18px divididas por Línea, dt Piedra Legible a la izquierda, cifra a la derecha), la acción oro que repite el monto ("Confirmar compra de US$ …") y un secundario "Cambiar monto". El recibo lleva un check verde en círculo de 44px sobre tinte, título 18px 800 en pasado ("Compraste dólares"), el monto en Space Grotesk 34px, el mismo `dl` y salidas a Historial o al comprobante. El foco pasa al título de cada paso.
+
+### Bandeja de solicitudes (paneles del personal, `BandejaSolicitudes`)
+Resumen 16px 700 arriba; un grupo por tipo con título 15px 800 y contador en píldora (Space Grotesk 13px sobre tinta 7%). Cada solicitud es una fila expandible en una tarjeta blanca de radio 22px: nombre 15px 800, meta "DNI · antigüedad" en Piedra Legible, qué pide, chip BCRA y "Revisar" subrayado en vino. El detalle es un `dl` en grilla sobre Papel (radio 16px). Aprobar una acción irreversible pide confirmación en línea con la consecuencia escrita ("Vas a acreditar … No se puede deshacer."); rechazar exige motivo (que ve el cliente) y detalle opcional. Con la bandeja vacía dice "Bandeja al día".
+
+### Chat con Ban
+Usa la variante `fill` del shell. Burbujas de hasta min(72%, 62ch), padding 12px 16px, 14.5px/1.55: las del usuario en Vino Institucional con texto blanco y punta abajo a la derecha; las de Ban blancas con sombra Ambiental y punta abajo a la izquierda, junto a un avatar circular de 36px que recorta la cara de Ban. Las respuestas se arman como elementos (párrafos, listas, negrita), nunca HTML crudo; el nombre de una sección se vuelve link subrayado en vino 800. Los errores son burbuja en tinte rojo con "Reintentar" en píldora. La primera vez, Ban se presenta a 150px con sugerencias en píldoras blancas.
+
+### Perfil como libro
+Cabecera con foto circular de 88px (iniciales en Space Grotesk 30px blanco sobre gradiente vino si no hay foto) y nombre 20px 800. Cada sección (Identidad, Contacto, Tus cuentas, Seguridad) es un título de sección sobre un `dl` en tarjeta blanca de radio 22px: filas en grilla 0.4fr | 1fr, dt 13.5px 700 Piedra Legible, dd 15px 700 Tinta, divididas por Línea.
+
+### Shell de ingreso y alta (`AuthShell`)
+Panel vino sticky (gradiente 160° #4a0817 → Vino Bodega → Vino Noche) con la marca, la lista de pasos (número en círculo de 30px; el actual en blanco con texto Vino Bodega, los hechos en blanco 12%) y Ban abajo con un globo blanco. A la derecha, sobre papel, una tarjeta blanca de radio 22px y padding 32px con título 26px 800 y subtítulo en Piedra Legible. Los formularios de Clerk toman los tokens desde `clerkAppearance` (inputs Papel de 46px, radio 12px; primario oro de 50px) y el texto desde `clerkLocalizacion`. Mientras se resuelve la sesión, `PantallaCarga` muestra un mensaje centrado en Piedra Legible 15px 600 sobre Papel.
+
+### Estados: cargando, error y vacío
+- **Cargando:** esqueletos con la forma de las filas reales (círculo de 40px y líneas de 11px en tinta 7%, pulso de 1.4s, quietos con `prefers-reduced-motion`) y un aviso oculto con `role="status"`. Un mensaje corto en Piedra Legible solo donde no hay filas que imitar.
+- **Error:** bloque en tinte rojo con texto Rojo Débito 600 que dice qué falló y qué hacer, y "Reintentar" como secundario sobre papel. Si una operación de plata no se pudo confirmar, el texto manda a revisar Historial antes de reintentar.
+- **Vacío:** tarjeta blanca en Piedra Legible que dice qué hay (no "No hay datos") y ofrece la próxima acción ("Hacé tu primera transferencia", "Ver todos").
+
+### Comprobante PDF (backend)
+Hoja blanca con una franja vino de 150pt arriba (#4a0817 → Vino Bodega → Vino Noche) y la marca "404" en Space Grotesk Bold + "Bank" en Manrope; Manrope (600/700/800) y Space Grotesk (500/700) van embebidas desde `backend/assets/fonts`. Estado en verde o rojo, monto en Space Grotesk 40pt (verde si lo recibiste, Tinta si lo enviaste), etiquetas en Piedra Legible y valores en Tinta, CBU en Space Grotesk 500. Cierra con una nota "Banco simulado" para que nadie lo tome por un comprobante real.
 
 ### Simulador de préstamos (signature, landing)
 Tarjeta blanca sobre el vino del hero (radio 26px, 22px en celular; padding 28px 28px 24px), con Ban asomando desde el borde superior. Título en Title ("Simulá un préstamo"); etiquetas de campo 12px 700 en mayúsculas, Piedra Legible.
@@ -263,6 +358,13 @@ Una tarjeta blanca (radio 22px, sombra Ambiental) con filas divididas por Línea
 ### Franja del dólar (landing)
 Al pie del hero, sobre vino, separada por una línea blanca 12%. Cabecera "Dólar hoy" (Manrope 15px 800 blanco) con hora en blanco 60%; cuatro casas en columnas divididas por línea blanca 14% (dos columnas ≤980px). Nombre de casa 12px 700 en mayúsculas blanco 62%; valores Compra/Venta en Space Grotesk 17px 700 tabular, con su rótulo en Manrope 11.5px blanco 62%.
 
+### Named Rules
+**The Review-Then-Receipt Rule.** Ningún movimiento de plata se confirma con un toast. Antes de confirmar se ve lo que va a pasar (cuánto sale, cuánto llega, cuánto queda) y la acción repite el monto; después, un recibo con la cifra confirmada y el camino al comprobante.
+
+**The Staff Wine Rule.** En los paneles del personal la decisión principal es vino lleno, no oro; el oro queda como insignia de rol. Toda aprobación irreversible se confirma en línea con la consecuencia escrita, y todo rechazo lleva motivo.
+
+**The Honest State Rule.** Cargando, error y vacío son estados diseñados: esqueletos con la forma real, error en tinte rojo con "Reintentar" y vacío que dice qué pasa y qué hacer.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -273,6 +375,9 @@ Al pie del hero, sobre vino, separada por una línea blanca 12%. Cabecera "Dóla
 - **Do** mantener a Ban y los logos de `src/assets` como portadores de la personalidad.
 - **Do** en una superficie sin AppLayout (como la landing), repetir los tokens en su propio `.page` con los mismos valores; nunca en `:root` ni con valores nuevos.
 - **Do** presentar servicios o pasos como libro mayor: una tarjeta blanca con filas divididas por Línea y el dato en chip Papel, no una grilla de íconos.
+- **Do** pasar todo movimiento de plata por revisión y recibo (The Review-Then-Receipt Rule).
+- **Do** mostrar pocas opciones con consecuencia como tarjetas elegibles visibles, no como un select.
+- **Do** dibujar la tarjeta de débito o crédito siempre con `TarjetaVisual`, nunca una versión propia por página.
 
 ### Don't:
 - **Don't** introducir grises fríos (#6b7280, #111827, #f9fafb) ni Segoe UI como fuente de trabajo nuevo; son deriva heredada (la landing ya se alineó).
@@ -280,3 +385,6 @@ Al pie del hero, sobre vino, separada por una línea blanca 12%. Cabecera "Dóla
 - **Don't** usar sombras negras pesadas sobre papel.
 - **Don't** usar esquinas rectas o radios menores a 10px en superficies.
 - **Don't** llevar los títulos en Space Grotesk de la landing a vistas autenticadas; ahí los títulos son Manrope 800.
+- **Don't** pintar de rojo un egreso común; el rojo es para problemas.
+- **Don't** dejar una vista en blanco o con un spinner suelto mientras carga, ni un error sin "Reintentar".
+- **Don't** usar oro para aprobar o rechazar en los paneles del personal.

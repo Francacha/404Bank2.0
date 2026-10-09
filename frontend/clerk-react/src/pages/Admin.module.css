@@ -237,7 +237,7 @@
 }
 
 .estadoActiva,
-.estadoAprobada { background: rgba(30, 142, 90, 0.1); color: var(--green); }
+.estadoAprobada { background: rgba(24, 122, 76, 0.1); color: var(--green); }
 .estadoBloqueada,
 .estadoRechazada { background: rgba(153, 27, 27, 0.1); color: var(--red); }
 
@@ -255,8 +255,8 @@
 
 .btnBloquear { background: rgba(153, 27, 27, 0.08); color: var(--red); }
 .btnBloquear:hover { background: rgba(153, 27, 27, 0.15); }
-.btnActivar { background: rgba(30, 142, 90, 0.1); color: var(--green); }
-.btnActivar:hover { background: rgba(30, 142, 90, 0.18); }
+.btnActivar { background: rgba(24, 122, 76, 0.1); color: var(--green); }
+.btnActivar:hover { background: rgba(24, 122, 76, 0.18); }
 
 /* ── Badge tipo transferencia ── */
 .tipoEntrante { color: var(--green); font-weight: 800; }
