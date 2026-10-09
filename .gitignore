@@ -15,3 +15,10 @@ build/
 **/.impeccable/*.png
 **/.impeccable/live/sessions/
 **/.impeccable/live/previews/
+
+# Herramientas de IA instaladas localmente (Impeccable para Claude Code, Codex, Gemini y otros agentes).
+# No las necesita la app; cada uno las instala en su compu si las usa.
+.claude/
+.agents/
+.codex/
+.gemini/
