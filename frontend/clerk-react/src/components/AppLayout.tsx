@@ -58,7 +58,7 @@ const NAV_ITEMS: NavItem[] = [
 const NAV_ITEMS_2: NavItem[] = [
   { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
   { label: 'Recargas', path: null, icon: <IconRefresh /> },
-  { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
+  { label: 'Cambio de Contraseña', path: '/perfil#seguridad', icon: <IconLock /> },
   { label: 'Chat', path: '/chat', icon: <IconChat /> },
   { label: 'Historial', path: '/historial', icon: <IconHistory /> },
 ];
@@ -116,7 +116,7 @@ function AppLayout({ title, subtitle, variant = 'default', children }: AppLayout
     : (initials || 'U');
 
   const renderNavItem = (item: NavItem) => {
-    const active = item.path === location.pathname;
+    const active = item.path === location.pathname + (item.path?.includes('#') ? location.hash : '');
     return (
       <button
         key={item.label}
@@ -128,6 +128,7 @@ function AppLayout({ title, subtitle, variant = 'default', children }: AppLayout
       >
         <span className={styles.navIcon}>{item.icon}</span>
         <span className={styles.navLabel}>{item.label}</span>
+        {!item.path && <span className={styles.navPronto}>Pronto</span>}
       </button>
     );
   };
@@ -208,7 +209,7 @@ function AppLayout({ title, subtitle, variant = 'default', children }: AppLayout
           </>
         )}
         {NAV_MOVIL.map(item => {
-          const active = item.path === location.pathname;
+          const active = item.path === location.pathname + (item.path?.includes('#') ? location.hash : '');
           return (
             <button
               key={item.label}

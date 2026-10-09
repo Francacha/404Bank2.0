@@ -2,17 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth, useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
+import { PROVINCIAS } from '../components/provincias';
 import styles from './Onboarding.module.css';
 
 const API_URL = 'http://localhost:3000';
 
 // Lista local: el alta no depende de ninguna API externa para conocer las provincias.
-const PROVINCIAS = [
-  'Buenos Aires', 'Ciudad Autónoma de Buenos Aires', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
-  'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja', 'Mendoza', 'Misiones',
-  'Neuquén', 'Río Negro', 'Salta', 'San Juan', 'San Luis', 'Santa Cruz', 'Santa Fe',
-  'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
-];
 
 type Campo = 'nombre' | 'apellido' | 'dni' | 'fechaNac' | 'email' | 'telefono' | 'direccion' | 'provincia' | 'ciudad' | 'codigoPostal';
 

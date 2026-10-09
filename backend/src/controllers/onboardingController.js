@@ -95,20 +95,84 @@ const completarPerfil = async (req, res) => {
     }
 };
 
+// Los datos de la persona, solo los del usuario autenticado.
 const obtenerPerfil = async (req, res) => {
     const clerkId = req.auth?.userId;
     if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
     try {
         const result = await pool.query(
-            'SELECT nombre, apellido FROM Personas WHERE clerk_id = $1',
+            `SELECT nombre, apellido, dni, email, telefono, fechanac, direccion, ciudad, provincia, pais, codigo_postal
+             FROM Personas WHERE clerk_id = $1`,
             [clerkId]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Perfil no encontrado' });
-        res.json({ nombre: result.rows[0].nombre, apellido: result.rows[0].apellido });
+        const p = result.rows[0];
+        res.json({
+            nombre: p.nombre,
+            apellido: p.apellido,
+            dni: p.dni,
+            email: p.email,
+            telefono: p.telefono,
+            fechaNac: p.fechanac,
+            direccion: p.direccion,
+            ciudad: p.ciudad,
+            provincia: p.provincia,
+            pais: p.pais,
+            codigoPostal: p.codigo_postal,
+        });
     } catch (error) {
         console.error('Error obteniendo perfil:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 };
 
-module.exports = { verificarPerfil, completarPerfil, obtenerPerfil };
+const PROVINCIAS = [
+    'Buenos Aires', 'Ciudad Autónoma de Buenos Aires', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes',
+    'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja', 'Mendoza', 'Misiones', 'Neuquén', 'Río Negro',
+    'Salta', 'San Juan', 'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
+];
+
+// El cliente puede cambiar su teléfono y su domicilio. Nombre, DNI y fecha de nacimiento quedan
+// fijos: están registrados en el Banco Central.
+const actualizarContacto = async (req, res) => {
+    const clerkId = req.auth?.userId;
+    if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
+
+    const limpio = (valor, largo) => (typeof valor === 'string' ? valor.trim().slice(0, largo) : '');
+    const telefono = limpio(req.body?.telefono, 30);
+    const direccion = limpio(req.body?.direccion, 120);
+    const ciudad = limpio(req.body?.ciudad, 80);
+    const provincia = limpio(req.body?.provincia, 80);
+    const codigoPostal = limpio(req.body?.codigoPostal, 10);
+
+    if (telefono && !/^[\d\s+()-]{8,}$/.test(telefono)) {
+        return res.status(400).json({ error: 'Revisá el teléfono: usá solo números, con código de área.', campo: 'telefono' });
+    }
+    if (!ciudad) return res.status(400).json({ error: 'Escribí tu ciudad o localidad.', campo: 'ciudad' });
+    if (!PROVINCIAS.includes(provincia)) return res.status(400).json({ error: 'Elegí tu provincia.', campo: 'provincia' });
+    if (codigoPostal && !/^[A-Za-z]?\d{4}[A-Za-z]{0,3}$/.test(codigoPostal)) {
+        return res.status(400).json({ error: 'Revisá el código postal, por ejemplo 1425 o C1425ABC.', campo: 'codigoPostal' });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE Personas
+             SET Telefono = $1, Direccion = $2, ciudad = $3, provincia = $4, codigo_postal = $5
+             WHERE clerk_id = $6
+             RETURNING telefono, direccion, ciudad, provincia, codigo_postal`,
+            [telefono || null, direccion || null, ciudad, provincia, codigoPostal || null, clerkId]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Perfil no encontrado' });
+        const p = result.rows[0];
+        res.json({ telefono: p.telefono, direccion: p.direccion, ciudad: p.ciudad, provincia: p.provincia, codigoPostal: p.codigo_postal });
+    } catch (error) {
+        // La columna Direccion es única en la base: dos clientes no pueden registrar la misma.
+        if (error.code === '23505') {
+            return res.status(409).json({ error: 'Esa dirección ya está registrada en otra cuenta. Revisala.', campo: 'direccion' });
+        }
+        console.error('Error actualizando contacto:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
+module.exports = { verificarPerfil, completarPerfil, obtenerPerfil, actualizarContacto };

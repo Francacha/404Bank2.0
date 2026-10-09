@@ -10,7 +10,6 @@ const { ClerkExpressRequireAuth } = require('@clerk/clerk-sdk-node');
 const { verifyDbConnection } = require('./src/config/db');
 
 const accountsRoutes = require('./src/routes/accountsRoutes');
-const personasRoutes = require('./src/routes/personasRoutes');
 const onboardingRoutes = require('./src/routes/onboardingRoutes');
 const transferenciasRoutes = require('./src/routes/transferenciasRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
@@ -40,7 +39,6 @@ app.use(express.json());
 app.get('/api/public/simular', simularPrestamo);
 
 app.use('/api/cuentas', authMiddleware, accountsRoutes);
-app.use('/api/personas', authMiddleware, personasRoutes);
 app.use('/api/onboarding', authMiddleware, onboardingRoutes);
 app.use('/api/transferencias', authMiddleware, transferenciasRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
