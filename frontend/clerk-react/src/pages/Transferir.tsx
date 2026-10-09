@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
+import { descargarComprobante } from '../components/descargarComprobante';
 import AppLayout from '../components/AppLayout';
 import styles from './Transferir.module.css';
 import banListo from '../assets/banListo.png';
@@ -127,6 +128,8 @@ function Transferir() {
   const [moneda, setMoneda] = useState<Moneda>('ARS');
   const [enviando, setEnviando] = useState(false);
   const [comprobante, setComprobante] = useState<Comprobante | null>(null);
+  const [descargandoPdf, setDescargandoPdf] = useState(false);
+  const [errorPdf, setErrorPdf] = useState(false);
   const [errorTransferencia, setErrorTransferencia] = useState('');
   const tituloExitoRef = useRef<HTMLHeadingElement>(null);
   // Cada búsqueda tiene un número: si el usuario escribe otra cosa mientras espera, la respuesta vieja se descarta.
@@ -213,6 +216,7 @@ function Transferir() {
   const seleccionarContacto = (contacto: Contacto) => {
     setErrorBusqueda('');
     setComprobante(null);
+    setErrorPdf(false);
     setErrorTransferencia('');
     setAgendarContacto(false);
     setBusqueda(contacto.alias || contacto.cbu);
@@ -235,6 +239,7 @@ function Transferir() {
     setErrorBusqueda('');
     setDestinatario(null);
     setComprobante(null);
+    setErrorPdf(false);
     setErrorTransferencia('');
     setAgendarContacto(false);
 
@@ -275,6 +280,7 @@ function Transferir() {
     setEnviando(true);
     setErrorTransferencia('');
     setComprobante(null);
+    setErrorPdf(false);
 
     try {
       const token = await getToken();
@@ -395,14 +401,36 @@ function Transferir() {
                       </dl>
 
                       <div className={styles.reciboAcciones}>
-                        <button type="button" className={styles.btnReciboPrimario} onClick={() => navigate('/comprobantes')}>
-                          Ver comprobante
-                        </button>
+                        {comprobante.transaccionId ? (
+                          <button
+                            type="button"
+                            className={styles.btnReciboPrimario}
+                            disabled={descargandoPdf}
+                            onClick={async () => {
+                              setErrorPdf(false);
+                              setDescargandoPdf(true);
+                              try {
+                                await descargarComprobante(comprobante.transaccionId!, await getToken());
+                              } catch {
+                                setErrorPdf(true);
+                              } finally {
+                                setDescargandoPdf(false);
+                              }
+                            }}
+                          >
+                            {descargandoPdf ? 'Generando comprobante…' : 'Descargar comprobante'}
+                          </button>
+                        ) : (
+                          <button type="button" className={styles.btnReciboPrimario} onClick={() => navigate('/historial')}>
+                            Ver en Historial
+                          </button>
+                        )}
                         <button
                           type="button"
                           className={styles.btnReciboSecundario}
                           onClick={() => {
                             setComprobante(null);
+                            setErrorPdf(false);
                             setErrorTransferencia('');
                             // El recibo se desmonta: devolvemos el foco al primer campo del formulario.
                             requestAnimationFrame(() => document.getElementById('busqueda')?.focus());
@@ -414,6 +442,11 @@ function Transferir() {
                           Volver al inicio
                         </button>
                       </div>
+                      {errorPdf && (
+                        <p className={styles.reciboErrorPdf} role="alert">
+                          No pudimos generar el comprobante. Probá de nuevo o descargalo desde Historial.
+                        </p>
+                      )}
                     </div>
                   </section>
                 ) : (

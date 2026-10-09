@@ -50,6 +50,7 @@ interface Mora {
 
 interface Movimiento {
   id: number;
+  transaccion_central_id: string;
   cbu_origen: string;
   cbu_destino: string;
   importe: number;
@@ -485,8 +486,8 @@ function Home() {
                     <button
                       type="button"
                       className={styles.movRow}
-                      onClick={() => navigate('/comprobantes')}
-                      aria-label={`${entrante ? 'Recibiste' : 'Enviaste'} ${monto} ${entrante ? 'de' : 'a'} ${contraparte}, ${fecha}. Ver comprobantes`}
+                      onClick={() => navigate(`/historial?op=${encodeURIComponent(m.transaccion_central_id)}`)}
+                      aria-label={`${entrante ? 'Recibiste' : 'Enviaste'} ${monto} ${entrante ? 'de' : 'a'} ${contraparte}, ${fecha}. Ver detalle`}
                     >
                       <span className={`${styles.movIconWrap} ${entrante ? styles.movIconEntrante : styles.movIconSaliente}`} aria-hidden="true">
                         {entrante ? <IconArrowIn /> : <IconArrowOut />}

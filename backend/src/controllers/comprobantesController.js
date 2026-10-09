@@ -22,19 +22,7 @@ const descargarComprobante = async (req, res) => {
     const { transaccionId } = req.params;
 
     try {
-        // 1. Traer la transferencia por su id de operación
-        const transferenciaResult = await pool.query(
-            `SELECT * FROM transferencias_central WHERE transaccion_central_id = $1 LIMIT 1`,
-            [transaccionId]
-        );
-
-        if (transferenciaResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Comprobante no encontrado' });
-        }
-
-        const transferencia = transferenciaResult.rows[0];
-
-        // 2. Verificar que el usuario autenticado sea dueño del CBU origen o destino
+        // 1. CBUs del usuario autenticado
         const cuentasResult = await pool.query(`
             SELECT cb.cbu
             FROM Cuentas_Bancarias cb
@@ -42,13 +30,24 @@ const descargarComprobante = async (req, res) => {
             JOIN Personas p ON tit.id_persona = p.id
             WHERE p.clerk_id = $1
         `, [clerkId]);
-
         const misCbus = cuentasResult.rows.map(r => r.cbu);
-        const esPropietario = misCbus.includes(transferencia.cbu_origen) || misCbus.includes(transferencia.cbu_destino);
 
-        if (!esPropietario) {
-            return res.status(403).json({ error: 'No tenés acceso a este comprobante' });
+        // 2. La transferencia solo se busca entre las del usuario: una ajena responde igual que una
+        //    inexistente, así no se puede averiguar qué números de operación existen.
+        //    fecha_hora se guarda en UTC sin zona horaria.
+        const transferenciaResult = await pool.query(`
+            SELECT *, fecha_hora AT TIME ZONE 'UTC' AS fecha_utc
+            FROM transferencias_central
+            WHERE transaccion_central_id = $1
+              AND (cbu_origen = ANY($2) OR cbu_destino = ANY($2))
+            LIMIT 1
+        `, [transaccionId, misCbus]);
+
+        if (transferenciaResult.rows.length === 0) {
+            return res.status(404).json({ error: 'No encontramos ese comprobante entre tus transferencias' });
         }
+
+        const transferencia = transferenciaResult.rows[0];
 
         // 3. Resolver nombres (si son cuentas del banco) y generar el PDF
         const [nombreOrigen, nombreDestino] = await Promise.all([
@@ -58,7 +57,7 @@ const descargarComprobante = async (req, res) => {
 
         const pdfBuffer = await generarComprobanteTransferencia({
             transaccionId: transferencia.transaccion_central_id,
-            fechaHora: transferencia.fecha_hora,
+            fechaHora: new Date(transferencia.fecha_utc),
             importe: Number(transferencia.importe),
             moneda: transferencia.moneda,
             estado: transferencia.estado,
@@ -66,6 +65,8 @@ const descargarComprobante = async (req, res) => {
             cbuDestino: transferencia.cbu_destino,
             nombreOrigen,
             nombreDestino,
+            // Desde el punto de vista de quien descarga: si la plata salió de una cuenta suya, la envió.
+            direccion: misCbus.includes(transferencia.cbu_origen) ? 'enviaste' : 'recibiste',
         });
 
         res.set({

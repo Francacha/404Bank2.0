@@ -30,7 +30,7 @@ A student-built bank that behaves like a real Argentine fintech. It registers pe
 ## Capabilities and Constraints
 
 - **Stack:** React 19 + Vite + TypeScript, react-router, CSS Modules per page, lucide-react icons, and Clerk for auth. The backend is Express 5 with PostgreSQL/Supabase, a Gemini chatbot, the banco central API, and dolarapi.
-- **Client routes:** `/home`, `/transferir`, `/historial`, `/prestamos`, `/tarjetas`, `/perfil`, `/chat`, `/inversiones`, `/comprobantes`. Frascos is on the client side as well.
+- **Client routes:** `/home`, `/transferir`, `/historial`, `/prestamos`, `/tarjetas`, `/perfil`, `/chat`, `/inversiones`. Frascos is on the client side as well. Receipts (comprobantes) download from each transfer in `/historial`; `/comprobantes` redirects there.
 - **Staff routes:** `/empleado`, `/gerente`, `/admin`, behind `RoleGuard`.
 - **Loans:** 1/3/6/12/24/36 installments, with TNA, the punitive surcharge, and IVA configurable through env.
 - **Frascos:** terms of 7 to 365 days with TNA from 28% to 35% and a minimum of $1000.

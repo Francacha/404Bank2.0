@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import { descargarComprobante as bajarPdf } from '../components/descargarComprobante';
 import styles from './Historial.module.css';
 
 const API_URL = 'http://localhost:3000';
@@ -109,6 +110,10 @@ const iconoMovimiento = (m: Movimiento) => {
 function Historial() {
   const { getToken } = useAuth();
   const navigate = useNavigate();
+  // ?op=<transaccion_central_id>: llega desde Home y abre ese movimiento ya desplegado.
+  const [searchParams] = useSearchParams();
+  const opBuscada = searchParams.get('op');
+  const opResuelta = useRef<string | null>(null);
 
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [limite, setLimite] = useState(50);
@@ -140,6 +145,20 @@ function Historial() {
   useEffect(() => {
     cargar();
   }, [cargar]);
+
+  useEffect(() => {
+    if (estado !== 'ok' || !opBuscada || opResuelta.current === opBuscada) return;
+    opResuelta.current = opBuscada;
+    const m = movimientos.find(x => x.transaccion_central_id === opBuscada);
+    if (!m) return;
+    const id = String(m.id);
+    setAbierto(id);
+    requestAnimationFrame(() => {
+      const fila = document.querySelector<HTMLButtonElement>(`[aria-controls="detalle-${CSS.escape(id)}"]`);
+      fila?.scrollIntoView({ block: 'center' });
+      fila?.focus({ preventScroll: true });
+    });
+  }, [estado, opBuscada, movimientos]);
 
   const filtrados = useMemo(() => {
     const ahora = Date.now();
@@ -177,20 +196,7 @@ function Historial() {
     setErrorDescarga(null);
     setDescargando(id);
     try {
-      const token = await getToken();
-      const res = await fetch(`${API_URL}/api/comprobantes/${m.transaccion_central_id}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error();
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `comprobante-${m.transaccion_central_id}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      await bajarPdf(m.transaccion_central_id, await getToken());
     } catch {
       setErrorDescarga(id);
     } finally {

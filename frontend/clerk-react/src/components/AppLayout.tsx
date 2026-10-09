@@ -35,9 +35,6 @@ const IconChat = () => (
 const IconHistory = () => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
 );
-const IconReceipt = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6" /></svg>
-);
 const IconMore = () => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></svg>
 );
@@ -64,7 +61,6 @@ const NAV_ITEMS_2: NavItem[] = [
   { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
   { label: 'Chat', path: '/chat', icon: <IconChat /> },
   { label: 'Historial', path: '/historial', icon: <IconHistory /> },
-  { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
 ];
 
 // En celular la navegación pasa a una barra inferior: estos van siempre visibles y el resto en "Más".
@@ -79,7 +75,6 @@ const NAV_MOVIL_MAS = [
   { label: 'Préstamos', path: '/prestamos', icon: <IconLoan /> },
   { label: 'Inversiones', path: '/inversiones', icon: <IconTrending /> },
   { label: 'Chat con Ban', path: '/chat', icon: <IconChat /> },
-  { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
   { label: 'Mi perfil', path: '/perfil', icon: <IconUser /> },
 ];
 
