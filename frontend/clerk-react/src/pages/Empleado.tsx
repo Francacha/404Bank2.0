@@ -101,7 +101,7 @@ function Empleado() {
   const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
 
-  const authHeader = useCallback(async () => {
+  const authHeader = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [getToken]);

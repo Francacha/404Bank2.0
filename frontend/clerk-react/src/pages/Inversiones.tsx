@@ -47,7 +47,7 @@ function Inversiones() {
 
   const cargarDatos = useCallback(async () => {
     const token = await getToken();
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
     const [cuentasRes, cotizacionRes] = await Promise.all([
       fetch(`${API_URL}/api/cuentas/mis-cuentas`, { headers }),
       fetch(`${API_URL}/api/divisas/cotizacion`, { headers }),
