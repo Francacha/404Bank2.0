@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T23:16:51.569613+00:00",
+  "title": "Design System: 404Bank",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta Cálida",
+        "tonalRamp": [
+          "oklch(15% 0.01 50)",
+          "oklch(25% 0.01 50)",
+          "oklch(35% 0.01 50)",
+          "oklch(45% 0.01 50)",
+          "oklch(58% 0.01 50)",
+          "oklch(70% 0.01 50)",
+          "oklch(82% 0.01 50)",
+          "oklch(95% 0.01 50)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Piedra",
+        "tonalRamp": [
+          "oklch(15% 0.015 60)",
+          "oklch(25% 0.015 60)",
+          "oklch(35% 0.015 60)",
+          "oklch(45% 0.015 60)",
+          "oklch(58% 0.015 60)",
+          "oklch(70% 0.015 60)",
+          "oklch(82% 0.015 60)",
+          "oklch(95% 0.015 60)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "tonalRamp": [
+          "oklch(15% 0.008 80)",
+          "oklch(25% 0.008 80)",
+          "oklch(35% 0.008 80)",
+          "oklch(45% 0.008 80)",
+          "oklch(58% 0.008 80)",
+          "oklch(70% 0.008 80)",
+          "oklch(82% 0.008 80)",
+          "oklch(95% 0.008 80)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Blanco Tarjeta"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Línea"
+      },
+      "wine": {
+        "role": "primary",
+        "displayName": "Vino Institucional",
+        "tonalRamp": [
+          "oklch(15% 0.13 15)",
+          "oklch(25% 0.13 15)",
+          "oklch(35% 0.13 15)",
+          "oklch(45% 0.13 15)",
+          "oklch(58% 0.13 15)",
+          "oklch(70% 0.13 15)",
+          "oklch(82% 0.13 15)",
+          "oklch(95% 0.13 15)"
+        ]
+      },
+      "brand-wine": {
+        "role": "primary",
+        "displayName": "Vino Marca",
+        "tonalRamp": [
+          "oklch(15% 0.11 15)",
+          "oklch(25% 0.11 15)",
+          "oklch(35% 0.11 15)",
+          "oklch(45% 0.11 15)",
+          "oklch(58% 0.11 15)",
+          "oklch(70% 0.11 15)",
+          "oklch(82% 0.11 15)",
+          "oklch(95% 0.11 15)"
+        ]
+      },
+      "wine-dark": {
+        "role": "primary",
+        "displayName": "Vino Bodega"
+      },
+      "wine-darker": {
+        "role": "primary",
+        "displayName": "Vino Noche"
+      },
+      "accent": {
+        "role": "secondary",
+        "displayName": "Oro Sello",
+        "tonalRamp": [
+          "oklch(15% 0.13 85)",
+          "oklch(25% 0.13 85)",
+          "oklch(35% 0.13 85)",
+          "oklch(45% 0.13 85)",
+          "oklch(58% 0.13 85)",
+          "oklch(70% 0.13 85)",
+          "oklch(82% 0.13 85)",
+          "oklch(95% 0.13 85)"
+        ]
+      },
+      "green": {
+        "role": "tertiary",
+        "displayName": "Verde Acreditado",
+        "tonalRamp": [
+          "oklch(15% 0.12 155)",
+          "oklch(25% 0.12 155)",
+          "oklch(35% 0.12 155)",
+          "oklch(45% 0.12 155)",
+          "oklch(58% 0.12 155)",
+          "oklch(70% 0.12 155)",
+          "oklch(82% 0.12 155)",
+          "oklch(95% 0.12 155)"
+        ]
+      },
+      "red": {
+        "role": "tertiary",
+        "displayName": "Rojo Débito",
+        "tonalRamp": [
+          "oklch(15% 0.14 27)",
+          "oklch(25% 0.14 27)",
+          "oklch(35% 0.14 27)",
+          "oklch(45% 0.14 27)",
+          "oklch(58% 0.14 27)",
+          "oklch(70% 0.14 27)",
+          "oklch(82% 0.14 27)",
+          "oklch(95% 0.14 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Saldo principal."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de página."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Títulos de tarjeta."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Contenido y navegación."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etiquetas en mayúsculas sobre cifras."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "CBU y números de cuenta."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient",
+        "value": "0 2px 14px rgba(26, 21, 18, 0.05)",
+        "purpose": "Tarjetas en reposo."
+      },
+      {
+        "name": "wine-lift",
+        "value": "0 12px 32px rgba(79, 9, 25, 0.13)",
+        "purpose": "Elementos destacados sobre papel."
+      },
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 3px rgba(126, 8, 39, 0.14)",
+        "purpose": "Foco en controles."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": "0.15s ease",
+        "purpose": "Cambios de fondo, color y borde."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "640px"
+      },
+      {
+        "name": "tablet",
+        "value": "980px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal, una por zona; sobre vino.",
+      "html": "<div class=\"ds-wine\"><button class=\"ds-btn-primary\">Transferir</button></div>",
+      "css": ".ds-wine{background:linear-gradient(135deg,#4a0817,#2a0410 68%,#150208);padding:24px;border-radius:26px}.ds-btn-primary{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#e8b84b;color:#2a0410;border:0;border-radius:16px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;transition:background .15s ease}.ds-btn-primary:hover{background:#f0c862}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(232,184,75,.45)}"
+    },
+    {
+      "name": "Secondary Button on Wine",
+      "kind": "button",
+      "refersTo": "button-secondary-on-wine",
+      "description": "Acciones secundarias dentro del hero vino.",
+      "html": "<div class=\"ds-wine2\"><button class=\"ds-btn-sec\">Historial</button></div>",
+      "css": ".ds-wine2{background:#2a0410;padding:24px;border-radius:26px}.ds-btn-sec{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s ease}.ds-btn-sec:hover{background:rgba(255,255,255,.14)}.ds-btn-sec:focus-visible{outline:2px solid #e8b84b;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Botón de topbar sobre papel.",
+      "html": "<button class=\"ds-btn-ghost\">Cerrar sesión</button>",
+      "css": ".ds-btn-ghost{font-family:'Manrope','Segoe UI',Arial,sans-serif;min-height:42px;padding:0 20px;border:1px solid rgba(26,21,18,.08);border-radius:999px;background:#fff;color:#1a1512;font-size:13.5px;font-weight:700;cursor:pointer;transition:border-color .15s ease}.ds-btn-ghost:hover{border-color:rgba(26,21,18,.2)}.ds-btn-ghost:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(126,8,39,.14)}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de formulario sobre tarjeta blanca.",
+      "html": "<input class=\"ds-input\" placeholder=\"Alias o CBU\" />",
+      "css": ".ds-input{font-family:'Manrope','Segoe UI',Arial,sans-serif;padding:12px 16px;border:1.5px solid rgba(26,21,18,.08);border-radius:12px;font-size:14.5px;color:#1a1512;background:#f4f2ee;outline:none;transition:border-color .15s ease}.ds-input:focus{border-color:#7a1128}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Barra lateral vino con ítems redondeados.",
+      "html": "<nav class=\"ds-nav\"><div class=\"ds-brand\"><b>404</b>Bank</div><a class=\"ds-nav-item ds-active\">Inicio</a><a class=\"ds-nav-item\">Transferir</a><a class=\"ds-nav-item\">Préstamos</a></nav>",
+      "css": ".ds-nav{font-family:'Manrope','Segoe UI',Arial,sans-serif;width:240px;padding:24px 16px;background:linear-gradient(180deg,#2a0410,#150208);border-radius:16px;display:flex;flex-direction:column;gap:2px}.ds-brand{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:26px;color:#fff;letter-spacing:-.5px;padding:0 12px 16px}.ds-brand b{font-weight:700}.ds-nav-item{padding:11px 16px;border-radius:14px;color:rgba(255,255,255,.68);font-size:14.5px;font-weight:600;cursor:pointer;transition:background .15s ease,color .15s ease}.ds-nav-item:hover{background:rgba(255,255,255,.06);color:#fff}.ds-active{background:rgba(255,255,255,.1);color:#fff;font-weight:700}"
+    },
+    {
+      "name": "Segmented Tabs",
+      "kind": "chip",
+      "refersTo": "chip-segmented-active",
+      "description": "Selector ARS/USD en píldora.",
+      "html": "<div class=\"ds-wine3\"><div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-on\">ARS</button><button class=\"ds-tab\">USD</button></div></div>",
+      "css": ".ds-wine3{background:#2a0410;padding:20px;border-radius:22px}.ds-tabs{display:inline-flex;gap:6px;background:rgba(255,255,255,.1);padding:4px;border-radius:999px}.ds-tab{font-family:'Manrope','Segoe UI',Arial,sans-serif;padding:7px 16px;border-radius:999px;border:0;background:transparent;color:rgba(255,255,255,.7);font-size:12.5px;font-weight:700;cursor:pointer}.ds-tab:hover{color:#fff}.ds-tab-on{background:#fff;color:#2a0410;font-weight:800}"
+    },
+    {
+      "name": "Panel Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tarjeta blanca sobre papel con título y link vino.",
+      "html": "<div class=\"ds-paper\"><div class=\"ds-card\"><div class=\"ds-card-h\"><span class=\"ds-card-t\">Últimos movimientos</span><a class=\"ds-card-l\">Ver todo</a></div><div class=\"ds-row\"><span>Transferencia recibida</span><b class=\"ds-in\">+$ 25.000</b></div><div class=\"ds-row\"><span>Cuota préstamo</span><b class=\"ds-out\">−$ 8.430</b></div></div></div>",
+      "css": ".ds-paper{background:#f4f2ee;padding:24px}.ds-card{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#fff;border-radius:22px;padding:24px;box-shadow:0 2px 14px rgba(26,21,18,.05);display:flex;flex-direction:column;gap:14px;color:#1a1512}.ds-card-h{display:flex;justify-content:space-between}.ds-card-t{font-size:14px;font-weight:800}.ds-card-l{font-size:12.5px;font-weight:700;color:#7a1128;cursor:pointer}.ds-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}.ds-row b{font-family:'Space Grotesk',sans-serif}.ds-in{color:#1e8e5a}.ds-out{color:#a3312c}"
+    },
+    {
+      "name": "Balance Hero",
+      "kind": "custom",
+      "description": "Bloque de saldo vino: firma del sistema.",
+      "html": "<div class=\"ds-hero\"><span class=\"ds-hl\">Saldo disponible</span><div class=\"ds-hb\">$ 1.284.530,00</div><span class=\"ds-cbu\">0000003100012345678901</span></div>",
+      "css": ".ds-hero{font-family:'Manrope','Segoe UI',Arial,sans-serif;border-radius:26px;padding:34px 38px;background:linear-gradient(135deg,#4a0817,#2a0410 68%,#150208);color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:8px}.ds-hl{font-size:13.5px;font-weight:600;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.6px}.ds-hb{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:700;letter-spacing:-1px}.ds-cbu{font-family:monospace;font-size:12.5px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.1);padding:5px 12px;border-radius:999px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "El Libro Mayor Cálido",
+    "overview": "404Bank se ve como un libro mayor bancario moderno: cifras claras sobre papel cálido, con el vino como firma institucional. La app es un shell de dos zonas — una barra lateral vino profundo que da peso y confianza, y un área de trabajo color papel donde viven tarjetas blancas con los datos. El oro aparece solo donde está la acción principal; el resto es tinta cálida, gris piedra y blanco.\n\nLa densidad es cómoda, no aireada: tipografía chica pero pesada (13–15px en 600–800), números grandes en Space Grotesk para saldos y montos. Las formas son suaves y seguras de sí — esquinas generosas, píldoras para chips y toggles, avatares circulares. La personalidad (Ban, el \"404\") vive en la marca y el copy; la interfaz de tareas se mantiene directa.\n\nEl sistema normativo es el de la app autenticada. La landing (`Landing.module.css`: fondo blanco, Segoe UI, grises Tailwind) es una deriva previa y se alinea a este sistema cuando se toque.",
+    "keyCharacteristics": [
+      "Shell vino oscuro + lienzo papel cálido (#f4f2ee), nunca gris frío.",
+      "Saldos y montos en Space Grotesk 700; todo lo demás en Manrope.",
+      "Oro (#e8b84b) reservado a la acción primaria y acentos de identidad.",
+      "Tarjetas blancas con sombra ambiental mínima, sin bordes duros.",
+      "Esquinas suaves (14–26px) y píldoras para controles segmentados."
+    ],
+    "rules": [
+      {
+        "name": "The One Gold Rule",
+        "body": "El oro marca la acción principal de una vista — una sola por zona. Si dos cosas son oro, ninguna es primaria.",
+        "section": "colors"
+      },
+      {
+        "name": "The Warm Neutral Rule",
+        "body": "Los neutros son cálidos (base marrón). Grises fríos tipo Tailwind (#6b7280, #111827) son deriva heredada; no se usan en trabajo nuevo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Money Color Rule",
+        "body": "Verde y rojo solo significan dinero que entra o sale (o estado sano/en problema). Nunca decorativos.",
+        "section": "colors"
+      },
+      {
+        "name": "The Figures Lead Rule",
+        "body": "Todo monto importante usa Space Grotesk; el texto que lo rodea se achica y se aclara para que la cifra mande.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper-Not-Plastic Rule",
+        "body": "Nada de sombras negras pesadas sobre papel; si algo necesita destacarse, usa vino o blanco, no oscuridad.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** usar Papel (#f4f2ee) como fondo de toda vista autenticada y tarjetas blancas encima.",
+      "**Do** poner montos en Space Grotesk 700 y CBU/números de cuenta en mono dentro de píldora.",
+      "**Do** reservar el Oro Sello (#e8b84b) para una sola acción primaria por zona.",
+      "**Do** usar verde/rojo solo para sentido del dinero y estado.",
+      "**Do** mantener a Ban y los logos de `src/assets` como portadores de la personalidad."
+    ],
+    "donts": [
+      "**Don't** introducir grises fríos (#6b7280, #111827, #f9fafb) ni Segoe UI como fuente de trabajo nuevo; son deriva de la landing.",
+      "**Don't** usar el violeta de plantilla de `index.css` (#aa3bff); es residuo de Vite.",
+      "**Don't** usar sombras negras pesadas sobre papel.",
+      "**Don't** usar esquinas rectas o radios menores a 10px en superficies."
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  simularPrestamo,
   solicitarPrestamo,
   getMisPrestamos,
   getMiSituacionCrediticia,
@@ -12,6 +13,7 @@ const {
 } = require('../controllers/prestamosController');
 
 // Cliente
+router.get('/simular', simularPrestamo);
 router.post('/solicitar', solicitarPrestamo);
 router.get('/mis-prestamos', getMisPrestamos);
 router.get('/mi-situacion-crediticia', getMiSituacionCrediticia);

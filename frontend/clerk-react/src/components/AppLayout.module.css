@@ -1,0 +1,533 @@
+/* Tokens de DESIGN.md, definidos en el shell para que todas las páginas compartan los mismos valores. */
+.page {
+  --ink: #1a1512;
+  --muted: #8a8078;
+  --muted-text: #6f665e;
+  --paper: #f4f2ee;
+  --line: rgba(26, 21, 18, 0.08);
+  --card: #ffffff;
+  --shadow: 0 2px 14px rgba(26, 21, 18, 0.05);
+  --wine: #7a1128;
+  --wine-dark: #2a0410;
+  --wine-darker: #150208;
+  --accent: #e8b84b;
+  --green: #1e8e5a;
+  --red: #a3312c;
+  --focus-ring: 0 0 0 3px rgba(126, 8, 39, 0.14);
+  --accent-hover: #f0c862;
+  --wine-hero: #4a0817;
+  --line-strong: rgba(26, 21, 18, 0.16);
+  --red-tint: rgba(163, 49, 44, 0.08);
+  --green-tint: rgba(30, 142, 90, 0.12);
+  --shadow-lift: 0 12px 32px rgba(79, 9, 25, 0.13);
+
+  min-height: 100vh;
+  display: flex;
+  background: var(--paper);
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+/* index.css (plantilla de Vite) fuerza system-ui y color-scheme oscuro en h1/h2 y :root.
+   Dentro del shell manda DESIGN.md: Manrope en todos los títulos y esquema claro. */
+.page {
+  color-scheme: light;
+}
+
+.page h1,
+.page h2,
+.page h3 {
+  font-family: inherit;
+}
+
+.page ::selection {
+  background: rgba(232, 184, 75, 0.45);
+  color: var(--ink);
+}
+
+.page button:focus-visible,
+.page a:focus-visible {
+  /* Cada superficie oscura define --focus-color (oro) para que el anillo se vea sobre vino. */
+  outline: 2px solid var(--focus-color, var(--wine));
+  outline-offset: 2px;
+}
+
+.pageFill {
+  height: 100vh;
+}
+
+/* ── Saltar al contenido (solo visible con teclado) ── */
+.skipLink {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--wine-dark);
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+
+.skipLink:focus-visible {
+  transform: none;
+  --focus-color: var(--wine-dark);
+}
+
+/* ── Barra lateral ── */
+.sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--wine-dark) 0%, var(--wine-darker) 100%);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+}
+
+.pageFill .sidebar {
+  height: 100vh;
+}
+
+.sidebarBrand {
+  padding: 32px 28px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.brand404,
+.brandBank {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.brand404 { font-weight: 700; }
+.brandBank { font-weight: 500; }
+
+.nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.nav::-webkit-scrollbar { width: 6px; }
+.nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.35); border-radius: 4px; }
+
+.navDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 10px 4px;
+}
+
+.navItem,
+.btnVolverPanel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border-radius: 14px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navItem:hover,
+.btnVolverPanel:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.navItemActive {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.navItem:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.navItem:disabled:hover {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.btnVolverPanel {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.navIcon {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.sidebar,
+.tabBar {
+  --focus-color: var(--accent);
+}
+
+.sidebarFooter {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.userSection:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.userAvatarSidebar,
+.userChipAvatar {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.userAvatarSidebar {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  color: var(--wine-dark);
+  font-size: 13px;
+}
+
+.userAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.userNameSidebar {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+/* ── Contenido ── */
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.main:focus {
+  outline: none;
+}
+
+.pageFill .main {
+  height: 100vh;
+}
+
+.topbar {
+  padding: 36px 44px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.pageFill .topbar {
+  padding: 28px 44px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.topbarTitle {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+}
+
+.topbarSubtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--muted-text);
+}
+
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 5px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.userChip:hover {
+  border-color: var(--line-strong);
+}
+
+.userChipAvatar {
+  width: 32px;
+  height: 32px;
+  background: var(--wine-dark);
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.userChip span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.btnSignOut {
+  min-height: 42px;
+  padding: 0 20px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.btnSignOut:hover {
+  border-color: var(--line-strong);
+}
+
+/* ── Barra inferior (solo celular) ── */
+.tabBar {
+  display: none;
+}
+
+/* ── Tablet: barra angosta solo con íconos ── */
+@media (max-width: 980px) {
+  .sidebar { width: 84px; }
+  .sidebarBrand { padding: 24px 0 16px; justify-content: center; }
+  .brandBank { display: none; }
+  .navItem,
+  .btnVolverPanel { justify-content: center; padding: 11px; }
+  .userSection { justify-content: center; }
+  .userNameSidebar { display: none; }
+
+  /* El texto se oculta a la vista pero lo sigue leyendo el lector de pantalla; el title da el tooltip. */
+  .navLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .topbar,
+  .pageFill .topbar { padding-left: 20px; padding-right: 20px; }
+}
+
+/* ── Celular: marca arriba, navegación al pulgar ── */
+@media (max-width: 640px) {
+  .page { display: block; }
+  .pageFill { height: auto; }
+
+  .sidebar {
+    position: static;
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    align-items: center;
+    background: var(--wine-darker);
+  }
+
+  .pageFill .sidebar { height: auto; }
+  .sidebarBrand { padding: 14px 16px; }
+  .brandBank { display: inline; }
+  .nav,
+  .sidebarFooter { display: none; }
+
+  .main,
+  .pageFill .main {
+    height: auto;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+
+  .topbar,
+  .pageFill .topbar { padding: 24px 20px 0; border-bottom: 0; }
+  .topbarActions .userChip { display: none; }
+
+  .tabBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, var(--wine-dark) 0%, var(--wine-darker) 100%);
+    box-shadow: 0 -8px 24px rgba(21, 2, 8, 0.18);
+  }
+
+  .tabItem {
+    position: relative;
+    z-index: 2;
+    min-height: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.68);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .tabItem span {
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tabItemActive {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  .tabItemActive svg {
+    color: var(--accent);
+  }
+
+  .masBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: rgba(21, 2, 8, 0.4);
+  }
+
+  .masPanel {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    right: 10px;
+    bottom: calc(100% + 10px);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 10px;
+    border-radius: 22px;
+    background: var(--card);
+    box-shadow: 0 12px 32px rgba(79, 9, 25, 0.22);
+    animation: masSube 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .masItem {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .masItem[aria-current='page'] {
+    background: rgba(122, 17, 40, 0.08);
+    color: var(--wine);
+  }
+
+  .masPanel {
+    --focus-color: var(--wine);
+  }
+
+  .masIcon {
+    display: flex;
+    color: var(--wine);
+  }
+}
+
+@keyframes masSube {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masPanel,
+  .skipLink { animation: none; transition: none; }
+}

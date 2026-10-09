@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth, useUser, SignOutButton } from '@clerk/react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useViewMode } from '../context/ViewModeContext';
+import { useAuth, useUser } from '@clerk/react';
+import { useNavigate } from 'react-router-dom';
+import AppLayout from '../components/AppLayout';
 import styles from './home.module.css';
+import banListo from '../assets/banListo.png';
 
 interface Cuenta {
   cbu: string;
+  alias?: string | null;
   saldo: number;
   moneda: 'ARS' | 'USD';
 }
@@ -25,6 +27,27 @@ interface SituacionCrediticia {
   deudas: unknown[];
 }
 
+interface CuotaPrestamo {
+  numero_cuota: number;
+  monto: number;
+  punitorios: number;
+  fecha_vencimiento: string;
+  estado: 'pendiente' | 'vencida' | 'pagada';
+}
+
+interface Prestamo {
+  id: number;
+  estado: string;
+  cant_cuotas: number | null;
+  cuotas: CuotaPrestamo[];
+}
+
+interface Mora {
+  en_mora: boolean;
+  deuda: number;
+  punitorios: number;
+}
+
 interface Movimiento {
   id: number;
   cbu_origen: string;
@@ -34,76 +57,37 @@ interface Movimiento {
   tipo: 'entrante' | 'saliente';
   fecha_hora: string;
   moneda: 'ARS' | 'USD';
+  nombre_contraparte: string | null;
 }
 
 const API_URL = 'http://localhost:3000';
 
-const SITUACION_INFO: Record<number, { etiqueta: string; claseColor: string }> = {
-  1: { etiqueta: 'Normal', claseColor: 'situacion1' },
-  2: { etiqueta: 'Riesgo bajo', claseColor: 'situacion2' },
-  3: { etiqueta: 'Riesgo medio', claseColor: 'situacion3' },
-  4: { etiqueta: 'Riesgo alto', claseColor: 'situacion4' },
-  5: { etiqueta: 'Irrecuperable', claseColor: 'situacion5' },
+// Situaciones de la Central de Deudores: qué significa cada una, en palabras del usuario.
+const SITUACION_INFO: Record<number, { etiqueta: string; claseColor: string; significado: string }> = {
+  1: { etiqueta: 'Normal', claseColor: 'situacion1', significado: 'Pagás tus deudas al día o con menos de 31 días de atraso.' },
+  2: { etiqueta: 'Riesgo bajo', claseColor: 'situacion2', significado: 'Tenés pagos atrasados entre 31 y 90 días.' },
+  3: { etiqueta: 'Riesgo medio', claseColor: 'situacion3', significado: 'Tenés pagos atrasados entre 91 y 180 días.' },
+  4: { etiqueta: 'Riesgo alto', claseColor: 'situacion4', significado: 'Tenés pagos atrasados entre 181 días y un año.' },
+  5: { etiqueta: 'Irrecuperable', claseColor: 'situacion5', significado: 'Tenés pagos atrasados por más de un año.' },
 };
 
-const IconHome = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></svg>
-);
 const IconCard = () => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5" /><path d="M2 10h20" /></svg>
-);
-const IconLoan = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 12h6l2-3 2 6 2-3h4" /></svg>
-);
-const IconTrending = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
 );
 const IconSend = () => (
   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h13" /><path d="m13 6 6 6-6 6" /></svg>
 );
-const IconRefresh = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h3" /></svg>
-);
-const IconLock = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
-);
-const IconChat = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.5 8.5 0 0 1-3.1-.6L3 21l1.8-5.5A8.4 8.4 0 1 1 21 11.5Z" /></svg>
-);
-const IconHistory = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
-);
-const IconReceipt = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6" /></svg>
-);
 const IconCopy = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
 );
-const IconCheck = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+const IconArrowIn = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 7 7 17" /><path d="M16 17H7V8" /></svg>
 );
-const IconAlert = () => (
-  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01" /><path d="m10.3 3.9-8 14A1.5 1.5 0 0 0 3.6 20h16.8a1.5 1.5 0 0 0 1.3-2.1l-8-14a1.5 1.5 0 0 0-2.6 0Z" /></svg>
-);
-const IconArrowUp = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></svg>
+const IconArrowOut = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7" /><path d="M8 7h9v9" /></svg>
 );
 
-const NAV_ITEMS = [
-  { label: 'Cuentas', path: '/', icon: <IconHome /> },
-  { label: 'Tarjetas', path: '/tarjetas', icon: <IconCard /> },
-  { label: 'Préstamos', path: '/prestamos', icon: <IconLoan /> },
-  { label: 'Inversiones', path: '/inversiones', icon: <IconTrending /> },
-];
-
-const NAV_ITEMS_2 = [
-  { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
-  { label: 'Recargas', path: null, icon: <IconRefresh /> },
-  { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
-  { label: 'Chat', path: '/chat', icon: <IconChat /> },
-  { label: 'Historial', path: '/historial', icon: <IconHistory /> },
-  { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
-];
+type EstadoCarga = 'cargando' | 'ok' | 'error';
 
 function Home() {
   const { getToken } = useAuth();
@@ -116,18 +100,21 @@ function Home() {
   const [cuentaActiva, setCuentaActiva] = useState<'pesos' | 'dolares'>('pesos');
   const [abriendoCuentaUSD, setAbriendoCuentaUSD] = useState(false);
   const [mensajeCuentaUSD, setMensajeCuentaUSD] = useState('');
-  const [copiado, setCopiado] = useState(false);
+  const [errorUsd, setErrorUsd] = useState('');
+  const [copiado, setCopiado] = useState<'cbu' | 'alias' | null>(null);
+  const [errorCopia, setErrorCopia] = useState(false);
+  const [estadoTarjetas, setEstadoTarjetas] = useState<EstadoCarga>('cargando');
+  const [tarjetasPendientes, setTarjetasPendientes] = useState(0);
+  const [estadoSituacion, setEstadoSituacion] = useState<EstadoCarga>('cargando');
+  const [estadoPrestamos, setEstadoPrestamos] = useState<EstadoCarga>('cargando');
+  const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
+  const [mora, setMora] = useState<Mora | null>(null);
+  const [errorMovimientos, setErrorMovimientos] = useState(false);
   const [situacionCrediticia, setSituacionCrediticia] = useState<SituacionCrediticia | null>(null);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [loadingMovimientos, setLoadingMovimientos] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
-  const { setViewMode } = useViewMode();
 
-  const role = user?.publicMetadata?.role as string | undefined;
-  const esLaboral = role === 'empleado' || role === 'gerente';
-  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
-  const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
   const cuentasARS = cuentas.filter(cuenta => cuenta.moneda === 'ARS');
   const cuentasUSD = cuentas.filter(cuenta => cuenta.moneda === 'USD');
@@ -145,23 +132,26 @@ function Home() {
     return data.cuentas;
   }, [getToken]);
 
-  useEffect(() => {
-    const cargarCuentas = async () => {
-      try {
-        setCuentas(await obtenerCuentas());
-      } catch (err: unknown) {
-        if (err instanceof Error) setError(err.message);
-        else setError('Error inesperado');
-      } finally {
-        setLoading(false);
-      }
-    };
-    cargarCuentas();
+  const cargarCuentas = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      setCuentas(await obtenerCuentas());
+    } catch {
+      // El detalle técnico queda en la consola del backend; acá le decimos al usuario qué hacer.
+      setError('No pudimos cargar tus cuentas.');
+    } finally {
+      setLoading(false);
+    }
   }, [obtenerCuentas]);
+
+  useEffect(() => {
+    cargarCuentas();
+  }, [cargarCuentas]);
 
   const abrirCuentaUSD = async () => {
     setAbriendoCuentaUSD(true);
-    setError('');
+    setErrorUsd('');
     setMensajeCuentaUSD('');
 
     try {
@@ -174,29 +164,42 @@ function Home() {
         },
         body: JSON.stringify({ moneda: 'USD' }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'No se pudo abrir la cuenta en dólares');
+      if (!res.ok) throw new Error('No pudimos abrir tu cuenta en dólares. Probá de nuevo en unos minutos.');
 
-      setMensajeCuentaUSD(data.mensaje || 'Tu cuenta en dólares fue creada correctamente.');
-      setCuentas(await obtenerCuentas());
+      setMensajeCuentaUSD('¡Listo! Ya tenés tu cuenta en dólares.');
+      // La cuenta ya se abrió: si después falla la recarga, lo informa el hero (no este flujo).
+      cargarCuentas();
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError('Error inesperado al abrir la cuenta en dólares');
+      // Error propio: si falla abrir la cuenta en dólares, el saldo en pesos se sigue viendo.
+      if (err instanceof Error) setErrorUsd(err.message);
+      else setErrorUsd('No pudimos abrir la cuenta en dólares. Intentá de nuevo.');
     } finally {
       setAbriendoCuentaUSD(false);
     }
   };
 
-  const copiarCbu = async () => {
-    if (!cuentaMostrada) return;
+  const copiar = async (texto: string, cual: 'cbu' | 'alias') => {
+    setErrorCopia(false);
     try {
-      await navigator.clipboard.writeText(cuentaMostrada.cbu);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 1500);
+      await navigator.clipboard.writeText(texto);
+      setCopiado(cual);
     } catch {
-      // El clipboard puede no estar disponible en algunos navegadores/contextos.
+      // Sin portapapeles (p. ej. HTTP en la red local): avisamos y el texto queda seleccionable a mano.
+      setErrorCopia(true);
     }
   };
+
+  const cambiarMoneda = (moneda: 'pesos' | 'dolares') => {
+    setCuentaActiva(moneda);
+    setCopiado(null);
+    setErrorCopia(false);
+  };
+
+  useEffect(() => {
+    if (!copiado) return;
+    const timer = setTimeout(() => setCopiado(null), 1800);
+    return () => clearTimeout(timer);
+  }, [copiado]);
 
   useEffect(() => {
     if (!user || user.firstName) return;
@@ -218,176 +221,184 @@ function Home() {
     syncNombre();
   }, [user, getToken]);
 
+  const cargarTarjetas = useCallback(async () => {
+    setEstadoTarjetas('cargando');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/tarjetas/mis-tarjetas`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const todas: Tarjeta[] = data.tarjetas || [];
+      setTarjetas(todas.filter(t => t.estado === 'activa'));
+      setTarjetasPendientes(todas.filter(t => t.estado === 'pendiente' || t.estado === 'pre_aprobada').length);
+      setEstadoTarjetas('ok');
+    } catch {
+      // Las tarjetas no bloquean la carga del resumen de cuentas.
+      setEstadoTarjetas('error');
+    }
+  }, [getToken]);
+
   useEffect(() => {
-    const cargarTarjetas = async () => {
-      try {
-        const token = await getToken();
-        const res = await fetch(`${API_URL}/api/tarjetas/mis-tarjetas`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        if (res.ok) setTarjetas(data.tarjetas.filter((t: Tarjeta) => t.estado === 'activa'));
-      } catch {
-        // Las tarjetas no bloquean la carga del resumen de cuentas.
-      }
-    };
     cargarTarjetas();
+  }, [cargarTarjetas]);
+
+  const cargarSituacion = useCallback(async () => {
+    setEstadoSituacion('cargando');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/prestamos/mi-situacion-crediticia`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setSituacionCrediticia(data.situacion_crediticia);
+      setEstadoSituacion('ok');
+    } catch {
+      // La situación crediticia es informativa, no bloquea el resto de la pantalla.
+      setEstadoSituacion('error');
+    }
   }, [getToken]);
 
   useEffect(() => {
-    const cargarSituacion = async () => {
-      try {
-        const token = await getToken();
-        const res = await fetch(`${API_URL}/api/prestamos/mi-situacion-crediticia`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        if (res.ok) setSituacionCrediticia(data.situacion_crediticia);
-      } catch {
-        // La situación crediticia es informativa, no bloquea el resto de la pantalla.
-      }
-    };
     cargarSituacion();
+  }, [cargarSituacion]);
+
+  const cargarPrestamos = useCallback(async () => {
+    setEstadoPrestamos('cargando');
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/prestamos/mis-prestamos`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setPrestamos(data.prestamos || []);
+      setMora(data.mora ?? null);
+      setEstadoPrestamos('ok');
+    } catch {
+      setEstadoPrestamos('error');
+    }
   }, [getToken]);
 
   useEffect(() => {
-    const cargarMovimientos = async () => {
-      setLoadingMovimientos(true);
-      try {
-        const token = await getToken();
-        const res = await fetch(`${API_URL}/api/transferencias/mis-transferencias`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        if (res.ok) {
-          const ordenados = [...data.transferencias].sort(
-            (a, b) => new Date(b.fecha_hora).getTime() - new Date(a.fecha_hora).getTime()
-          );
-          setMovimientos(ordenados.slice(0, 4));
-        }
-      } catch {
-        // Los movimientos recientes son informativos, no bloquean el resto de la pantalla.
-      } finally {
-        setLoadingMovimientos(false);
-      }
-    };
-    cargarMovimientos();
+    cargarPrestamos();
+  }, [cargarPrestamos]);
+
+  // La cuota que viene: la impaga con vencimiento más cercano entre los préstamos aprobados.
+  const proximaCuota = prestamos
+    .filter(p => p.estado === 'aprobado')
+    .flatMap(p => p.cuotas.filter(c => c.estado !== 'pagada').map(c => ({ ...c, total: p.cant_cuotas ?? p.cuotas.length })))
+    .sort((a, b) => new Date(a.fecha_vencimiento).getTime() - new Date(b.fecha_vencimiento).getTime())[0];
+  const infoSituacion = situacionCrediticia ? SITUACION_INFO[situacionCrediticia.situacion] : undefined;
+
+  const cargarMovimientos = useCallback(async () => {
+    setLoadingMovimientos(true);
+    setErrorMovimientos(false);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/transferencias/mis-transferencias`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      // El backend ya las devuelve de la más nueva a la más vieja.
+      setMovimientos((data.transferencias || []).slice(0, 4));
+    } catch {
+      // Los movimientos recientes son informativos, no bloquean el resto de la pantalla.
+      setErrorMovimientos(true);
+    } finally {
+      setLoadingMovimientos(false);
+    }
   }, [getToken]);
+
+  useEffect(() => {
+    cargarMovimientos();
+  }, [cargarMovimientos]);
 
   const formatearMonto = (monto: number, moneda: 'ARS' | 'USD') =>
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: moneda, minimumFractionDigits: 2 }).format(monto);
 
   return (
-    <div className={styles.page}>
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarBrand} aria-label="404Bank">
-          <span className={styles.brand404}>404</span>
-          <span className={styles.brandBank}>Bank</span>
-        </div>
-
-        <nav className={styles.nav}>
-          {NAV_ITEMS.map(item => {
-            const active = item.path === location.pathname;
-            return (
-              <button
-                key={item.label}
-                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-                onClick={() => item.path && navigate(item.path)}
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-
-          <div className={styles.navDivider} />
-
-          {NAV_ITEMS_2.map(item => {
-            const active = item.path === location.pathname;
-            return (
-              <button
-                key={item.label}
-                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-                onClick={() => item.path && navigate(item.path)}
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          {esLaboral && (
-            <button
-              className={styles.btnVolverPanel}
-              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
-            >
-              Volver al panel
-            </button>
-          )}
-          <button className={styles.userSection} onClick={() => navigate('/perfil')}>
-            <div className={styles.userAvatarSidebar}>
-              {user?.hasImage
-                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
-                : (initials || 'U')
-              }
-            </div>
-            <span className={styles.userNameSidebar}>{displayName}</span>
-          </button>
-        </div>
-      </aside>
-
-      <main className={styles.main}>
-        <header className={styles.topbar}>
-          <div>
-            <h1 className={styles.topbarTitle}>Hola, {user?.firstName || 'Franco'}</h1>
-            <p className={styles.topbarSubtitle}>Este es el resumen de tu cuenta hoy</p>
-          </div>
-          <div className={styles.topbarActions}>
-            <button className={styles.userChip} onClick={() => navigate('/perfil')}>
-              <div className={styles.userChipAvatar}>
-                {user?.hasImage
-                  ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
-                  : (initials || 'U')
-                }
-              </div>
-              <span>{displayName}</span>
-            </button>
-            <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
-              <button className={styles.btnSignOut}>Cerrar sesion</button>
-            </SignOutButton>
-          </div>
-        </header>
+    <AppLayout title={user?.firstName ? `Hola, ${user.firstName}` : 'Hola'} subtitle="Tu plata, de un vistazo.">
+        <div className={styles.homeBody}>
 
         <section className={styles.hero}>
           <div className={styles.heroTop}>
+            {/* Primero en el DOM: la moneda se elige antes de leer la cifra (y el foco sigue ese orden). */}
+            <div className={styles.heroTabs} role="group" aria-label="Moneda de la cuenta">
+              <button
+                className={`${styles.heroTab} ${cuentaActiva === 'pesos' ? styles.heroTabActive : ''}`}
+                onClick={() => cambiarMoneda('pesos')}
+                aria-pressed={cuentaActiva === 'pesos'}
+              >
+                Pesos
+              </button>
+              <button
+                className={`${styles.heroTab} ${cuentaActiva === 'dolares' ? styles.heroTabActive : ''}`}
+                onClick={() => cambiarMoneda('dolares')}
+                aria-pressed={cuentaActiva === 'dolares'}
+              >
+                Dólares
+              </button>
+            </div>
             <div>
               <span className={styles.heroLabel}>
-                {cuentaActiva === 'pesos' ? 'Saldo disponible' : 'Saldo en dólares'}
+                {cuentaActiva === 'pesos' ? 'Saldo en pesos' : 'Saldo en dólares'}
+                {((cuentaActiva === 'pesos' && cuentasARS.length > 1) || (cuentaActiva === 'dolares' && cuentasUSD.length > 1)) && ' · cuenta principal'}
               </span>
 
-              {loading && <p className={styles.heroStateText}>Cargando tus cuentas...</p>}
-              {error && <div className={styles.heroError}>{error}</div>}
+              <div aria-live="polite">
+                {loading && <p className={styles.heroStateText}>Cargando tus cuentas…</p>}
+              </div>
+              {error && (
+                <div className={styles.heroError} role="alert">
+                  <span>{error}</span>
+                  <button type="button" className={styles.btnReintentarHero} onClick={cargarCuentas}>Reintentar</button>
+                </div>
+              )}
 
               {!loading && !error && cuentaMostrada && (
                 <>
                   <div className={styles.heroBalance}>
-                    {cuentaActiva === 'pesos' ? '$ ' : 'US$ '}
-                    {Number(cuentaMostrada.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    {formatearMonto(Number(cuentaMostrada.saldo), cuentaMostrada.moneda)}
                   </div>
+                  {cuentaMostrada.alias && (
+                    <div className={styles.heroCbuRow}>
+                      <span className={styles.heroAlias}>
+                        <span className={styles.heroDatoLabel}>Alias</span> {cuentaMostrada.alias}
+                      </span>
+                      <button className={styles.copyBtn} onClick={() => copiar(cuentaMostrada.alias!, 'alias')}>
+                        <IconCopy />
+                        {copiado === 'alias' ? 'Copiado' : 'Copiar'}
+                        <span className={styles.srOnly}> alias</span>
+                      </button>
+                    </div>
+                  )}
                   <div className={styles.heroCbuRow}>
-                    <span className={styles.heroCbu}>CBU: {cuentaMostrada.cbu}</span>
-                    <button className={styles.copyBtn} onClick={copiarCbu} aria-label="Copiar CBU">
+                    <span className={styles.heroCbu}><span className={styles.heroDatoLabel}>CBU</span> {cuentaMostrada.cbu}</span>
+                    <button className={styles.copyBtn} onClick={() => copiar(cuentaMostrada.cbu, 'cbu')}>
                       <IconCopy />
-                      {copiado ? 'Copiado' : 'Copiar'}
+                      {copiado === 'cbu' ? 'Copiado' : 'Copiar'}
+                      <span className={styles.srOnly}> CBU</span>
                     </button>
                   </div>
+                  <span className={styles.srOnly} aria-live="polite">
+                    {copiado === 'alias' ? 'Alias copiado' : copiado === 'cbu' ? 'CBU copiado' : ''}
+                  </span>
+                  {errorCopia && (
+                    <p className={styles.heroCopiaError} role="alert">
+                      No pudimos copiar. Mantené apretado el alias o el CBU para seleccionarlo.
+                    </p>
+                  )}
                 </>
               )}
 
               {!loading && !error && cuentaActiva === 'pesos' && !primaryAccount && (
-                <p className={styles.heroStateText}>No tenés cuentas activas.</p>
+                <p className={styles.heroStateText}>
+                  {cuentas.length > 0 ? 'No tenés una cuenta en pesos.' : 'Todavía no tenés cuentas activas.'}
+                </p>
               )}
 
               {!loading && !error && cuentaActiva === 'dolares' && !primaryUsdAccount && (
@@ -396,70 +407,138 @@ function Home() {
                   <button className={styles.btnOpenUsd} onClick={abrirCuentaUSD} disabled={abriendoCuentaUSD}>
                     {abriendoCuentaUSD ? 'Abriendo cuenta...' : 'Abrir cuenta en dólares'}
                   </button>
+                  {errorUsd && <div className={styles.heroError} role="alert">{errorUsd}</div>}
                 </div>
               )}
 
-              {mensajeCuentaUSD && <p className={styles.heroSuccess}>{mensajeCuentaUSD}</p>}
+              {/* Solo en la pestaña de dólares: es la confirmación de esa cuenta, no un mensaje general. */}
+              <div aria-live="polite">
+                {mensajeCuentaUSD && cuentaActiva === 'dolares' && <p className={styles.heroSuccess}>{mensajeCuentaUSD}</p>}
+              </div>
             </div>
 
-            <div className={styles.heroTabs}>
-              <button
-                className={`${styles.heroTab} ${cuentaActiva === 'pesos' ? styles.heroTabActive : ''}`}
-                onClick={() => setCuentaActiva('pesos')}
-              >
-                ARS
-              </button>
-              <button
-                className={`${styles.heroTab} ${cuentaActiva === 'dolares' ? styles.heroTabActive : ''}`}
-                onClick={() => setCuentaActiva('dolares')}
-              >
-                USD
-              </button>
-            </div>
           </div>
 
           {((cuentaActiva === 'pesos' && cuentasARS.length > 1) || (cuentaActiva === 'dolares' && cuentasUSD.length > 1)) && (
             <div className={styles.heroAdditional}>
               {(cuentaActiva === 'pesos' ? cuentasARS.slice(1) : cuentasUSD.slice(1)).map(cuenta => (
                 <div key={cuenta.cbu} className={styles.heroAdditionalRow}>
-                  <span className={styles.heroAdditionalCbu}>CBU: {cuenta.cbu}</span>
+                  <span className={styles.heroAdditionalCbu}>
+                    <span className={styles.heroDatoLabel}>Otra cuenta</span>{' '}
+                    {cuenta.alias || cuenta.cbu}
+                  </span>
                   <span className={styles.heroAdditionalBalance}>
-                    {cuenta.moneda === 'USD' ? 'US$ ' : '$ '}
-                    {Number(cuenta.saldo).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    {formatearMonto(Number(cuenta.saldo), cuenta.moneda)}
                   </span>
                 </div>
               ))}
             </div>
           )}
 
-          <div className={styles.heroActions}>
-            <button className={styles.heroActionPrimary} onClick={() => navigate('/transferir')}>
-              <IconSend /> Transferir
-            </button>
-            <button className={styles.heroActionSecondary} onClick={() => navigate('/tarjetas')}>
-              <IconCard /> Ver tarjetas
-            </button>
-            <button className={styles.heroActionSecondary} onClick={() => navigate('/historial')}>
-              <IconHistory /> Historial
-            </button>
+          {/* Una sola acción: tarjetas e historial ya están en la navegación y en sus paneles. */}
+          {/* Sin cuentas cargadas no hay desde dónde transferir: el botón aparece solo cuando hay saldo para mover. */}
+          {!loading && !error && cuentaMostrada && (
+            <div className={styles.heroActions}>
+              <button className={styles.heroActionPrimary} onClick={() => navigate('/transferir')}>
+                <IconSend /> Transferir
+              </button>
+            </div>
+          )}
+        </section>
+
+        {/* Después del saldo, lo que más se mira es qué se movió: va antes que los paneles. */}
+        <section className={styles.panelCard}>
+          <div className={styles.panelHeader}>
+            <h2 className={styles.panelTitle}>Movimientos recientes</h2>
+            <button type="button" className={styles.panelLink} onClick={() => navigate('/historial')}>Ver historial completo</button>
           </div>
+
+          {loadingMovimientos && <p className={styles.panelStateText}>Cargando movimientos…</p>}
+          {!loadingMovimientos && errorMovimientos && (
+            <div className={styles.panelError}>
+              <p>No pudimos cargar tus movimientos.</p>
+              <button type="button" className={styles.btnReintentar} onClick={cargarMovimientos}>Reintentar</button>
+            </div>
+          )}
+          {!loadingMovimientos && !errorMovimientos && movimientos.length === 0 && (
+            <div className={styles.movEmpty}>
+              <p className={styles.panelStateText}>Todavía no tenés movimientos. Cuando envíes o recibas plata, la vas a ver acá.</p>
+              {cuentas.length > 0 && (
+                <button type="button" className={styles.panelLink} onClick={() => navigate('/transferir')}>
+                  Hacé tu primera transferencia
+                </button>
+              )}
+            </div>
+          )}
+
+          {movimientos.length > 0 && (
+            <ul className={styles.movList}>
+              {movimientos.map(m => {
+                const entrante = m.tipo === 'entrante';
+                const cbuContraparte = entrante ? m.cbu_origen : m.cbu_destino;
+                // Quién es lo que importa: el nombre manda; si es de otro banco, los últimos 4 del CBU.
+                const contraparte = m.nombre_contraparte || `CBU ···${cbuContraparte.slice(-4)}`;
+                const fecha = new Date(m.fecha_hora).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+                const monto = formatearMonto(Number(m.importe), m.moneda);
+                return (
+                  <li key={m.id}>
+                    <button
+                      type="button"
+                      className={styles.movRow}
+                      onClick={() => navigate('/comprobantes')}
+                      aria-label={`${entrante ? 'Recibiste' : 'Enviaste'} ${monto} ${entrante ? 'de' : 'a'} ${contraparte}, ${fecha}. Ver comprobantes`}
+                    >
+                      <span className={`${styles.movIconWrap} ${entrante ? styles.movIconEntrante : styles.movIconSaliente}`} aria-hidden="true">
+                        {entrante ? <IconArrowIn /> : <IconArrowOut />}
+                      </span>
+                      <span className={styles.movInfo}>
+                        <span className={styles.movTitle}>{contraparte}</span>
+                        <span className={styles.movDate}>{entrante ? 'Recibiste' : 'Enviaste'} · {fecha}</span>
+                      </span>
+                      <span className={`${styles.movAmount} ${entrante ? styles.movAmountPositivo : ''}`}>
+                        {entrante ? '+ ' : '− '}{monto}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <section className={styles.grid3}>
 
           <div className={styles.panelCard}>
             <div className={styles.panelHeader}>
-              <span className={styles.panelTitle}>Mi tarjeta</span>
-              <a className={styles.panelLink} onClick={() => navigate('/tarjetas')}>Ver todas</a>
+              <h2 className={styles.panelTitle}>Mi tarjeta</h2>
+              <button type="button" className={styles.panelLink} onClick={() => navigate('/tarjetas')}>Ver todas</button>
             </div>
 
-            {tarjetas.length === 0 ? (
+            {estadoTarjetas === 'cargando' ? (
+              <p className={styles.panelStateText}>Cargando tus tarjetas…</p>
+            ) : estadoTarjetas === 'error' ? (
+              <div className={styles.panelError}>
+                <p>No pudimos cargar tus tarjetas.</p>
+                <button type="button" className={styles.btnReintentar} onClick={cargarTarjetas}>Reintentar</button>
+              </div>
+            ) : tarjetas.length === 0 ? (
               <div className={styles.tarjetaEmpty}>
                 <span className={styles.tarjetaEmptyIcon}><IconCard /></span>
-                <p className={styles.tarjetaEmptyText}>No poseés tarjeta. ¿Querés solicitar una?</p>
-                <button className={styles.btnSolicitarTarjeta} onClick={() => navigate('/tarjetas')}>
-                  Solicitar tarjeta
-                </button>
+                {tarjetasPendientes > 0 ? (
+                  <>
+                    <p className={styles.tarjetaEmptyText}>Tu solicitud de tarjeta está en revisión.</p>
+                    <button className={styles.btnSolicitarTarjeta} onClick={() => navigate('/tarjetas')}>
+                      Ver estado
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className={styles.tarjetaEmptyText}>Todavía no tenés tarjeta. ¿Querés solicitar una?</p>
+                    <button className={styles.btnSolicitarTarjeta} onClick={() => navigate('/tarjetas')}>
+                      Solicitar tarjeta
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div className={styles.tarjetaCarousel}>
@@ -468,7 +547,7 @@ function Home() {
                     <button
                       className={styles.arrowBtn}
                       onClick={() => setTarjetaIdx(i => (i - 1 + tarjetas.length) % tarjetas.length)}
-                      aria-label="Anterior"
+                      aria-label="Tarjeta anterior"
                     >‹</button>
                   )}
 
@@ -510,7 +589,7 @@ function Home() {
                     <button
                       className={styles.arrowBtn}
                       onClick={() => setTarjetaIdx(i => (i + 1) % tarjetas.length)}
-                      aria-label="Siguiente"
+                      aria-label="Tarjeta siguiente"
                     >›</button>
                   )}
                 </div>
@@ -522,7 +601,8 @@ function Home() {
                         key={i}
                         className={i === tarjetaIdx ? styles.dotActive : styles.dot}
                         onClick={() => setTarjetaIdx(i)}
-                        aria-label={`Tarjeta ${i + 1}`}
+                        aria-label={`Ver tarjeta ${i + 1} de ${tarjetas.length}`}
+                        aria-current={i === tarjetaIdx ? 'true' : undefined}
                       />
                     ))}
                   </div>
@@ -533,90 +613,91 @@ function Home() {
 
           <div className={styles.panelCard}>
             <div className={styles.panelHeader}>
-              <span className={styles.panelTitle}>Accesos rápidos</span>
+              <h2 className={styles.panelTitle}>Tu préstamo</h2>
+              <button type="button" className={styles.panelLink} onClick={() => navigate('/prestamos')}>Ver préstamos</button>
             </div>
-            <div className={styles.accessGrid}>
-              <button className={styles.accessTile} onClick={() => navigate('/prestamos')}>
-                <span className={styles.accessIconWrap}><IconLoan /></span>
-                <span className={styles.accessLabel}>Préstamos</span>
-              </button>
-              <button className={styles.accessTile} onClick={() => navigate('/inversiones')}>
-                <span className={styles.accessIconWrap}><IconTrending /></span>
-                <span className={styles.accessLabel}>Inversiones</span>
-              </button>
-              <button className={styles.accessTile}>
-                <span className={styles.accessIconWrap}><IconRefresh /></span>
-                <span className={styles.accessLabel}>Recargas</span>
-              </button>
-              <button className={styles.accessTile} onClick={() => navigate('/chat')}>
-                <span className={styles.accessIconWrap}><IconChat /></span>
-                <span className={styles.accessLabel}>Chat</span>
-              </button>
-            </div>
-          </div>
 
-          <div className={styles.panelCard}>
-            <div className={styles.panelHeader}>
-              <span className={styles.panelTitle}>Situación crediticia</span>
-            </div>
-            {situacionCrediticia ? (
-              <div className={styles.situacionBody}>
-                <span className={`${styles.situacionIconWrap} ${styles[SITUACION_INFO[situacionCrediticia.situacion]?.claseColor ?? 'situacion1']}`}>
-                  {situacionCrediticia.situacion <= 2 ? <IconCheck /> : <IconAlert />}
-                </span>
-                <span className={styles.situacionLabel}>
-                  {SITUACION_INFO[situacionCrediticia.situacion]?.etiqueta ?? 'Desconocida'}
-                </span>
-                <span className={styles.situacionSub}>
-                  {situacionCrediticia.deudas.length === 0
-                    ? 'Sin deudas registradas en el BCRA'
-                    : `${situacionCrediticia.deudas.length} deuda(s) registrada(s)`}
-                </span>
+            {estadoPrestamos === 'cargando' ? (
+              <p className={styles.panelStateText}>Cargando tus préstamos…</p>
+            ) : estadoPrestamos === 'error' ? (
+              <div className={styles.panelError}>
+                <p>No pudimos cargar tus préstamos.</p>
+                <button type="button" className={styles.btnReintentar} onClick={cargarPrestamos}>Reintentar</button>
               </div>
             ) : (
-              <div className={styles.situacionBody}>
-                <span className={styles.heroStateText}>Consultando situación crediticia...</span>
+              <div className={styles.prestamoBody}>
+                {mora?.en_mora && (
+                  <div className={styles.moraAviso} role="alert">
+                    <strong>Tenés {formatearMonto(Number(mora.deuda), 'ARS')} en mora.</strong>
+                    {Number(mora.punitorios) > 0 && <> Incluye {formatearMonto(Number(mora.punitorios), 'ARS')} de intereses punitorios, que siguen sumando.</>}
+                    {' '}Ingresá plata en tu cuenta en pesos para regularizarla.
+                  </div>
+                )}
+
+                {proximaCuota ? (
+                  <div className={styles.cuotaProxima}>
+                    <span className={styles.cuotaEtiqueta}>
+                      {proximaCuota.estado === 'vencida' ? 'Cuota vencida' : 'Próxima cuota'}
+                    </span>
+                    <span className={`${styles.cuotaMonto} ${proximaCuota.estado === 'vencida' ? styles.cuotaMontoVencida : ''}`}>
+                      {formatearMonto(Number(proximaCuota.monto) + Number(proximaCuota.punitorios || 0), 'ARS')}
+                    </span>
+                    <span className={styles.cuotaDetalle}>
+                      {proximaCuota.estado === 'vencida' ? 'Venció el ' : 'Vence el '}
+                      {new Date(proximaCuota.fecha_vencimiento).toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })}
+                      {' · '}cuota {proximaCuota.numero_cuota} de {proximaCuota.total}
+                    </span>
+                    <span className={styles.cuotaNota}>
+                      {proximaCuota.estado === 'vencida'
+                        ? 'Se debita en cuanto tengas saldo en tu cuenta en pesos.'
+                        : 'Se debita automáticamente de tu cuenta en pesos.'}
+                    </span>
+                  </div>
+                ) : (
+                  <div className={styles.cuotaProxima}>
+                    <span className={styles.cuotaEtiqueta}>Sin cuotas pendientes</span>
+                    <p className={styles.panelStateText}>No tenés préstamos activos.</p>
+                    <button type="button" className={styles.panelLinkInline} onClick={() => navigate('/prestamos')}>
+                      Simulá un préstamo
+                    </button>
+                  </div>
+                )}
+
+                {/* La situación crediticia es contexto del préstamo: una línea, no un panel propio. */}
+                <div className={styles.situacionLinea}>
+                  {estadoSituacion === 'error' ? (
+                    <>
+                      <span>No pudimos consultar tu situación crediticia.</span>
+                      <button type="button" className={styles.panelLinkInline} onClick={cargarSituacion}>Reintentar</button>
+                    </>
+                  ) : situacionCrediticia && infoSituacion ? (
+                    <>
+                      <span className={`${styles.situacionDot} ${styles[infoSituacion.claseColor]}`} aria-hidden="true" />
+                      <span>
+                        Situación crediticia: <strong>{infoSituacion.etiqueta}</strong>
+                        {situacionCrediticia.situacion > 1 && <> · {infoSituacion.significado}</>}
+                      </span>
+                    </>
+                  ) : (
+                    <span>Consultando tu situación crediticia…</span>
+                  )}
+                </div>
               </div>
             )}
           </div>
 
+          <button type="button" className={styles.banCard} onClick={() => navigate('/chat')}>
+            <span className={styles.banCardTexto}>
+              <span className={styles.banCardTitulo}>¿Dudas? Preguntale a Ban</span>
+              <span className={styles.banCardSub}>Te ayuda con transferencias, préstamos y tu cuenta.</span>
+            </span>
+            <img src={banListo} alt="" width={240} height={324} className={styles.banCardImg} />
+          </button>
+
         </section>
 
-        <section className={styles.panelCard}>
-          <div className={styles.panelHeader}>
-            <span className={styles.panelTitle}>Movimientos recientes</span>
-            <a className={styles.panelLink} onClick={() => navigate('/historial')}>Ver historial completo</a>
-          </div>
-
-          {loadingMovimientos && <p className={styles.heroStateText}>Cargando movimientos...</p>}
-          {!loadingMovimientos && movimientos.length === 0 && (
-            <p className={styles.heroStateText}>Todavía no tenés movimientos registrados.</p>
-          )}
-
-          <div className={styles.movList}>
-            {movimientos.map(m => (
-              <div key={m.id} className={styles.movRow}>
-                <span className={`${styles.movIconWrap} ${m.tipo === 'entrante' ? styles.movIconEntrante : styles.movIconSaliente}`}>
-                  {m.tipo === 'entrante' ? <IconArrowUp /> : <IconSend />}
-                </span>
-                <div className={styles.movInfo}>
-                  <span className={styles.movTitle}>
-                    {m.tipo === 'entrante' ? 'Transferencia recibida' : 'Transferencia enviada'}
-                  </span>
-                  <span className={styles.movDate}>
-                    {m.tipo === 'entrante' ? `De: ${m.cbu_origen}` : `Para: ${m.cbu_destino}`} · {new Date(m.fecha_hora).toLocaleDateString('es-AR')}
-                  </span>
-                </div>
-                <span className={`${styles.movAmount} ${m.tipo === 'entrante' ? styles.movAmountPositivo : ''}`}>
-                  {m.tipo === 'entrante' ? '+ ' : '− '}{formatearMonto(Number(m.importe), m.moneda)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-      </main>
-    </div>
+        </div>
+      </AppLayout>
   );
 }
 

@@ -183,8 +183,9 @@ const obtenerMisTransferencias = async (req, res) => {
             WHERE p.clerk_id = $1 AND cb.estado = 'Activa'
         `, [clerkId]);
 
+        // Sin cuentas activas no hay movimientos: es una lista vacía, no un error.
         if (cuentaResult.rows.length === 0) {
-            return res.status(404).json({ error: 'No se encontraron cuentas activas' });
+            return res.json({ transferencias: [] });
         }
 
         const cbus = cuentaResult.rows.map(row => row.cbu);
@@ -198,7 +199,32 @@ const obtenerMisTransferencias = async (req, res) => {
             LIMIT 50
         `, [cbus]);
 
-        res.json({ transferencias: result.rows });
+        // Resuelve el nombre de la contraparte (el otro CBU de cada movimiento) cuando es una
+        // cuenta de 404Bank. Si es una cuenta externa, no hay nombre local y se sigue mostrando el CBU.
+        const cbusContraparte = [...new Set(result.rows.map(t =>
+            t.tipo === 'entrante' ? t.cbu_origen : t.cbu_destino
+        ))];
+
+        const nombresResult = cbusContraparte.length > 0
+            ? await pool.query(`
+                SELECT cb.cbu, p.nombre, p.apellido
+                FROM Cuentas_Bancarias cb
+                JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+                JOIN Personas p ON tit.id_persona = p.id
+                WHERE cb.cbu = ANY($1)
+            `, [cbusContraparte])
+            : { rows: [] };
+
+        const nombrePorCbu = new Map(
+            nombresResult.rows.map(r => [r.cbu, `${r.nombre} ${r.apellido}`])
+        );
+
+        const transferencias = result.rows.map(t => ({
+            ...t,
+            nombre_contraparte: nombrePorCbu.get(t.tipo === 'entrante' ? t.cbu_origen : t.cbu_destino) || null
+        }));
+
+        res.json({ transferencias });
     } catch (error) {
         console.error('Error obteniendo transferencias:', error);
         res.status(500).json({ error: 'Error interno del servidor' });

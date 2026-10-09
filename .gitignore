@@ -9,3 +9,9 @@ pnpm-debug.log*
 dist/
 build/
 .DS_Store
+
+# Impeccable (archivos generados/locales, no el skill en sí)
+**/.impeccable/config.local.json
+**/.impeccable/*.png
+**/.impeccable/live/sessions/
+**/.impeccable/live/previews/

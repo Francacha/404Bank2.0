@@ -60,11 +60,13 @@ const getMisCuentas = async (req, res) => {
     try {
         // Buscamos las cuentas haciendo un JOIN con Personas usando el clerk_id
         const query = `
-            SELECT cb.cbu, cb.saldo, cb.moneda
+            SELECT cb.cbu, cb.alias, cb.saldo, cb.moneda
             FROM Cuentas_Bancarias cb
             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
             JOIN Personas p ON tit.id_persona = p.id
-            WHERE p.clerk_id = $1 AND cb.estado = 'Activa';
+            WHERE p.clerk_id = $1 AND cb.estado = 'Activa'
+            -- Orden fijo: la primera cuenta de cada moneda es la que Home muestra como principal.
+            ORDER BY cb.id_cuenta;
         `;
         
         const result = await pool.query(query, [clerkId]);

@@ -26,14 +26,14 @@
 }
 
 .metricLabel {
-  color: var(--muted);
+  color: var(--muted-text);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.45px;
   text-transform: uppercase;
 }
 
-.muted { margin: 0; color: var(--muted); line-height: 1.5; }
+.muted { margin: 0; color: var(--muted-text); line-height: 1.5; }
 
 .estimate {
   display: flex;
@@ -46,7 +46,7 @@
 }
 
 .estimate strong { font-family: 'Space Grotesk', sans-serif; font-size: 23px; }
-.estimate small { color: var(--muted); }
+.estimate small { color: var(--muted-text); }
 
 /* ── Frascos ── */
 .frascoForm {
@@ -76,7 +76,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  color: var(--muted);
+  color: var(--muted-text);
   font-size: 13px;
 }
 
@@ -101,7 +101,7 @@
   background: var(--wine);
 }
 
-.frascoDetalle { color: var(--muted); font-size: 11.5px; }
+.frascoDetalle { color: var(--muted-text); font-size: 11.5px; }
 
 @media (max-width: 720px) {
   .summaryGrid { grid-template-columns: 1fr; }

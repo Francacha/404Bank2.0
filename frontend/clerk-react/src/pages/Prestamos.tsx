@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth, useUser, SignOutButton } from '@clerk/react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useViewMode } from '../context/ViewModeContext';
+import { useAuth } from '@clerk/react';
+import AppLayout from '../components/AppLayout';
 import styles from './Prestamos.module.css';
 
 const API_URL = 'http://localhost:3000';
 
-const OPCIONES_CUOTAS = [1, 3, 6, 12] as const;
+const CUOTAS_POR_DEFECTO = [1, 3, 6, 12, 24, 36];
 
 interface Cuota {
   id: number;
   numero_cuota: number;
   monto: number;
+  capital: number | null;
+  interes: number;
+  iva: number;
+  punitorios: number;
   fecha_vencimiento: string;
   estado: 'pendiente' | 'vencida' | 'pagada';
   fecha_pago: string | null;
@@ -24,7 +27,31 @@ interface Prestamo {
   fecha_solicitud: string;
   fecha_resolucion: string | null;
   cant_cuotas: number | null;
+  tna: number;
+  monto_total: number | null;
   cuotas: Cuota[];
+}
+
+interface Mora {
+  en_mora: boolean;
+  deuda: number;
+  punitorios: number;
+}
+
+interface OpcionSimulada {
+  cant_cuotas: number;
+  monto_cuota: number;
+  monto_total: number;
+  recargo_porcentaje: number;
+  tea: number;
+  cftea: number;
+}
+
+interface Simulacion {
+  tna: number;
+  iva_intereses: number;
+  cuotas_permitidas: number[];
+  opciones: OpcionSimulada[];
 }
 
 interface SituacionCrediticia {
@@ -32,6 +59,9 @@ interface SituacionCrediticia {
   situacion: number;
   deudas: unknown[];
 }
+
+const pesos = (valor: number) =>
+  `$ ${Number(valor).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const SITUACION_INFO: Record<number, { etiqueta: string; icono: string; claseColor: string }> = {
   1: { etiqueta: 'Normal', icono: '🟢', claseColor: 'situacion1' },
@@ -41,59 +71,12 @@ const SITUACION_INFO: Record<number, { etiqueta: string; icono: string; claseCol
   5: { etiqueta: 'Irrecuperable', icono: '⚫', claseColor: 'situacion5' },
 };
 
-const IconHome = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5" /></svg>
+const IconAlert = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01" /><path d="m10.3 3.9-8 14A1.5 1.5 0 0 0 3.6 20h16.8a1.5 1.5 0 0 0 1.3-2.1l-8-14a1.5 1.5 0 0 0-2.6 0Z" /></svg>
 );
-const IconCard = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5" /><path d="M2 10h20" /></svg>
-);
-const IconLoan = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 12h6l2-3 2 6 2-3h4" /></svg>
-);
-const IconTrending = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 17 6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>
-);
-const IconSend = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h13" /><path d="m13 6 6 6-6 6" /></svg>
-);
-const IconRefresh = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M9 7h6M9 11h6M9 15h3" /></svg>
-);
-const IconLock = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="10" width="16" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>
-);
-const IconChat = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4 8.5 8.5 0 0 1-3.1-.6L3 21l1.8-5.5A8.4 8.4 0 1 1 21 11.5Z" /></svg>
-);
-const IconHistory = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M9 8h6M9 12h6M9 16h4" /></svg>
-);
-const IconReceipt = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" /><path d="M9 8h6M9 12h6" /></svg>
-);
-
-const NAV_ITEMS = [
-  { label: 'Cuentas', path: '/home', icon: <IconHome /> },
-  { label: 'Tarjetas', path: '/tarjetas', icon: <IconCard /> },
-  { label: 'Préstamos', path: '/prestamos', icon: <IconLoan /> },
-  { label: 'Inversiones', path: '/inversiones', icon: <IconTrending /> },
-];
-
-const NAV_ITEMS_2 = [
-  { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
-  { label: 'Recargas', path: null, icon: <IconRefresh /> },
-  { label: 'Cambio de Contraseña', path: null, icon: <IconLock /> },
-  { label: 'Chat', path: '/chat', icon: <IconChat /> },
-  { label: 'Historial', path: '/historial', icon: <IconHistory /> },
-  { label: 'Comprobantes', path: '/comprobantes', icon: <IconReceipt /> },
-];
 
 function Prestamos() {
   const { getToken } = useAuth();
-  const { user } = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { setViewMode } = useViewMode();
 
   const [prestamos, setPrestamos] = useState<Prestamo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,18 +86,14 @@ function Prestamos() {
   const [cantCuotas, setCantCuotas] = useState<number>(1);
   const [expandidos, setExpandidos] = useState<Set<number>>(new Set());
   const [enviando, setEnviando] = useState(false);
+  const [mora, setMora] = useState<Mora | null>(null);
+  const [simulacion, setSimulacion] = useState<Simulacion | null>(null);
 
   const [situacionCrediticia, setSituacionCrediticia] = useState<SituacionCrediticia | null>(null);
   const [loadingSituacion, setLoadingSituacion] = useState(true);
   const [errorSituacion, setErrorSituacion] = useState('');
   const [mensajeSolicitud, setMensajeSolicitud] = useState('');
   const [errorSolicitud, setErrorSolicitud] = useState('');
-
-  const role = user?.publicMetadata?.role as string | undefined;
-  const esLaboral = role === 'empleado' || role === 'gerente';
-  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
-  const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
-  const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
 
   const cargarPrestamos = useCallback(async () => {
     setLoading(true);
@@ -127,6 +106,7 @@ function Prestamos() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al cargar préstamos');
       setPrestamos(data.prestamos);
+      setMora(data.mora ?? null);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError('Error inesperado');
@@ -138,6 +118,25 @@ function Prestamos() {
   useEffect(() => {
     cargarPrestamos();
   }, [cargarPrestamos]);
+
+  // Simula el préstamo mientras el cliente escribe el monto (con una pequeña espera entre teclas)
+  useEffect(() => {
+    const timeout = setTimeout(async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch(`${API_URL}/api/prestamos/simular?monto=${Number(monto) || 0}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (res.ok) setSimulacion(await res.json());
+      } catch {
+        setSimulacion(null);
+      }
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [monto, getToken]);
+
+  const opcionesCuotas = simulacion?.cuotas_permitidas ?? CUOTAS_POR_DEFECTO;
+  const opcionElegida = simulacion?.opciones.find(o => o.cant_cuotas === cantCuotas);
 
   useEffect(() => {
     const cargarSituacion = async () => {
@@ -191,7 +190,7 @@ function Prestamos() {
   };
 
   const badgeClass = (estado: string) => {
-    if (estado === 'aprobado') return styles.badgeAprobado;
+    if (estado === 'aprobado' || estado === 'finalizado') return styles.badgeAprobado;
     if (estado === 'rechazado') return styles.badgeRechazado;
     if (estado === 'pre_aprobado') return styles.badgePreAprobado;
     return styles.badgePendiente;
@@ -213,87 +212,7 @@ function Prestamos() {
   };
 
   return (
-    <div className={styles.page}>
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarBrand} aria-label="404Bank">
-          <span className={styles.brand404}>404</span>
-          <span className={styles.brandBank}>Bank</span>
-        </div>
-
-        <nav className={styles.nav}>
-          {NAV_ITEMS.map(item => {
-            const active = item.path === location.pathname;
-            return (
-              <button
-                key={item.label}
-                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-                onClick={() => item.path && navigate(item.path)}
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-
-          <div className={styles.navDivider} />
-
-          {NAV_ITEMS_2.map(item => {
-            const active = item.path === location.pathname;
-            return (
-              <button
-                key={item.label}
-                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-                onClick={() => item.path && navigate(item.path)}
-              >
-                <span className={styles.navIcon}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className={styles.sidebarFooter}>
-          {esLaboral && (
-            <button
-              className={styles.btnVolverPanel}
-              onClick={() => { setViewMode('work'); navigate(panelUrl); }}
-            >
-              Volver al panel
-            </button>
-          )}
-          <button className={styles.userSection} onClick={() => navigate('/perfil')}>
-            <div className={styles.userAvatarSidebar}>
-              {user?.hasImage
-                ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
-                : (initials || 'U')
-              }
-            </div>
-            <span className={styles.userNameSidebar}>{displayName}</span>
-          </button>
-        </div>
-      </aside>
-
-      <main className={styles.main}>
-        <header className={styles.topbar}>
-          <div>
-            <h1 className={styles.topbarTitle}>Solicitá un préstamo</h1>
-            <p className={styles.topbarSubtitle}>Completá el formulario y seguí el estado de tus solicitudes.</p>
-          </div>
-          <div className={styles.topbarActions}>
-            <button className={styles.userChip} onClick={() => navigate('/perfil')}>
-              <div className={styles.userChipAvatar}>
-                {user?.hasImage
-                  ? <img src={user.imageUrl} alt={displayName} className={styles.userAvatarImg} />
-                  : (initials || 'U')
-                }
-              </div>
-              <span>{displayName}</span>
-            </button>
-            <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
-              <button className={styles.btnSignOut}>Cerrar sesion</button>
-            </SignOutButton>
-          </div>
-        </header>
+    <AppLayout title="Solicitá un préstamo" subtitle="Completá el formulario y seguí el estado de tus solicitudes.">
 
         <div className={styles.pageContent}>
           <div className={styles.pageWrapper}>
@@ -319,38 +238,79 @@ function Prestamos() {
               <p className={styles.errorMsg}>{errorSituacion}</p>
             )}
 
+            {mora?.en_mora && (
+              <div className={`${styles.situacionCard} ${styles.situacion4}`}>
+                <span className={styles.situacionIconoAlerta}><IconAlert /></span>
+                <div className={styles.situacionTexto}>
+                  <span className={styles.situacionTitulo}>
+                    Tenés cuotas impagas: debés {pesos(mora.deuda)}
+                  </span>
+                  <span className={styles.situacionSubtitulo}>
+                    La deuda está en el saldo negativo de tu cuenta y se descuenta sola cuando ingresa dinero.
+                    {mora.punitorios > 0 && ` Incluye ${pesos(mora.punitorios)} de intereses punitorios, que siguen aumentando mientras no la canceles.`}
+                    {' '}Hasta regularizarla no podés pedir préstamos ni tarjetas.
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className={styles.formCard}>
               <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
               <form onSubmit={handleSolicitar} className={styles.form}>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Monto solicitado ($)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={monto}
-                    onChange={e => setMonto(e.target.value)}
-                    placeholder="Ej: 50000"
-                    className={styles.input}
-                    required
-                  />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>Cantidad de cuotas</label>
-                  <select
-                    value={cantCuotas}
-                    onChange={e => setCantCuotas(Number(e.target.value))}
-                    className={styles.input}
-                  >
-                    {OPCIONES_CUOTAS.map(opcion => (
-                      <option key={opcion} value={opcion}>
-                        {opcion === 1 ? 'Pago único (1 cuota)' : `${opcion} cuotas`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
-                  {enviando ? 'Enviando...' : 'Solicitar préstamo'}
-                </button>
+                <fieldset disabled={mora?.en_mora} className={styles.fieldset}>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Monto solicitado ($)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={monto}
+                      onChange={e => setMonto(e.target.value)}
+                      placeholder="Ej: 50000"
+                      className={styles.input}
+                      required
+                    />
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Cantidad de cuotas</label>
+                    <select
+                      value={cantCuotas}
+                      onChange={e => setCantCuotas(Number(e.target.value))}
+                      className={styles.input}
+                    >
+                      {opcionesCuotas.map(opcion => (
+                        <option key={opcion} value={opcion}>
+                          {opcion === 1 ? 'Pago único (1 cuota)' : `${opcion} cuotas`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {opcionElegida && (
+                    <div className={styles.simulacion}>
+                      <div className={styles.simulacionFila}>
+                        <span>{cantCuotas === 1 ? 'Pago único' : `${cantCuotas} cuotas fijas de`}</span>
+                        <strong>{pesos(opcionElegida.monto_cuota)}</strong>
+                      </div>
+                      <div className={styles.simulacionFila}>
+                        <span>Total a devolver</span>
+                        <strong>{pesos(opcionElegida.monto_total)}</strong>
+                      </div>
+                      <div className={styles.simulacionFila}>
+                        <span>Intereses + IVA</span>
+                        <strong>+{opcionElegida.recargo_porcentaje.toLocaleString('es-AR')}%</strong>
+                      </div>
+                      <p className={styles.simulacionTasas}>
+                        TNA {simulacion?.tna}% · TEA {opcionElegida.tea.toLocaleString('es-AR')}% ·
+                        CFTEA {opcionElegida.cftea.toLocaleString('es-AR')}% (con IVA {simulacion?.iva_intereses}%).
+                        Sistema francés: la cuota es fija y el interés se calcula sobre el capital que queda por pagar.
+                      </p>
+                    </div>
+                  )}
+
+                  <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
+                    {enviando ? 'Enviando...' : 'Solicitar préstamo'}
+                  </button>
+                </fieldset>
               </form>
               {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
               {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
@@ -365,7 +325,7 @@ function Prestamos() {
               )}
               <div className={styles.lista}>
                 {prestamos.map(p => {
-                  const tieneCuotas = p.estado === 'aprobado' && p.cuotas?.length > 0;
+                  const tieneCuotas = (p.estado === 'aprobado' || p.estado === 'finalizado') && p.cuotas?.length > 0;
                   const abierto = expandidos.has(p.id);
                   return (
                     <div key={p.id} className={styles.prestamoCard}>
@@ -384,6 +344,12 @@ function Prestamos() {
                           {p.cant_cuotas && (
                             <span className={styles.prestamoFecha}>
                               {p.cant_cuotas === 1 ? 'Pago único' : `${p.cant_cuotas} cuotas`}
+                              {Number(p.tna) > 0 && ` · TNA ${Number(p.tna)}%`}
+                            </span>
+                          )}
+                          {p.monto_total && Number(p.monto_total) !== Number(p.monto) && (
+                            <span className={styles.prestamoFecha}>
+                              Total a devolver: {pesos(p.monto_total)}
                             </span>
                           )}
                           {p.fecha_resolucion && (
@@ -405,14 +371,28 @@ function Prestamos() {
                           <p className={styles.cuotasListTitle}>Plan de cuotas</p>
                           {p.cuotas.map(c => (
                             <div key={c.id} className={styles.cuotaRow}>
-                              <span className={styles.cuotaNumero}>Cuota {c.numero_cuota}</span>
-                              <span className={styles.cuotaVencimiento}>
-                                Vence: {new Date(c.fecha_vencimiento).toLocaleDateString('es-AR')}
-                              </span>
+                              <div className={styles.cuotaInfo}>
+                                <span className={styles.cuotaNumero}>Cuota {c.numero_cuota}</span>
+                                <span className={styles.cuotaVencimiento}>
+                                  Vence: {new Date(c.fecha_vencimiento).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })}
+                                </span>
+                                {Number(c.interes) > 0 && (
+                                  <span className={styles.cuotaDetalle}>
+                                    Capital {pesos(Number(c.capital))} · Interés {pesos(c.interes)} · IVA {pesos(c.iva)}
+                                  </span>
+                                )}
+                                {Number(c.punitorios) > 0 && (
+                                  <span className={`${styles.cuotaDetalle} ${styles.cuotaPunitorios}`}>
+                                    + {pesos(c.punitorios)} de intereses punitorios
+                                  </span>
+                                )}
+                              </div>
                               <span className={styles.cuotaMonto}>
                                 $ {Number(c.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                               </span>
-                              <span className={badgeCuotaClass(c.estado)}>{c.estado}</span>
+                              <span className={badgeCuotaClass(c.estado)}>
+                                {c.estado === 'vencida' ? 'en mora' : c.estado}
+                              </span>
                             </div>
                           ))}
                         </div>
@@ -424,8 +404,7 @@ function Prestamos() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </AppLayout>
   );
 }
 

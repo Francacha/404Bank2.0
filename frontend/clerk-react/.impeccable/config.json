@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-10-07T23:57:14.783Z",
+        "reason": "DESIGN.md pins Space Grotesk as the brand mark and figures font (The Figures Lead Rule); incumbent system documented from the app"
+      }
+    ]
+  }
+}
