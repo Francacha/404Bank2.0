@@ -668,7 +668,7 @@ function Home() {
           <button type="button" className={styles.banCard} onClick={() => navigate('/chat')}>
             <span className={styles.banCardTexto}>
               <span className={styles.banCardTitulo}>¿Dudas? Preguntale a Ban</span>
-              <span className={styles.banCardSub}>Te ayuda con transferencias, préstamos y tu cuenta.</span>
+              <span className={styles.banCardSub}>Te explica cómo transferir, pedir un préstamo o armar un frasco.</span>
             </span>
             <img src={banListo} alt="" width={240} height={324} className={styles.banCardImg} />
           </button>

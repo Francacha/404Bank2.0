@@ -1,190 +1,355 @@
-import { useState, useRef, useEffect } from 'react';
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useAuth } from '@clerk/react';
+import { Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import banImg from '../assets/banListo.png';
 import styles from './Chat.module.css';
 
-interface Message {
-  id: number;
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+const LARGO_MAXIMO = 2000;
+
+interface Mensaje {
+  id: string;
   from: 'user' | 'ban';
   text: string;
+  // Un error no es una respuesta de Ban: se muestra distinto, se puede reintentar y no viaja a Gemini.
+  error?: boolean;
+  reintento?: string;
 }
 
-const QA = [
-  {
-    keywords: ['cbu', 'número de cuenta', 'alias', 'cuenta'],
-    question: '¿Cómo obtengo mi CBU?',
-    answer: 'Tu CBU lo encontrás en la sección Inicio, dentro del resumen de tu cuenta. Podés usarlo para recibir transferencias desde cualquier banco del país.',
-  },
-  {
-    keywords: ['transferir', 'transferencia', 'enviar dinero', 'enviar plata', 'mandar plata'],
-    question: '¿Cómo hago una transferencia?',
-    answer: 'Desde el menú lateral andá a Transacciones → Transferir. Ingresá el CBU del destinatario, el monto y confirmá. Las transferencias son inmediatas las 24 horas.',
-  },
-  {
-    keywords: ['tarjeta', 'solicitar tarjeta', 'débito', 'crédito', 'pedir tarjeta'],
-    question: '¿Cómo solicito una tarjeta?',
-    answer: 'Podés solicitar una tarjeta de débito o crédito desde Productos → Tarjetas. Elegí el tipo, enviá la solicitud y un empleado la revisará. Te notificaremos cuando esté aprobada.',
-  },
-  {
-    keywords: ['préstamo', 'prestamo', 'crédito personal', 'solicitar préstamo', 'pedir prestamo', 'plata prestada'],
-    question: '¿Cómo solicito un préstamo?',
-    answer: 'Desde Productos → Préstamos ingresá el monto que necesitás y enviá la solicitud. Un asesor evaluará tu pedido y recibirás una respuesta en los próximos días hábiles.',
-  },
-  {
-    keywords: ['horario', 'sucursal', 'cajero', 'horarios', 'dónde están', 'donde estan'],
-    question: '¿Cuáles son los horarios de atención?',
-    answer: 'Nuestras sucursales atienden de lunes a viernes de 10:00 a 15:00 hs. La banca digital está disponible las 24 horas. Encontrás cajeros y sucursales en Atención al cliente → Cajeros y sucursales.',
-  },
-  {
-    keywords: ['contraseña', 'password', 'cambiar contraseña', 'clave', 'cambiar clave'],
-    question: '¿Cómo cambio mi contraseña?',
-    answer: 'Podés cambiar tu contraseña desde Seguridad → Cambio de Contraseña en el menú lateral. Usá una contraseña segura y única para proteger tu cuenta.',
-  },
-  {
-    keywords: ['límite', 'limite', 'máximo', 'cuánto puedo transferir', 'monto máximo'],
-    question: '¿Cuál es el límite de transferencia?',
-    answer: 'El límite diario de transferencia para cuentas estándar es de $500.000. Si necesitás operar montos mayores, comunicáte con un asesor desde Atención al cliente → Turnos.',
-  },
-  {
-    keywords: ['cvv', 'código de seguridad', 'vencimiento', 'datos tarjeta', 'numero tarjeta'],
-    question: '¿Dónde veo el CVV de mi tarjeta?',
-    answer: 'Los datos de tu tarjeta (número, CVV y vencimiento) los podés ver en Productos → Tarjetas, en la tarjeta que figure como activa.',
-  },
-  {
-    keywords: ['persona', 'humano', 'asesor', 'hablar con alguien', 'soporte', 'turno'],
-    question: '¿Cómo hablo con un asesor?',
-    answer: 'Podés solicitar un turno desde Atención al cliente → Turnos, o acercarte a cualquier sucursal en horario de atención de lunes a viernes de 10:00 a 15:00 hs.',
-  },
-  {
-    keywords: ['saldo', 'cuánto tengo', 'plata disponible', 'dinero', 'cuanto tengo'],
-    question: '¿Cómo veo mi saldo?',
-    answer: 'Tu saldo actual lo podés ver en la pantalla de Inicio, en la sección Cuentas. Se actualiza en tiempo real con cada movimiento.',
-  },
+const SUGERENCIAS = [
+  '¿Cómo transfiero a un alias?',
+  '¿Dónde veo mi CBU?',
+  '¿Cómo funciona un frasco de ahorro?',
+  '¿Cuánto pago por un préstamo?',
+  '¿Cómo pido una tarjeta?',
 ];
 
-const SUGGESTED = QA.slice(0, 5).map(q => q.question);
+// Secciones reales de la app: si Ban nombra una en negrita, se vuelve un link.
+const SECCIONES: Record<string, string> = {
+  inicio: '/home',
+  transferir: '/transferir',
+  historial: '/historial',
+  prestamos: '/prestamos',
+  inversiones: '/inversiones',
+  'frascos de ahorro': '/inversiones?tab=frascos',
+  frascos: '/inversiones?tab=frascos',
+  tarjetas: '/tarjetas',
+  'mi perfil': '/perfil',
+  perfil: '/perfil',
+};
 
-const FALLBACK =
-  'No entendí bien tu consulta. Podés reformularla o elegir una de las preguntas sugeridas. Si necesitás ayuda personalizada, un asesor está disponible en Atención al cliente → Turnos.';
+const normalizar = (texto: string) =>
+  texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 
-const WELCOME =
-  '¡Hola! Soy Ban, tu asistente virtual de 404Bank. ¿En qué puedo ayudarte hoy?';
+const nuevoId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+// ── Formato de las respuestas ──
+// Gemini responde con un markdown mínimo (párrafos, guiones, **negrita**). Se arma con elementos
+// de React, nunca con HTML, así una respuesta no puede inyectar código en la página.
+const MONTO = /((?:US\$|\$)\s?\d{1,3}(?:\.\d{3})*(?:,\d+)?|(?:US\$|\$)\s?\d+(?:,\d+)?)/g;
 
-let nextId = 1;
+function conMontos(texto: string, clave: string): ReactNode[] {
+  return texto.split(MONTO).map((parte, i) =>
+    i % 2 === 1
+      ? <span key={`${clave}-m${i}`} className={styles.monto}>{parte}</span>
+      : <Fragment key={`${clave}-t${i}`}>{parte}</Fragment>
+  );
+}
+
+function enLinea(texto: string, clave: string): ReactNode[] {
+  return texto.split(/\*\*(.+?)\*\*/g).map((parte, i) => {
+    if (i % 2 === 0) return <Fragment key={`${clave}-${i}`}>{conMontos(parte, `${clave}-${i}`)}</Fragment>;
+    const ruta = SECCIONES[normalizar(parte)];
+    return ruta
+      ? <Link key={`${clave}-${i}`} to={ruta} className={styles.linkSeccion}>{parte}</Link>
+      : <strong key={`${clave}-${i}`}>{conMontos(parte, `${clave}-${i}`)}</strong>;
+  });
+}
+
+const ITEM = /^\s*([-*•]|\d+[.)])\s+/;
+
+// Cada bloque (separado por línea en blanco) se parte en tramos: líneas de lista seguidas forman
+// una lista; el resto, un párrafo. Gemini suele poner "Por ejemplo:" y los guiones sin línea en blanco.
+function RespuestaBan({ texto }: { texto: string }) {
+  const tramos: { lista: boolean; lineas: string[] }[] = [];
+  texto.replace(/\r\n/g, '\n').split(/\n{2,}/).forEach(bloque => {
+    let anterior: { lista: boolean; lineas: string[] } | null = null;
+    bloque.split('\n').filter(l => l.trim()).forEach(linea => {
+      const lista = ITEM.test(linea);
+      if (anterior && anterior.lista === lista) anterior.lineas.push(linea);
+      else {
+        anterior = { lista, lineas: [linea] };
+        tramos.push(anterior);
+      }
+    });
+  });
+
+  return (
+    <>
+      {tramos.map((tramo, b) => {
+        if (tramo.lista) {
+          const items = tramo.lineas.map((l, i) => <li key={i}>{enLinea(l.replace(ITEM, ''), `${b}-${i}`)}</li>);
+          return /^\s*\d/.test(tramo.lineas[0])
+            ? <ol key={b} className={styles.lista}>{items}</ol>
+            : <ul key={b} className={styles.lista}>{items}</ul>;
+        }
+        return (
+          <p key={b} className={styles.parrafo}>
+            {tramo.lineas.map((l, i) => (
+              <Fragment key={i}>{i > 0 && <br />}{enLinea(l.replace(/^#+\s*/, ''), `${b}-${i}`)}</Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </>
+  );
+}
+
+function AvatarBan() {
+  return (
+    <span className={styles.avatar} aria-hidden="true">
+      <img src={banImg} alt="" width={240} height={324} />
+    </span>
+  );
+}
 
 function Chat() {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const claveSesion = `404bank-chat-${userId ?? 'anon'}`;
 
-  const [messages, setMessages] = useState<Message[]>([
-    { id: nextId++, from: 'ban', text: WELCOME },
-  ]);
+  // La conversación dura lo que la pestaña del navegador: se puede ir a otra sección y volver.
+  const [mensajes, setMensajes] = useState<Mensaje[]>(() => {
+    try {
+      const guardado = sessionStorage.getItem(claveSesion);
+      return guardado ? JSON.parse(guardado) : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [showChips, setShowChips] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [escribiendo, setEscribiendo] = useState(false);
+
+  const areaRef = useRef<HTMLDivElement>(null);
+  const finalRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const seguirAlFinal = useRef(true);
+  const enviandoRef = useRef(false);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    try {
+      sessionStorage.setItem(claveSesion, JSON.stringify(mensajes.slice(-40)));
+    } catch {
+      // Sin almacenamiento la conversación igual funciona; solo no se recuerda al volver.
+    }
+  }, [mensajes, claveSesion]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isTyping) return;
-    setMessages(prev => [...prev, { id: nextId++, from: 'user', text: text.trim() }]);
+  // ¿El usuario está mirando el final? Si subió a leer algo, no lo arrastramos hacia abajo.
+  const cercaDelFinal = () => {
+    const area = areaRef.current;
+    if (area && area.scrollHeight > area.clientHeight + 1) {
+      return area.scrollHeight - area.scrollTop - area.clientHeight < 140;
+    }
+    const doc = document.documentElement;
+    return doc.scrollHeight - window.scrollY - window.innerHeight < 220;
+  };
+
+  useLayoutEffect(() => {
+    if (!seguirAlFinal.current) return;
+    const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    finalRef.current?.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'end' });
+  }, [mensajes, escribiendo]);
+
+  const enviar = async (texto: string) => {
+    const consulta = texto.trim();
+    if (!consulta || enviandoRef.current) return;
+    enviandoRef.current = true;
+
+    // Historial para Gemini: solo lo que realmente se dijeron (sin errores), los últimos 10.
+    // Al reintentar, la misma pregunta puede seguir al final: no se manda dos veces.
+    const previos = mensajes.filter(m => !m.error);
+    if (previos.at(-1)?.from === 'user' && previos.at(-1)?.text === consulta) previos.pop();
+    const historial = previos.slice(-10).map(m => ({ from: m.from, text: m.text }));
+
+    seguirAlFinal.current = true;
+    setMensajes(prev => [...prev, { id: nuevoId(), from: 'user', text: consulta }]);
     setInput('');
-    setShowChips(false);
-    setIsTyping(true);
+    setEscribiendo(true);
 
     try {
       const token = await getToken();
       const res = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          message: text.trim(),
-          history: messages.slice(-10),
-        }),
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ message: consulta, history: historial }),
       });
-
-      if (!res.ok) throw new Error('Respuesta no válida');
-      const data = await res.json();
-      setMessages(prev => [...prev, { id: nextId++, from: 'ban', text: data.reply }]);
-    } catch {
-      setMessages(prev => [...prev, { id: nextId++, from: 'ban', text: FALLBACK }]);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.reply) {
+        throw new Error(data?.error || 'Ban no pudo responder ahora. Probá de nuevo en un momento.');
+      }
+      seguirAlFinal.current = cercaDelFinal();
+      setMensajes(prev => [...prev, { id: nuevoId(), from: 'ban', text: data.reply }]);
+    } catch (err) {
+      seguirAlFinal.current = true;
+      const texto = err instanceof Error && err.message !== 'Failed to fetch'
+        ? err.message
+        : 'No pudimos conectarnos con Ban. Revisá tu conexión y probá de nuevo.';
+      // El mensaje del usuario se saca para no duplicarlo al reintentar.
+      setMensajes(prev => [
+        ...prev.slice(0, -1),
+        { id: nuevoId(), from: 'user', text: consulta },
+        { id: nuevoId(), from: 'ban', text: texto, error: true, reintento: consulta },
+      ]);
     } finally {
-      setIsTyping(false);
+      enviandoRef.current = false;
+      setEscribiendo(false);
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void sendMessage(input);
+  const reintentar = (consulta: string) => {
+    // Se quita el par (pregunta + error) y se vuelve a mandar la misma pregunta.
+    setMensajes(prev => {
+      const i = prev.findIndex(m => m.error && m.reintento === consulta);
+      return i > 0 ? [...prev.slice(0, i - 1), ...prev.slice(i + 1)] : prev;
+    });
+    setTimeout(() => enviar(consulta), 0);
   };
 
+  const nuevaConversacion = () => {
+    setMensajes([]);
+    setInput('');
+    requestAnimationFrame(() => inputRef.current?.focus());
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void enviar(input);
+  };
+
+  // Enter envía; Shift+Enter hace un salto de línea.
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault();
+      void enviar(input);
+    }
+  };
+
+  // El textarea crece con el texto hasta 5 líneas.
+  useLayoutEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
+  }, [input]);
+
+  const vacia = mensajes.length === 0;
+  const restantes = LARGO_MAXIMO - input.length;
+
   return (
-    <AppLayout title="Chat" subtitle="Hablá con Ban, tu asistente virtual." variant="fill">
-
-        <div className={styles.chatWrapper}>
-          <div className={styles.messagesArea}>
-            {messages.map(msg => (
-              <div key={msg.id} className={msg.from === 'user' ? styles.rowUser : styles.rowBan}>
-                {msg.from === 'ban' && <div className={styles.banAvatar}>B</div>}
-                <div className={msg.from === 'user' ? styles.bubbleUser : styles.bubbleBan}>
-                  {msg.from === 'ban' && <span className={styles.banName}>Ban</span>}
-                  <p className={styles.bubbleText}>{msg.text}</p>
+    <AppLayout
+      title="Chat con Ban"
+      subtitle="Te explico cómo usar 404Bank. No veo tu saldo ni hago operaciones por vos."
+      variant="fill"
+    >
+      <div className={styles.chat}>
+        <div
+          ref={areaRef}
+          className={styles.area}
+          onScroll={() => { seguirAlFinal.current = cercaDelFinal(); }}
+        >
+          {vacia ? (
+            <div className={styles.inicio}>
+              <img src={banImg} alt="" width={240} height={324} className={styles.inicioBan} />
+              <div className={styles.inicioTexto}>
+                <h2 className={styles.inicioTitulo}>¡Hola! Soy Ban.</h2>
+                <p>
+                  Preguntame cómo transferir, pedir un préstamo, armar un frasco o lo que no entiendas de 404Bank.
+                  No veo tu saldo ni tus datos: para eso está <Link to="/home" className={styles.linkSeccion}>Inicio</Link>.
+                </p>
+                <div className={styles.sugerencias} role="group" aria-label="Preguntas sugeridas">
+                  {SUGERENCIAS.map(s => (
+                    <button key={s} type="button" className={styles.chip} onClick={() => enviar(s)}>
+                      {s}
+                    </button>
+                  ))}
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className={styles.encabezado}>
+              <button type="button" className={styles.btnNueva} onClick={nuevaConversacion} disabled={escribiendo}>
+                Nueva conversación
+              </button>
+            </div>
+          )}
+
+          <ol className={styles.mensajes} role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversación con Ban">
+            {mensajes.map(m => (
+              <li key={m.id} className={m.from === 'user' ? styles.filaUsuario : styles.filaBan}>
+                {m.from === 'ban' && <AvatarBan />}
+                <div
+                  className={
+                    m.from === 'user' ? styles.burbujaUsuario : m.error ? styles.burbujaError : styles.burbujaBan
+                  }
+                >
+                  <span className={styles.srOnly}>{m.from === 'user' ? 'Vos: ' : 'Ban: '}</span>
+                  {m.from === 'ban' && !m.error ? (
+                    <RespuestaBan texto={m.text} />
+                  ) : (
+                    <p className={styles.parrafo}>{m.text}</p>
+                  )}
+                  {m.error && m.reintento && (
+                    <button
+                      type="button"
+                      className={styles.btnReintentar}
+                      onClick={() => reintentar(m.reintento!)}
+                      disabled={escribiendo}
+                    >
+                      Reintentar
+                    </button>
+                  )}
+                </div>
+              </li>
             ))}
-
-            {isTyping && (
-              <div className={styles.rowBan}>
-                <div className={styles.banAvatar}>B</div>
-                <div className={styles.bubbleBan}>
-                  <span className={styles.banName}>Ban</span>
-                  <div className={styles.typingDots}>
-                    <span /><span /><span />
-                  </div>
+            {escribiendo && (
+              <li className={styles.filaBan}>
+                <AvatarBan />
+                <div className={styles.burbujaBan}>
+                  <span className={styles.srOnly}>Ban está escribiendo…</span>
+                  <span className={styles.puntos} aria-hidden="true"><span /><span /><span /></span>
                 </div>
-              </div>
+              </li>
             )}
-
-            {showChips && !isTyping && (
-              <div className={styles.chipsRow}>
-                {SUGGESTED.map(q => (
-                  <button key={q} className={styles.chip} onClick={() => sendMessage(q)}>
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div ref={bottomRef} />
-          </div>
-
-          <form onSubmit={handleSubmit} className={styles.inputBar}>
-            <input
-              className={styles.inputField}
-              type="text"
-              placeholder="Escribí tu consulta..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              disabled={isTyping}
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              className={styles.btnSend}
-              disabled={!input.trim() || isTyping}
-            >
-              Enviar
-            </button>
-          </form>
+          </ol>
+          <div ref={finalRef} />
         </div>
-      </AppLayout>
+
+        <form onSubmit={onSubmit} className={styles.barra}>
+          <label htmlFor="mensaje-ban" className={styles.srOnly}>Mensaje para Ban</label>
+          <textarea
+            id="mensaje-ban"
+            ref={inputRef}
+            rows={1}
+            className={styles.campo}
+            placeholder="Escribile a Ban…"
+            value={input}
+            maxLength={LARGO_MAXIMO}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            aria-describedby={restantes < 200 ? 'mensaje-restantes' : undefined}
+          />
+          {restantes < 200 && (
+            <span id="mensaje-restantes" className={styles.restantes}>{restantes}</span>
+          )}
+          <button type="submit" className={styles.btnEnviar} disabled={!input.trim() || escribiendo} aria-label="Enviar mensaje">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+            </svg>
+          </button>
+        </form>
+      </div>
+    </AppLayout>
   );
 }
 
