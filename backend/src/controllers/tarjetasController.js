@@ -1,12 +1,28 @@
+const crypto = require('crypto');
 const { pool } = require('../config/db');
 
-const generarNumeroTarjeta = () => {
-  return Array.from({ length: 16 }, () => Math.floor(Math.random() * 10)).join('');
+// Número de 16 dígitos con prefijo de red (4 = Visa para débito, 5 = Mastercard para crédito)
+// y dígito verificador de Luhn, como una tarjeta real.
+const generarNumeroTarjeta = (tipo) => {
+  const digitos = [tipo === 'credito' ? 5 : 4];
+  while (digitos.length < 15) digitos.push(crypto.randomInt(10));
+  const suma = digitos.reduce((acc, d, i) => {
+    // Desde la derecha (contando el verificador que falta), se duplican las posiciones pares.
+    if (i % 2 === 0) {
+      const doble = d * 2;
+      return acc + (doble > 9 ? doble - 9 : doble);
+    }
+    return acc + d;
+  }, 0);
+  digitos.push((10 - (suma % 10)) % 10);
+  return digitos.join('');
 };
 
-const generarCVV = () => {
-  return Array.from({ length: 3 }, () => Math.floor(Math.random() * 10)).join('');
-};
+const generarCVV = () => String(crypto.randomInt(1000)).padStart(3, '0');
+
+// Lo que el cliente ve de sus tarjetas en listados: nunca el número completo ni el CVV.
+const COLUMNAS_CLIENTE = `t.id, t.tipo, t.estado, t.fecha_solicitud, t.fecha_resolucion, t.fecha_vencimiento,
+       RIGHT(t.numero, 4) AS ultimos4`;
 
 const generarVencimiento = () => {
   const fecha = new Date();
@@ -20,7 +36,7 @@ const solicitarTarjeta = async (req, res) => {
   const { tipo } = req.body;
 
   if (!tipo || !['debito', 'credito'].includes(tipo)) {
-    return res.status(400).json({ error: 'El tipo debe ser debito o credito' });
+    return res.status(400).json({ error: 'Elegí si querés una tarjeta de débito o de crédito.' });
   }
 
   try {
@@ -39,8 +55,25 @@ const solicitarTarjeta = async (req, res) => {
 
     const id_cuenta = cuentaResult.rows[0].id_cuenta;
 
+    // Una tarjeta de cada tipo: si ya hay una activa o en trámite, no se pide otra.
+    const existente = await pool.query(
+      `SELECT estado FROM tarjetas
+       WHERE id_cuenta = $1 AND tipo = $2 AND estado IN ('pendiente', 'pre_aprobada', 'activa')
+       LIMIT 1`,
+      [id_cuenta, tipo]
+    );
+    if (existente.rows.length > 0) {
+      const nombre = tipo === 'credito' ? 'crédito' : 'débito';
+      return res.status(409).json({
+        error: existente.rows[0].estado === 'activa'
+          ? `Ya tenés una tarjeta de ${nombre} activa.`
+          : `Ya tenés una solicitud de tarjeta de ${nombre} en revisión.`
+      });
+    }
+
     const result = await pool.query(
-      `INSERT INTO tarjetas (id_cuenta, tipo) VALUES ($1, $2) RETURNING *`,
+      `INSERT INTO tarjetas (id_cuenta, tipo) VALUES ($1, $2)
+       RETURNING id, tipo, estado, fecha_solicitud, fecha_resolucion, fecha_vencimiento`,
       [id_cuenta, tipo]
     );
 
@@ -57,7 +90,7 @@ const getMisTarjetas = async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT t.* FROM tarjetas t
+      `SELECT ${COLUMNAS_CLIENTE} FROM tarjetas t
        JOIN cuentas_bancarias cb ON t.id_cuenta = cb.id_cuenta
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
@@ -69,6 +102,31 @@ const getMisTarjetas = async (req, res) => {
     res.json({ tarjetas: result.rows });
   } catch (error) {
     console.error('Error obteniendo tarjetas:', error);
+    res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
+// CLIENTE: número completo y CVV, solo de una tarjeta propia y activa
+const getDatosTarjeta = async (req, res) => {
+  const clerkId = req.auth.userId;
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT t.numero, t.cvv, t.fecha_vencimiento FROM tarjetas t
+       JOIN cuentas_bancarias cb ON t.id_cuenta = cb.id_cuenta
+       JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
+       JOIN personas p ON tc.id_persona = p.id
+       WHERE t.id = $1 AND p.clerk_id = $2 AND t.estado = 'activa'`,
+      [id, clerkId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No encontramos esa tarjeta entre tus tarjetas activas.' });
+    }
+    res.set('Cache-Control', 'no-store');
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error obteniendo datos de tarjeta:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
@@ -175,7 +233,7 @@ const aprobar = async (req, res) => {
       return res.status(404).json({ error: 'Tarjeta no encontrada o no está pre-aprobada' });
     }
 
-    const numero = generarNumeroTarjeta();
+    const numero = generarNumeroTarjeta(tarjetaResult.rows[0].tipo);
     const cvv = generarCVV();
     const fecha_vencimiento = generarVencimiento();
 
@@ -183,7 +241,7 @@ const aprobar = async (req, res) => {
       `UPDATE tarjetas
        SET estado = 'activa', numero = $1, cvv = $2, fecha_vencimiento = $3,
            clerk_id_gerente = $4, fecha_resolucion = NOW()
-       WHERE id = $5 RETURNING *`,
+       WHERE id = $5 RETURNING id, tipo, estado, fecha_resolucion, fecha_vencimiento`,
       [numero, cvv, fecha_vencimiento, clerkId, id]
     );
 
@@ -194,4 +252,4 @@ const aprobar = async (req, res) => {
   }
 };
 
-module.exports = { solicitarTarjeta, getMisTarjetas, getPendientes, preAprobar, rechazar, getPreAprobadas, aprobar };
+module.exports = { solicitarTarjeta, getMisTarjetas, getDatosTarjeta, getPendientes, preAprobar, rechazar, getPreAprobadas, aprobar };

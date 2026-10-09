@@ -1,0 +1,138 @@
+/* Tarjeta física de 404Bank. Proporción ISO 7810 (1.586:1); los tokens vienen del shell (.page). */
+.tarjeta {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.586 / 1;
+  container-type: inline-size;
+  border-radius: 18px;
+  padding: 7% 7.5%;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  overflow: hidden;
+  color: #ffffff;
+  box-shadow: 0 10px 28px rgba(42, 4, 16, 0.18);
+  isolation: isolate;
+}
+
+/* Brillo diagonal suave, como el laminado de una tarjeta real. */
+.tarjeta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 55%);
+}
+
+.debito {
+  background: linear-gradient(135deg, #2b231d 0%, var(--ink) 55%, #0f0c0a 100%);
+}
+
+.credito {
+  background: linear-gradient(135deg, var(--wine-hero) 0%, var(--wine-dark) 60%, var(--wine-darker) 100%);
+}
+
+.arriba {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(15px, 6.4cqi, 22px);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.marca404 { color: #ffffff; }
+.marcaBank { color: var(--accent); font-family: 'Manrope', sans-serif; font-weight: 700; }
+
+.tipo {
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  font-size: clamp(11px, 3.6cqi, 13px);
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.chip {
+  align-self: center;
+  width: clamp(30px, 12cqi, 44px);
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, transparent 32%, rgba(42, 4, 16, 0.25) 33%, transparent 34%, transparent 65%, rgba(42, 4, 16, 0.25) 66%, transparent 67%),
+    linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 50%, #b98a2a 100%);
+}
+
+.numero {
+  margin: 0 0 6%;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(15px, 6.6cqi, 24px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  color: #ffffff;
+}
+
+.puntos { letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.72); }
+
+.abajo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.datosDerecha {
+  display: flex;
+  gap: clamp(12px, 5cqi, 22px);
+  flex-shrink: 0;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.etiqueta {
+  font-size: clamp(11px, 3.2cqi, 12px);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.valor {
+  font-size: clamp(12px, 4cqi, 15px);
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.valorCifra {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(12px, 4.2cqi, 16px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

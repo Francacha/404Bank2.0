@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
+import TarjetaVisual from '../components/TarjetaVisual';
 import styles from './home.module.css';
 import banListo from '../assets/banListo.png';
 
@@ -15,8 +16,7 @@ interface Cuenta {
 interface Tarjeta {
   id: number;
   tipo: string;
-  numero: string | null;
-  cvv: string | null;
+  ultimos4: string | null;
   fecha_vencimiento: string | null;
   estado: string;
 }
@@ -552,38 +552,13 @@ function Home() {
                     >‹</button>
                   )}
 
-                  <div className={`${styles.tarjetaCard} ${tarjetas[tarjetaIdx].tipo === 'credito' ? styles.tarjetaCredito : styles.tarjetaDebito}`}>
-                    <div className={styles.tarjetaTopRow}>
-                      <div className={styles.chip}></div>
-                      <div className={styles.tarjetaTopRight}>
-                        <span className={styles.tarjetaBankLogo}>
-                          <span className={styles.tarjetaLogo404}>404</span>
-                          <span className={styles.tarjetaLogoBank}>Bank</span>
-                        </span>
-                        <span className={styles.tarjetaTipoBadge}>
-                          {tarjetas[tarjetaIdx].tipo === 'credito' ? 'CRÉDITO' : 'DÉBITO'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className={styles.tarjetaNumero}>
-                      •••• •••• •••• {tarjetas[tarjetaIdx].numero?.slice(-4) ?? '----'}
-                    </p>
-
-                    <div className={styles.tarjetaBottomRow}>
-                      <div className={styles.tarjetaDato}>
-                        <span className={styles.tarjetaLabel}>TITULAR</span>
-                        <span className={styles.tarjetaValor}>{displayName.toUpperCase()}</span>
-                      </div>
-                      <div className={styles.tarjetaDato}>
-                        <span className={styles.tarjetaLabel}>VENCE</span>
-                        <span className={styles.tarjetaValor}>
-                          {tarjetas[tarjetaIdx].fecha_vencimiento
-                            ? new Date(tarjetas[tarjetaIdx].fecha_vencimiento!).toLocaleDateString('es-AR', { month: '2-digit', year: '2-digit' })
-                            : '--/--'}
-                        </span>
-                      </div>
-                    </div>
+                  <div className={styles.tarjetaSlot}>
+                    <TarjetaVisual
+                      tipo={tarjetas[tarjetaIdx].tipo}
+                      ultimos4={tarjetas[tarjetaIdx].ultimos4}
+                      titular={displayName}
+                      vencimiento={tarjetas[tarjetaIdx].fecha_vencimiento}
+                    />
                   </div>
 
                   {tarjetas.length > 1 && (
