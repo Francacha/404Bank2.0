@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/react';
 import AppLayout from '../components/AppLayout';
 import styles from './Prestamos.module.css';
@@ -6,6 +6,7 @@ import styles from './Prestamos.module.css';
 const API_URL = 'http://localhost:3000';
 
 const CUOTAS_POR_DEFECTO = [1, 3, 6, 12, 24, 36];
+const MONTO_MAXIMO_POR_DEFECTO = 5000000;
 
 interface Cuota {
   id: number;
@@ -50,6 +51,8 @@ interface OpcionSimulada {
 interface Simulacion {
   tna: number;
   iva_intereses: number;
+  recargo_punitorio: number;
+  monto_maximo: number;
   cuotas_permitidas: number[];
   opciones: OpcionSimulada[];
 }
@@ -62,6 +65,8 @@ interface SituacionCrediticia {
 
 const pesos = (valor: number) =>
   `$ ${Number(valor).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+const porcentaje = (valor: number) => `${Number(valor).toLocaleString('es-AR', { maximumFractionDigits: 2 })}%`;
 
 const SITUACION_INFO: Record<number, { etiqueta: string; icono: string; claseColor: string }> = {
   1: { etiqueta: 'Normal', icono: '🟢', claseColor: 'situacion1' },
@@ -88,6 +93,11 @@ function Prestamos() {
   const [enviando, setEnviando] = useState(false);
   const [mora, setMora] = useState<Mora | null>(null);
   const [simulacion, setSimulacion] = useState<Simulacion | null>(null);
+  // Monto para el que se calculó la simulación: si no coincide con lo escrito, los números están desactualizados.
+  const [montoSimulado, setMontoSimulado] = useState<number | null>(null);
+  const [revisando, setRevisando] = useState(false);
+  const simulacionIdRef = useRef(0);
+  const resultadoRef = useRef<HTMLDivElement>(null);
 
   const [situacionCrediticia, setSituacionCrediticia] = useState<SituacionCrediticia | null>(null);
   const [loadingSituacion, setLoadingSituacion] = useState(true);
@@ -119,24 +129,39 @@ function Prestamos() {
     cargarPrestamos();
   }, [cargarPrestamos]);
 
-  // Simula el préstamo mientras el cliente escribe el monto (con una pequeña espera entre teclas)
+  const montoNumero = Number(monto) || 0;
+  const montoMaximo = simulacion?.monto_maximo ?? MONTO_MAXIMO_POR_DEFECTO;
+  const superaMaximo = montoNumero > montoMaximo;
+
+  // Simula el préstamo mientras el cliente escribe el monto (con una pequeña espera entre teclas).
+  // Cada simulación tiene un número: si llega una respuesta vieja, se descarta.
   useEffect(() => {
+    setRevisando(false);
+    const simulacionId = ++simulacionIdRef.current;
     const timeout = setTimeout(async () => {
       try {
         const token = await getToken();
-        const res = await fetch(`${API_URL}/api/prestamos/simular?monto=${Number(monto) || 0}`, {
+        const res = await fetch(`${API_URL}/api/prestamos/simular?monto=${montoNumero}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
-        if (res.ok) setSimulacion(await res.json());
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (simulacionId !== simulacionIdRef.current) return;
+        setSimulacion(data);
+        setMontoSimulado(montoNumero);
       } catch {
-        setSimulacion(null);
+        if (simulacionId === simulacionIdRef.current) setMontoSimulado(null);
       }
     }, 300);
     return () => clearTimeout(timeout);
-  }, [monto, getToken]);
+  }, [montoNumero, getToken]);
 
   const opcionesCuotas = simulacion?.cuotas_permitidas ?? CUOTAS_POR_DEFECTO;
-  const opcionElegida = simulacion?.opciones.find(o => o.cant_cuotas === cantCuotas);
+  const simulacionAlDia = montoSimulado === montoNumero && montoNumero > 0;
+  const opcionElegida = simulacionAlDia ? simulacion?.opciones.find(o => o.cant_cuotas === cantCuotas) : undefined;
+  const calculando = montoNumero > 0 && !superaMaximo && !simulacionAlDia;
+  // Tasa anual que se cobra sobre la deuda atrasada: la TNA más el recargo punitorio.
+  const tnaPunitoria = simulacion ? simulacion.tna * (1 + simulacion.recargo_punitorio / 100) : null;
 
   useEffect(() => {
     const cargarSituacion = async () => {
@@ -160,8 +185,21 @@ function Prestamos() {
     cargarSituacion();
   }, [getToken]);
 
-  const handleSolicitar = async (e: React.FormEvent) => {
+  const situacionBloquea = !!situacionCrediticia && situacionCrediticia.situacion > 2;
+  const bloqueado = !!mora?.en_mora || situacionBloquea;
+
+  // El primer paso solo muestra el resumen; la deuda se pide recién al confirmar.
+  const revisarSolicitud = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!opcionElegida || bloqueado || superaMaximo) return;
+    setMensajeSolicitud('');
+    setErrorSolicitud('');
+    setRevisando(true);
+    requestAnimationFrame(() => resultadoRef.current?.focus());
+  };
+
+  const confirmarSolicitud = async () => {
+    if (!opcionElegida) return;
     setMensajeSolicitud('');
     setErrorSolicitud('');
     setEnviando(true);
@@ -176,8 +214,12 @@ function Prestamos() {
         body: JSON.stringify({ monto: Number(monto), cant_cuotas: cantCuotas }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al solicitar');
-      setMensajeSolicitud('Solicitud enviada correctamente. Quedará pendiente de revisión.');
+      if (!res.ok) throw new Error(data.error || 'No pudimos enviar tu solicitud. Probá de nuevo.');
+      setMensajeSolicitud(
+        `Listo, enviaste tu solicitud de ${pesos(montoNumero)} en ${cantCuotas === 1 ? 'un pago' : `${cantCuotas} cuotas`}. ` +
+        'La vas a ver en "Mis solicitudes" mientras se revisa.'
+      );
+      setRevisando(false);
       setMonto('');
       setCantCuotas(1);
       cargarPrestamos();
@@ -254,27 +296,53 @@ function Prestamos() {
               </div>
             )}
 
+            {situacionBloquea && !mora?.en_mora && (
+              <div className={`${styles.situacionCard} ${styles.situacion4}`} role="alert">
+                <span className={styles.situacionIconoAlerta}><IconAlert /></span>
+                <div className={styles.situacionTexto}>
+                  <span className={styles.situacionTitulo}>Por ahora no podés pedir un préstamo</span>
+                  <span className={styles.situacionSubtitulo}>
+                    Tu situación crediticia es {SITUACION_INFO[situacionCrediticia!.situacion]?.etiqueta.toLowerCase()}.
+                    Solo se otorgan préstamos con situación normal o de riesgo bajo.
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className={styles.formCard}>
-              <h3 className={styles.formCardTitle}>Nueva solicitud</h3>
-              <form onSubmit={handleSolicitar} className={styles.form}>
-                <fieldset disabled={mora?.en_mora} className={styles.fieldset}>
+              <h2 className={styles.formCardTitle}>Nueva solicitud</h2>
+              <form onSubmit={revisarSolicitud} className={styles.form}>
+                <fieldset disabled={bloqueado || enviando} className={styles.fieldset}>
                   <div className={styles.inputGroup}>
-                    <label className={styles.label}>Monto solicitado ($)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={monto}
-                      onChange={e => setMonto(e.target.value)}
-                      placeholder="Ej: 50000"
-                      className={styles.input}
-                      required
-                    />
+                    <label className={styles.label} htmlFor="monto-prestamo">¿Cuánto necesitás?</label>
+                    <div className={styles.montoField}>
+                      <span className={styles.montoPrefijo} aria-hidden="true">$</span>
+                      <input
+                        id="monto-prestamo"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        value={monto ? Number(monto).toLocaleString('es-AR') : ''}
+                        onChange={e => setMonto(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="500.000"
+                        className={`${styles.input} ${styles.montoInput}`}
+                        aria-invalid={superaMaximo}
+                        aria-describedby="monto-ayuda"
+                        required
+                      />
+                    </div>
+                    <p id="monto-ayuda" className={superaMaximo ? styles.errorMsg : styles.ayuda}>
+                      {superaMaximo
+                        ? `El monto máximo es ${pesos(montoMaximo)}.`
+                        : `Podés pedir hasta ${pesos(montoMaximo)}.`}
+                    </p>
                   </div>
                   <div className={styles.inputGroup}>
-                    <label className={styles.label}>Cantidad de cuotas</label>
+                    <label className={styles.label} htmlFor="cuotas-prestamo">Cantidad de cuotas</label>
                     <select
+                      id="cuotas-prestamo"
                       value={cantCuotas}
-                      onChange={e => setCantCuotas(Number(e.target.value))}
+                      onChange={e => { setCantCuotas(Number(e.target.value)); setRevisando(false); }}
                       className={styles.input}
                     >
                       {opcionesCuotas.map(opcion => (
@@ -285,35 +353,90 @@ function Prestamos() {
                     </select>
                   </div>
 
-                  {opcionElegida && (
-                    <div className={styles.simulacion}>
-                      <div className={styles.simulacionFila}>
-                        <span>{cantCuotas === 1 ? 'Pago único' : `${cantCuotas} cuotas fijas de`}</span>
-                        <strong>{pesos(opcionElegida.monto_cuota)}</strong>
-                      </div>
-                      <div className={styles.simulacionFila}>
-                        <span>Total a devolver</span>
-                        <strong>{pesos(opcionElegida.monto_total)}</strong>
-                      </div>
-                      <div className={styles.simulacionFila}>
-                        <span>Intereses + IVA</span>
-                        <strong>+{opcionElegida.recargo_porcentaje.toLocaleString('es-AR')}%</strong>
-                      </div>
-                      <p className={styles.simulacionTasas}>
-                        TNA {simulacion?.tna}% · TEA {opcionElegida.tea.toLocaleString('es-AR')}% ·
-                        CFTEA {opcionElegida.cftea.toLocaleString('es-AR')}% (con IVA {simulacion?.iva_intereses}%).
-                        Sistema francés: la cuota es fija y el interés se calcula sobre el capital que queda por pagar.
-                      </p>
-                    </div>
-                  )}
+                  <div aria-live="polite">
+                    {calculando && <p className={styles.ayuda}>Calculando cuánto vas a pagar…</p>}
+                    {opcionElegida && (
+                      <div className={styles.simulacion}>
+                        <span className={styles.simulacionEtiqueta}>Vas a devolver en total</span>
+                        <span className={styles.simulacionTotal}>{pesos(opcionElegida.monto_total)}</span>
+                        <span className={styles.simulacionCuota}>
+                          {cantCuotas === 1
+                            ? 'En un pago único'
+                            : <>{cantCuotas} cuotas fijas de <strong>{pesos(opcionElegida.monto_cuota)}</strong></>}
+                          {' · '}
+                          {pesos(opcionElegida.monto_total - montoNumero)} de intereses e IVA (+{porcentaje(opcionElegida.recargo_porcentaje)})
+                        </span>
 
-                  <button type="submit" disabled={enviando || !monto} className={styles.btnSolicitar}>
-                    {enviando ? 'Enviando...' : 'Solicitar préstamo'}
-                  </button>
+                        <dl className={styles.tasas}>
+                          <div className={styles.tasaPrincipal}>
+                            <dt>CFTEA</dt>
+                            <dd>{porcentaje(opcionElegida.cftea)}</dd>
+                            <span className={styles.tasaAyuda}>Costo total anual, con intereses e IVA. Es el número para comparar préstamos.</span>
+                          </div>
+                          <div className={styles.tasa}>
+                            <dt>TNA</dt>
+                            <dd>{porcentaje(simulacion!.tna)}</dd>
+                          </div>
+                          <div className={styles.tasa}>
+                            <dt>TEA</dt>
+                            <dd>{porcentaje(opcionElegida.tea)}</dd>
+                          </div>
+                        </dl>
+                        <p className={styles.simulacionTasas}>
+                          Sistema francés: la cuota es fija y el interés se calcula sobre lo que te queda por pagar.
+                          {cantCuotas > 1 && ' La última cuota puede variar unos centavos por redondeo.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {!revisando && (
+                    <button
+                      type="submit"
+                      disabled={!opcionElegida || superaMaximo || bloqueado}
+                      className={styles.btnSolicitar}
+                    >
+                      Revisar solicitud
+                    </button>
+                  )}
                 </fieldset>
               </form>
-              {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
-              {errorSolicitud && <p className={styles.errorMsg}>{errorSolicitud}</p>}
+
+              {revisando && opcionElegida && (
+                <div className={styles.revision} ref={resultadoRef} tabIndex={-1} role="region" aria-label="Revisá tu solicitud">
+                  <h3 className={styles.revisionTitulo}>Antes de confirmar</h3>
+                  <ul className={styles.revisionLista}>
+                    <li>
+                      Recibís <strong>{pesos(montoNumero)}</strong> en tu cuenta en pesos cuando la solicitud se apruebe.
+                    </li>
+                    <li>
+                      Devolvés <strong>{pesos(opcionElegida.monto_total)}</strong>
+                      {cantCuotas === 1 ? ' en un pago único' : <> en {cantCuotas} cuotas de <strong>{pesos(opcionElegida.monto_cuota)}</strong></>},
+                      {' '}que se debitan solas de tu cuenta cada mes.
+                    </li>
+                    {tnaPunitoria !== null && (
+                      <li>
+                        Si una cuota no se puede cobrar, la deuda atrasada suma intereses punitorios del{' '}
+                        <strong>{porcentaje(tnaPunitoria)} anual</strong> hasta que la pagues.
+                      </li>
+                    )}
+                    <li>Primero la revisa un empleado y después la aprueba un gerente.</li>
+                  </ul>
+                  <div className={styles.revisionAcciones}>
+                    <button type="button" className={styles.btnConfirmar} onClick={confirmarSolicitud} disabled={enviando}>
+                      {enviando ? 'Enviando…' : 'Confirmar solicitud'}
+                    </button>
+                    <button type="button" className={styles.btnVolver} onClick={() => setRevisando(false)} disabled={enviando}>
+                      Volver y cambiar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div aria-live="polite">
+                {mensajeSolicitud && <p className={styles.successMsg} role="status">{mensajeSolicitud}</p>}
+              </div>
+              {errorSolicitud && <p className={styles.errorMsg} role="alert">{errorSolicitud}</p>}
             </div>
 
             <div className={styles.listSection}>
@@ -388,7 +511,8 @@ function Prestamos() {
                                 )}
                               </div>
                               <span className={styles.cuotaMonto}>
-                                $ {Number(c.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                {/* En mora lo que se debe es la cuota más los punitorios acumulados. */}
+                                {pesos(c.estado === 'vencida' ? Number(c.monto) + Number(c.punitorios || 0) : Number(c.monto))}
                               </span>
                               <span className={badgeCuotaClass(c.estado)}>
                                 {c.estado === 'vencida' ? 'en mora' : c.estado}

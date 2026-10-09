@@ -1,127 +1,40 @@
-import { useState } from "react"
-import { ClerkDegraded, ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, useAuth } from "@clerk/react"
+import { ClerkFailed, ClerkLoaded, ClerkLoading, SignIn, useAuth } from "@clerk/react"
 import { Navigate } from "react-router-dom"
-import styles from './Login.module.css'
-import logoF from '../assets/404log.png'
-import banImg from '../assets/Ban.png'
-import banSImg from '../assets/banS.png'
+import AuthShell from "../components/AuthShell"
+import { clerkAppearance } from "../components/clerkAppearance"
+import styles from "./Login.module.css"
 
 function Login() {
   const { isLoaded, isSignedIn } = useAuth()
-  const [banHabla, setBanHabla] = useState(false)
 
   if (isLoaded && isSignedIn) {
     return <Navigate to="/home" replace />
   }
 
   return (
-    <div className={styles.container}>
-
-      {/* ── PANEL IZQUIERDO ── */}
-      <div className={styles.leftPanel}>
-        <img src={logoF} alt="404Bank logo" className={styles.logoImg} />
-        <h1 className={styles.leftTitle}>
-          Online<br />Banking
-        </h1>
-        <div className={styles.leftDivider} />
-        <p className={styles.leftSubtitle}>
-          Donde tus ahorros<br />toman vuelo.
+    <AuthShell
+      title="Ingresá a tu cuenta"
+      subtitle="Usá el nombre de usuario y la contraseña con los que te registraste."
+      mensajeBan="¡Hola de nuevo! Cuando entres, preguntame lo que necesites."
+    >
+      <ClerkLoading>
+        <p className={styles.estado}>Cargando el ingreso…</p>
+      </ClerkLoading>
+      <ClerkFailed>
+        <p className={styles.error} role="alert">
+          No pudimos cargar el ingreso. Recargá la página e intentá de nuevo.
         </p>
-        <div className={styles.banWrapper}>
-          {banHabla && (
-            <div className={styles.banBubble}>
-              ¡Hola! Soy Ban, tu asistente virtual.<br />¿En qué te ayudo hoy? 👋
-            </div>
-          )}
-          <img
-            src={banHabla ? banSImg : banImg}
-            alt="Mascota 404Bank"
-            className={styles.banImg}
-            onClick={() => setBanHabla(prev => !prev)}
-          />
-        </div>
-      </div>
-
-      {/* ── PANEL DERECHO ── */}
-      <div className={styles.rightPanel}>
-
-        <div className={styles.rightWelcome}>
-          <h2 className={styles.rightTitle}>¡Bienvenido 404User!</h2>
-          <p className={styles.rightSubtitle}>
-            Ingresá tus datos para acceder a tu cuenta.
-          </p>
-        </div>
-
-        <div className={styles.clerkWrapper}>
-          <ClerkLoading>
-            <div />
-          </ClerkLoading>
-
-          <ClerkFailed>
-            <div className={styles.clerkFailedBox}>
-              <h2>Clerk no pudo iniciar</h2>
-              <p>
-                Si la pantalla se queda en blanco o recarga sola, el problema suele
-                estar en la clave publishable, el dominio permitido o la
-                inicialización de Clerk.
-              </p>
-            </div>
-          </ClerkFailed>
-
-          <ClerkDegraded>
-            <div />
-          </ClerkDegraded>
-
-          <ClerkLoaded>
-            <SignIn
-              routing="hash"
-              signUpUrl="/register"
-              forceRedirectUrl="/home"
-              fallbackRedirectUrl="/home"
-              appearance={{
-                variables: {
-                  colorPrimary: '#BABABA',
-                  colorText: '#111827',
-                  colorTextSecondary: '#6b7280',
-                  colorBackground: '#4F0919',
-                  colorInputBackground: '#f9fafb',
-                  colorInputText: '#111827',
-                  borderRadius: '8px',
-                  fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
-                },
-                elements: {
-                  card: {
-                    boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
-                    borderRadius: '14px',
-                    border: 'none',
-                  },
-                  headerTitle: { display: 'none' },
-                  headerSubtitle: { display: 'none' },
-                  formButtonPrimary: {
-                    backgroundColor: '#ffffff',
-                    color: '#4F0919',
-                    borderRadius: '8px',
-                    fontSize: '15px',
-                    fontWeight: '700',
-                    letterSpacing: '0.2px',
-                    boxShadow: '0 4px 14px rgba(255,255,255,0.15)',
-                  },
-                  footerActionLink: { color: '#ffffff' },
-                  formFieldInput: {
-                    backgroundColor: '#f9fafb',
-                    color: '#111827',
-                    borderRadius: '8px',
-                    fontSize: '15px',
-                    padding: '10px 14px',
-                  },
-                },
-              }}
-            />
-          </ClerkLoaded>
-        </div>
-
-      </div>
-    </div>
+      </ClerkFailed>
+      <ClerkLoaded>
+        <SignIn
+          routing="hash"
+          signUpUrl="/register"
+          forceRedirectUrl="/home"
+          fallbackRedirectUrl="/home"
+          appearance={clerkAppearance}
+        />
+      </ClerkLoaded>
+    </AuthShell>
   )
 }
 

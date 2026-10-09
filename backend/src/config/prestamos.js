@@ -19,6 +19,9 @@ const CUOTAS_INTERVALO = process.env.CUOTAS_INTERVALO || '1 month';
 
 const CUOTAS_PERMITIDAS = [1, 3, 6, 12, 24, 36];
 
+// Monto máximo que se puede pedir en un préstamo personal (en pesos).
+const MONTO_MAXIMO = Number(process.env.PRESTAMOS_MONTO_MAXIMO ?? 5000000);
+
 // Tasa mensual efectiva que paga el cliente: interés compensatorio + IVA sobre ese interés.
 const tasaMensualConIva = (tna) => Number(tna) / 100 / 12 * (1 + IVA_INTERESES / 100);
 
@@ -61,4 +64,4 @@ const calcularPlanFrances = (monto, cantCuotas, tna) => {
   };
 };
 
-module.exports = { TNA, RECARGO_PUNITORIO, IVA_INTERESES, CUOTAS_INTERVALO, CUOTAS_PERMITIDAS, calcularPlanFrances };
+module.exports = { TNA, RECARGO_PUNITORIO, IVA_INTERESES, CUOTAS_INTERVALO, CUOTAS_PERMITIDAS, MONTO_MAXIMO, calcularPlanFrances };

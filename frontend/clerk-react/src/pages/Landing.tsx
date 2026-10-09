@@ -1,32 +1,11 @@
-import { useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useAuth } from "@clerk/react"
 import { Navigate, Link } from "react-router-dom"
-import {
-  Landmark, ArrowLeftRight, Banknote, CreditCard,
-  Car, Tag, TrendingUp, Briefcase, ShieldCheck, Building2,
-  Lock, Zap, Smartphone,
-} from "lucide-react"
-
-const IconInstagram = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-  </svg>
-)
-
-const IconYoutube = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
-  </svg>
-)
-
-const IconX = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.737-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-  </svg>
-)
 import styles from "./Landing.module.css"
-import logoF from "../assets/404log.png"
-import banImg from "../assets/Ban.png"
+import logo404Bank from "../assets/logo404bank.png"
+import banImg from "../assets/banLanding.png"
+
+const API_URL = "http://localhost:3000"
 
 interface Cotizacion {
   casa: string
@@ -36,263 +15,359 @@ interface Cotizacion {
   fechaActualizacion: string
 }
 
+interface OpcionSimulada {
+  cant_cuotas: number
+  monto_cuota: number
+  monto_total: number
+  recargo_porcentaje: number
+  tea: number
+  cftea: number
+}
+
+interface Simulacion {
+  tna: number
+  monto_maximo: number
+  cuotas_permitidas: number[]
+  opciones: OpcionSimulada[]
+}
+
 const CASAS_VISIBLES = ["oficial", "blue", "bolsa", "tarjeta"]
-
-const NOMBRE_DISPLAY: Record<string, string> = {
+const NOMBRE_CASA: Record<string, string> = {
+  oficial: "Oficial",
+  blue: "Blue",
   bolsa: "MEP",
+  tarjeta: "Tarjeta",
 }
 
-const formatPeso = (n: number | null) =>
-  n != null ? `$${n.toLocaleString("es-AR")}` : "—"
+const CUOTAS = [1, 3, 6, 12, 24, 36]
+const MONTO_INICIAL = "500000"
 
-const formatFecha = (iso: string) => {
-  const d = new Date(iso)
-  return d.toLocaleString("es-AR", {
-    day: "2-digit", month: "2-digit",
-    hour: "2-digit", minute: "2-digit",
-  })
-}
+const pesos = (valor: number, decimales = 2) =>
+  new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales,
+  }).format(valor)
+
+const porcentaje = (valor: number) => `${valor.toLocaleString("es-AR", { maximumFractionDigits: 2 })}%`
+
+// Lo que existe hoy en 404Bank. Cada línea tiene que poder mostrarse en la demo.
+const SERVICIOS = [
+  { nombre: "Cuenta en pesos y en dólares", detalle: "CBU y alias propios desde el primer día.", dato: "CBU + alias" },
+  { nombre: "Transferencias", detalle: "Por CBU o alias, con tus contactos guardados.", dato: "Al instante" },
+  { nombre: "Préstamos personales", detalle: "Cuota fija con sistema francés, simulá antes de pedir.", dato: "1 a 36 cuotas" },
+  { nombre: "Frascos de ahorro", detalle: "Apartás plata a plazo fijo, de 7 a 365 días, desde $ 1.000.", dato: "TNA 28–35%" },
+  { nombre: "Tarjetas", detalle: "Débito y crédito, las pedís desde la app.", dato: "Débito · crédito" },
+  { nombre: "Compra de dólares", detalle: "Convertís pesos de tu cuenta al tipo de cambio oficial.", dato: "USD" },
+  { nombre: "Comprobantes", detalle: "El PDF de cada transferencia, cuando lo necesites.", dato: "PDF" },
+  { nombre: "Ban", detalle: "Tu asistente: le preguntás y te responde con IA.", dato: "Chat" },
+]
+
+const PASOS = [
+  { titulo: "Creá tu usuario", texto: "Con tu email y una contraseña." },
+  { titulo: "Completá tus datos", texto: "DNI y datos personales, una sola vez." },
+  { titulo: "Recibí tu CBU y alias", texto: "Tu cuenta en pesos queda abierta." },
+  { titulo: "Hacé tu primera transferencia", texto: "O simulá tu primer préstamo." },
+]
 
 function Landing() {
   const { isLoaded, isSignedIn } = useAuth()
-  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([])
-  const [loadingCot, setLoadingCot] = useState(true)
 
-  useEffect(() => {
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([])
+  const [estadoCot, setEstadoCot] = useState<"cargando" | "ok" | "error">("cargando")
+
+  const [monto, setMonto] = useState(MONTO_INICIAL)
+  const [cuotas, setCuotas] = useState(12)
+  const [simulacion, setSimulacion] = useState<Simulacion | null>(null)
+  const [montoSimulado, setMontoSimulado] = useState<number | null>(null)
+  const [errorSim, setErrorSim] = useState(false)
+  const simulacionIdRef = useRef(0)
+
+  const montoNumero = Number(monto) || 0
+  const montoMaximo = simulacion?.monto_maximo ?? 5000000
+  const superaMaximo = montoNumero > montoMaximo
+
+  const cargarCotizaciones = () => {
+    setEstadoCot("cargando")
     fetch("https://dolarapi.com/v1/dolares")
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error()
+        return r.json()
+      })
       .then((data: Cotizacion[]) => {
         setCotizaciones(data.filter(d => CASAS_VISIBLES.includes(d.casa)))
+        setEstadoCot("ok")
       })
-      .catch(() => {})
-      .finally(() => setLoadingCot(false))
-  }, [])
+      .catch(() => setEstadoCot("error"))
+  }
+
+  useEffect(() => {
+    // Con sesión iniciada se redirige a /home: no hace falta pedir nada.
+    if (isSignedIn) return
+    cargarCotizaciones()
+  }, [isSignedIn])
+
+  // Simulación con las mismas cuentas que hace el backend al pedir un préstamo.
+  // Cada pedido tiene un número: si llega una respuesta vieja, se descarta.
+  useEffect(() => {
+    if (isSignedIn) return
+    const simulacionId = ++simulacionIdRef.current
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/public/simular?monto=${montoNumero}`)
+        if (!res.ok) throw new Error()
+        const data: Simulacion = await res.json()
+        if (simulacionId !== simulacionIdRef.current) return
+        setSimulacion(data)
+        setMontoSimulado(montoNumero)
+        setErrorSim(false)
+      } catch {
+        if (simulacionId === simulacionIdRef.current) setErrorSim(true)
+      }
+    }, 250)
+    return () => clearTimeout(timeout)
+  }, [montoNumero, isSignedIn])
 
   if (isLoaded && isSignedIn) {
     return <Navigate to="/home" replace />
   }
 
+  // Se muestra el último resultado mientras llega el nuevo (atenuado), en lugar de vaciar el panel en cada tecla.
+  const opcion = montoNumero > 0 && !superaMaximo
+    ? simulacion?.opciones.find(o => o.cant_cuotas === cuotas)
+    : undefined
+  const desactualizado = !!opcion && montoSimulado !== montoNumero && !errorSim
+  const montoDelResultado = montoSimulado ?? montoNumero
+  const calculando = montoNumero > 0 && !superaMaximo && !opcion && !errorSim
+  const actualizado = cotizaciones[0]?.fechaActualizacion
+
   return (
     <div className={styles.page}>
+      <a href="#contenido" className={styles.skipLink}>Saltar al contenido</a>
 
-      {/* ── NAVBAR ── */}
-      <nav className={styles.navbar}>
-        <div className={styles.navBrand}>
-          <img src={logoF} alt="404Bank" className={styles.navLogo} />
-        </div>
-        <ul className={styles.navLinks}>
-          <li><a href="#servicios">Servicios</a></li>
-          <li><a href="#beneficios">Beneficios</a></li>
-          <li><a href="#nosotros">Nosotros</a></li>
-        </ul>
-        <div className={styles.navActions}>
-          <Link to="/login" className={styles.btnLogin}>Iniciar sesión</Link>
-        </div>
-      </nav>
-
-      {/* ── HERO ── */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <span className={styles.heroBadge}>Banking del futuro</span>
-          <h1 className={styles.heroTitle}>
-            Donde tus ahorros<br />toman vuelo.
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Administrá tu dinero, realizá transferencias y solicitá préstamos —<br />
-            todo desde un solo lugar, sin papeles ni filas.
-          </p>
-          <div className={styles.heroActions}>
-            <Link to="/register" className={styles.heroBtnPrimary}>Abrir tu cuenta gratis</Link>
+      {/* ── Hero: el titular y el simulador ── */}
+      <header className={styles.hero}>
+        <nav className={styles.nav} aria-label="Principal">
+          <Link to="/" className={styles.marca} aria-label="404Bank, inicio">
+            <span className={styles.marca404}>404</span>
+            <span className={styles.marcaBank}>Bank</span>
+          </Link>
+          <div className={styles.navLinks}>
+            <a href="#servicios">Qué podés hacer</a>
+            <a href="#nosotros">Nosotros</a>
           </div>
-        </div>
-        <div className={styles.heroVisual}>
-          <div className={styles.heroBanWrapper}>
-            <img src={banImg} alt="Ban - mascota 404Bank" className={styles.heroBan} />
-            <div className={styles.heroBubble}>
-              ¡Hola! Soy Ban, tu asistente virtual.
-              <br />Bienvenido a 404Bank 👋
+          <div className={styles.navAcciones}>
+            <Link to="/login" className={styles.btnIngresar}>Iniciar sesión</Link>
+            <Link to="/register" className={styles.btnAbrirNav}>Abrir cuenta</Link>
+          </div>
+        </nav>
+
+        <div className={styles.heroGrid} id="contenido">
+          <div className={styles.heroTexto}>
+            <h1 className={styles.titular}>
+              Filas, papeles y letra chica:
+              <span className={styles.titular404}> error 404.</span>
+            </h1>
+            <p className={styles.bajada}>
+              Una cuenta digital con CBU y alias, transferencias, préstamos y frascos de ahorro.
+              Y los números a la vista antes de firmar nada.
+            </p>
+            <Link to="/register" className={styles.btnPrincipal}>Abrir mi cuenta gratis</Link>
+            <p className={styles.notaSimulado}>Banco simulado: no opera con dinero real.</p>
+          </div>
+
+          <section className={styles.simulador} aria-labelledby="sim-titulo">
+            <img src={banImg} alt="" width={300} height={598} className={styles.banSimulador} />
+            <h2 id="sim-titulo" className={styles.simTitulo}>Simulá un préstamo</h2>
+
+            <label className={styles.simLabel} htmlFor="sim-monto">¿Cuánto necesitás?</label>
+            <div className={styles.simMontoField}>
+              <span className={styles.simPrefijo} aria-hidden="true">$</span>
+              <input
+                id="sim-monto"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                value={monto ? Number(monto).toLocaleString("es-AR") : ""}
+                onChange={e => setMonto(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                className={styles.simMonto}
+                aria-invalid={superaMaximo}
+                aria-describedby="sim-ayuda"
+              />
             </div>
-          </div>
-        </div>
-      </section>
+            <p id="sim-ayuda" className={superaMaximo ? styles.simError : styles.simAyuda}>
+              {superaMaximo ? `El máximo es ${pesos(montoMaximo, 0)}.` : `Hasta ${pesos(montoMaximo, 0)}.`}
+            </p>
 
-      {/* ── SERVICIOS ── */}
-      <section className={styles.services} id="servicios">
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>Conocé todo lo que tenemos para vos</h2>
-          <p className={styles.sectionSubtitle}>
-            Accedé a todos los servicios bancarios desde tu celular o computadora.
-          </p>
-        </div>
-        <div className={styles.servicesGrid}>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Landmark size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Cuentas</h3>
-            <p className={styles.serviceDesc}>Abrí tu cuenta en minutos, sin papeles ni turnos. 100% digital y gratuita.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><ArrowLeftRight size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Transferencias</h3>
-            <p className={styles.serviceDesc}>Enviá y recibí dinero al instante, sin comisiones ocultas, las 24 horas.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Banknote size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Préstamos Personales</h3>
-            <p className={styles.serviceDesc}>Solicitá préstamos con tasas competitivas y aprobación rápida desde la app.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><CreditCard size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Tarjetas</h3>
-            <p className={styles.serviceDesc}>Tarjetas de débito y crédito con beneficios exclusivos para cada perfil.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Car size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Préstamos Prendarios</h3>
-            <p className={styles.serviceDesc}>Financiá tu vehículo con cuotas flexibles y tasas preferenciales.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Tag size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Promociones</h3>
-            <p className={styles.serviceDesc}>Descuentos y beneficios exclusivos en comercios adheridos con tu tarjeta.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><TrendingUp size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Inversiones</h3>
-            <p className={styles.serviceDesc}>Hacé crecer tu dinero con plazos fijos, fondos y opciones de inversión.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Briefcase size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Cuenta Sueldo</h3>
-            <p className={styles.serviceDesc}>Recibí tu sueldo sin costo de mantenimiento y con beneficios adicionales.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><ShieldCheck size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Seguros y Asistencias</h3>
-            <p className={styles.serviceDesc}>Protegé lo que más importa con seguros de vida, hogar y accidentes.</p>
-          </div>
-          <div className={styles.serviceCard}>
-            <div className={styles.serviceIconWrap}><Building2 size={36} strokeWidth={1.5} color="#4F0919" /></div>
-            <h3 className={styles.serviceTitle}>Pymes y Empresas</h3>
-            <p className={styles.serviceDesc}>Soluciones financieras a medida para potenciar tu negocio o empresa.</p>
-          </div>
-        </div>
-      </section>
+            <span className={styles.simLabel} id="sim-cuotas">Cuotas</span>
+            <div className={styles.simCuotas} role="radiogroup" aria-labelledby="sim-cuotas">
+              {CUOTAS.map(n => (
+                <button
+                  key={n}
+                  type="button"
+                  role="radio"
+                  aria-checked={cuotas === n}
+                  className={`${styles.simCuota} ${cuotas === n ? styles.simCuotaActiva : ""}`}
+                  onClick={() => setCuotas(n)}
+                >
+                  {n === 1 ? "1 pago" : n}
+                </button>
+              ))}
+            </div>
 
-      {/* ── COTIZACIONES ── */}
-      <section className={styles.cotizaciones}>
-        <div className={styles.cotHeader}>
-          <h3 className={styles.cotTitle}>Cotización del dólar</h3>
-          {!loadingCot && cotizaciones.length > 0 && (
-            <span className={styles.cotFecha}>
-              Actualizado: {formatFecha(cotizaciones[0].fechaActualizacion)}
-            </span>
-          )}
+            <div
+              className={`${styles.simResultado} ${desactualizado ? styles.simDesactualizado : ""}`}
+              aria-live="polite"
+              aria-busy={desactualizado}
+            >
+              {errorSim && (
+                <p className={styles.simError}>
+                  {opcion
+                    ? "No pudimos recalcular: estos números son del monto anterior. Probá de nuevo en un momento."
+                    : "No pudimos calcular ahora. Probá de nuevo en un momento."}
+                </p>
+              )}
+              {opcion ? (
+                <>
+                  <span className={styles.simEtiqueta}>Vas a devolver</span>
+                  {/* Cada cifra entra con una transición corta cuando cambia su valor. */}
+                  <span key={opcion.monto_total} className={styles.simTotal}>{pesos(opcion.monto_total)}</span>
+                  <span key={`c${opcion.monto_cuota}`} className={`${styles.simCuotaTexto} ${styles.cifraNueva}`}>
+                    {cuotas === 1 ? "En un pago" : <>{cuotas} cuotas de <strong>{pesos(opcion.monto_cuota)}</strong></>}
+                  </span>
+                  <dl className={styles.simTasas}>
+                    <div>
+                      <dt>CFTEA</dt>
+                      <dd key={`f${opcion.cftea}`} className={styles.cifraNueva}>{porcentaje(opcion.cftea)}</dd>
+                    </div>
+                    <div>
+                      <dt>TNA</dt>
+                      <dd>{porcentaje(simulacion!.tna)}</dd>
+                    </div>
+                    <div>
+                      <dt>Intereses e IVA</dt>
+                      <dd key={`i${opcion.monto_total}`} className={styles.cifraNueva}>
+                        {pesos(opcion.monto_total - montoDelResultado, 0)}
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              ) : calculando && !errorSim ? (
+                <p className={styles.simAyuda}>Calculando…</p>
+              ) : !superaMaximo && !errorSim ? (
+                <p className={styles.simAyuda}>Escribí un monto para ver cuánto devolvés.</p>
+              ) : null}
+            </div>
+            <p className={styles.simNota}>
+              Es la misma cuenta que hace 404Bank cuando pedís el préstamo: sistema francés, con IVA sobre los intereses.
+            </p>
+          </section>
         </div>
-        <div className={styles.cotGrid}>
-          {loadingCot ? (
-            <span className={styles.cotLoading}>Cargando cotizaciones...</span>
-          ) : cotizaciones.length === 0 ? (
-            <span className={styles.cotLoading}>No se pudo obtener la cotización.</span>
-          ) : (
-            cotizaciones.map(c => (
-              <div key={c.casa} className={styles.cotCard}>
-                <span className={styles.cotNombre}>{NOMBRE_DISPLAY[c.casa] ?? c.nombre}</span>
-                <div className={styles.cotRow}>
-                  <span className={styles.cotRowLabel}>Compra</span>
-                  <span className={styles.cotRowValue}>{formatPeso(c.compra)}</span>
-                </div>
-                <div className={styles.cotDivider} />
-                <div className={styles.cotRow}>
-                  <span className={styles.cotRowLabel}>Venta</span>
-                  <span className={styles.cotRowValue}>{formatPeso(c.venta)}</span>
-                </div>
+
+        {/* ── El dólar de hoy, como prueba en vivo ── */}
+        <section className={styles.dolar} aria-labelledby="dolar-titulo">
+          <div className={styles.dolarCabecera}>
+            <h2 id="dolar-titulo" className={styles.dolarTitulo}>Dólar hoy</h2>
+            {estadoCot === "ok" && actualizado && (
+              <span className={styles.dolarHora}>
+                Actualizado {new Date(actualizado).toLocaleString("es-AR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+          </div>
+          <div aria-live="polite" className={styles.dolarFila}>
+            {estadoCot === "cargando" && <p className={styles.dolarEstado}>Cargando cotizaciones…</p>}
+            {estadoCot === "error" && (
+              <p className={styles.dolarEstado}>
+                No pudimos traer la cotización.{" "}
+                <button type="button" className={styles.dolarReintentar} onClick={cargarCotizaciones}>Reintentar</button>
+              </p>
+            )}
+            {estadoCot === "ok" && cotizaciones.map(c => (
+              <div key={c.casa} className={styles.dolarItem}>
+                <span className={styles.dolarCasa}>{NOMBRE_CASA[c.casa] ?? c.nombre}</span>
+                <span className={styles.dolarValores}>
+                  <span><small>Compra</small> {c.compra != null ? pesos(c.compra, 0) : "—"}</span>
+                  <span><small>Venta</small> {c.venta != null ? pesos(c.venta, 0) : "—"}</span>
+                </span>
               </div>
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* ── BENEFICIOS ── */}
-      <section className={styles.benefits} id="beneficios">
-        <div className={styles.sectionHeader}>
-          <h2 className={styles.sectionTitle}>¿Por qué elegir 404Bank?</h2>
-          <p className={styles.sectionSubtitle}>Construido para la nueva generación de ahorradores.</p>
-        </div>
-        <div className={styles.benefitsGrid}>
-          <div className={styles.benefitItem}>
-            <div className={styles.benefitIconWrap}><Lock size={32} strokeWidth={1.5} color="#4F0919" /></div>
-            <h4 className={styles.benefitTitle}>Seguridad bancaria</h4>
-            <p className={styles.benefitDesc}>
-              Tus datos y tu dinero protegidos con cifrado de nivel bancario y autenticación en dos pasos.
-            </p>
+            ))}
           </div>
-          <div className={styles.benefitItem}>
-            <div className={styles.benefitIconWrap}><Zap size={32} strokeWidth={1.5} color="#4F0919" /></div>
-            <h4 className={styles.benefitTitle}>Operaciones instantáneas</h4>
-            <p className={styles.benefitDesc}>
-              Transferencias, pagos y movimientos en segundos, sin demoras ni burocracia.
-            </p>
-          </div>
-          <div className={styles.benefitItem}>
-            <div className={styles.benefitIconWrap}><Smartphone size={32} strokeWidth={1.5} color="#4F0919" /></div>
-            <h4 className={styles.benefitTitle}>100% digital</h4>
-            <p className={styles.benefitDesc}>
-              Sin sucursales, sin filas. Todo desde tu dispositivo, cuando y donde quieras.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </header>
 
-      {/* ── CTA FINAL ── */}
-      <section className={styles.cta} id="nosotros">
-        <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>¿Listo para empezar?</h2>
-          <p className={styles.ctaSubtitle}>Abrí tu cuenta gratis en menos de 5 minutos.</p>
-          <Link to="/register" className={styles.ctaBtn}>Crear mi cuenta</Link>
-        </div>
-      </section>
+      <main>
+        {/* ── Lo que existe de verdad ── */}
+        <section className={styles.servicios} id="servicios" aria-labelledby="servicios-titulo">
+          <div className={styles.seccionCabecera}>
+            <h2 id="servicios-titulo" className={styles.seccionTitulo}>Lo que sí vas a encontrar</h2>
+            <p className={styles.seccionBajada}>Todo esto funciona hoy, desde tu cuenta.</p>
+          </div>
+          <ul className={styles.listaServicios}>
+            {SERVICIOS.map(s => (
+              <li key={s.nombre} className={styles.servicio}>
+                <span className={styles.servicioNombre}>{s.nombre}</span>
+                <span className={styles.servicioDetalle}>{s.detalle}</span>
+                <span className={styles.servicioDato}>{s.dato}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      {/* ── FOOTER ── */}
+        {/* ── Cómo abrir la cuenta ── */}
+        <section className={styles.pasos} aria-labelledby="pasos-titulo">
+          <div className={styles.seccionCabecera}>
+            <h2 id="pasos-titulo" className={styles.seccionTitulo}>Abrir tu cuenta lleva cuatro pasos</h2>
+          </div>
+          <ol className={styles.listaPasos}>
+            {PASOS.map((p, i) => (
+              <li key={p.titulo} className={styles.paso}>
+                <span className={styles.pasoNumero} aria-hidden="true">{i + 1}</span>
+                <span className={styles.pasoCuerpo}>
+                  <span className={styles.pasoTitulo}>{p.titulo}</span>
+                  <span className={styles.pasoTexto}>{p.texto}</span>
+                </span>
+                {i === 2 && (
+                  <span className={styles.aliasEjemplo}>
+                    <span className={styles.aliasEtiqueta}>Ejemplo</span>
+                    <span className={styles.aliasPill}>tu.alias.404</span>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* ── Nosotros: honesto sobre qué es esto ── */}
+        <section className={styles.nosotros} id="nosotros" aria-labelledby="nosotros-titulo">
+          <div className={styles.nosotrosTexto}>
+            <h2 id="nosotros-titulo" className={styles.nosotrosTitulo}>Un banco de práctica, hecho en serio</h2>
+            <p>
+              404Bank es un banco digital simulado, desarrollado por Franco y Mateo para Práctica Profesionalizante I.
+              No opera con dinero real: las cuentas, los préstamos y los frascos funcionan con datos de prueba y un
+              Banco Central simulado.
+            </p>
+            <p>
+              Lo que sí es real son las cuentas: las tasas, el IVA, las cuotas y los punitorios se calculan como en un
+              banco de verdad.
+            </p>
+            <Link to="/register" className={styles.btnPrincipal}>Abrir mi cuenta gratis</Link>
+          </div>
+          <div className={styles.nosotrosBan}>
+            <p className={styles.globo}>¿Dudas? Cuando entres, preguntame a mí.</p>
+            <img src={banImg} alt="Ban, el asistente de 404Bank, saludando" width={300} height={598} className={styles.banNosotros} />
+          </div>
+        </section>
+      </main>
+
       <footer className={styles.footer}>
-        <div className={styles.footerTop}>
-          <div className={styles.footerBrand}>
-            <span className={styles.footerBrandName}>404Bank</span>
-            <div className={styles.footerSocial}>
-              <a href="#" className={styles.footerSocialLink} aria-label="Instagram"><IconInstagram /></a>
-              <a href="#" className={styles.footerSocialLink} aria-label="YouTube"><IconYoutube /></a>
-              <a href="#" className={styles.footerSocialLink} aria-label="X / Twitter"><IconX /></a>
-            </div>
-          </div>
-          <div className={styles.footerLinks}>
-            <div className={styles.footerCol}>
-              <h5 className={styles.footerColTitle}>Servicios</h5>
-              <ul>
-                <li><a href="#servicios">Cuentas</a></li>
-                <li><a href="#servicios">Transferencias</a></li>
-                <li><a href="#servicios">Préstamos</a></li>
-                <li><a href="#servicios">Tarjetas</a></li>
-              </ul>
-            </div>
-            <div className={styles.footerCol}>
-              <h5 className={styles.footerColTitle}>Empresa</h5>
-              <ul>
-                <li><a href="#nosotros">Nosotros</a></li>
-                <li><a href="#beneficios">Beneficios</a></li>
-              </ul>
-            </div>
-            <div className={styles.footerCol}>
-              <h5 className={styles.footerColTitle}>Cuenta</h5>
-              <ul>
-                <li><Link to="/login">Iniciar sesión</Link></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <p>© 2026 404Bank. Todos los derechos reservados.</p>
+        <img src={logo404Bank} alt="404Bank" width={140} height={28} className={styles.footerLogo} />
+        <p className={styles.footerTexto}>© 2026 404Bank · Proyecto académico de Práctica Profesionalizante I</p>
+        <div className={styles.footerLinks}>
+          <Link to="/login">Iniciar sesión</Link>
+          <Link to="/register">Abrir cuenta</Link>
         </div>
       </footer>
-
     </div>
   )
 }

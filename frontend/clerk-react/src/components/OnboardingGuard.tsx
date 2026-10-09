@@ -3,6 +3,7 @@ import { useAuth, useUser } from '@clerk/react';
 import { Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useViewMode } from '../context/ViewModeContext';
+import PantallaCarga from './PantallaCarga';
 
 const API_URL = 'http://localhost:3000';
 
@@ -73,9 +74,9 @@ function OnboardingGuard({ children, onlyIncomplete = false }: Props) {
   // Para clientes puros y laborales en modo cliente: verificar perfil
   if (!isAuthLoaded || !isUserLoaded || tienePerfil === null) {
     return (
-      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
-        <p>{errorVerificacion ? 'No pudimos verificar tu perfil. Recargá la página e intentá nuevamente.' : 'Verificando tu perfil...'}</p>
-      </div>
+      <PantallaCarga
+        mensaje={errorVerificacion ? 'No pudimos verificar tu perfil. Recargá la página e intentá de nuevo.' : 'Preparando tu cuenta…'}
+      />
     );
   }
 

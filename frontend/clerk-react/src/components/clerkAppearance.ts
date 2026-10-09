@@ -1,0 +1,68 @@
+// Apariencia compartida de los formularios de Clerk (Login y Registro), con los tokens de DESIGN.md:
+// tinta cálida, papel en los inputs, Manrope, y el botón principal en oro con texto vino oscuro.
+export const clerkAppearance = {
+  variables: {
+    colorPrimary: '#7a1128',
+    colorText: '#1a1512',
+    colorTextSecondary: '#6f665e',
+    colorBackground: '#ffffff',
+    colorInputBackground: '#f4f2ee',
+    colorInputText: '#1a1512',
+    colorDanger: '#a3312c',
+    borderRadius: '12px',
+    fontFamily: "'Manrope', 'Segoe UI', Arial, sans-serif",
+    fontSize: '15px',
+  },
+  elements: {
+    rootBox: { width: '100%' },
+    // overflow visible: con el padding en 0, Clerk recortaba la primera letra de las etiquetas.
+    cardBox: { width: '100%', maxWidth: '100%', boxShadow: 'none', border: 'none', overflow: 'visible' },
+    card: {
+      width: '100%',
+      maxWidth: '100%',
+      boxShadow: 'none',
+      border: 'none',
+      borderRadius: '0',
+      padding: '0',
+      background: 'transparent',
+      overflow: 'visible',
+    },
+    header: { display: 'none' },
+    formFieldLabel: { color: '#1a1512', fontWeight: '700', fontSize: '13px' },
+    formFieldInput: {
+      minHeight: '46px',
+      backgroundColor: '#f4f2ee',
+      color: '#1a1512',
+      border: '1.5px solid rgba(26, 21, 18, 0.08)',
+      borderRadius: '12px',
+      fontSize: '16px',
+      boxShadow: 'none',
+    },
+    formButtonPrimary: {
+      minHeight: '50px',
+      backgroundColor: '#e8b84b',
+      backgroundImage: 'none',
+      color: '#2a0410',
+      borderRadius: '16px',
+      fontSize: '15px',
+      fontWeight: '800',
+      textTransform: 'none',
+      border: '0 !important',
+      // Clerk dibuja el borde vino con box-shadow y un brillo con ::after; la Regla del Oro lo quiere plano.
+      boxShadow: 'none !important',
+      '&::after': { display: 'none' },
+      '&::before': { display: 'none' },
+      '&:hover, &:active': { backgroundColor: '#f0c862' },
+      '&:focus-visible': { outline: '3px solid rgba(122, 17, 40, 0.45)', outlineOffset: '2px' },
+    },
+    socialButtonsBlockButton: {
+      minHeight: '46px',
+      borderRadius: '12px',
+      border: '1.5px solid rgba(26, 21, 18, 0.12)',
+    },
+    dividerLine: { background: 'rgba(26, 21, 18, 0.08)' },
+    footer: { background: 'transparent', padding: '18px 0 0' },
+    footerActionText: { color: '#6f665e' },
+    footerActionLink: { color: '#7a1128', fontWeight: '700' },
+  },
+};

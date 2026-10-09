@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useAuth } from '@clerk/react'
 import { Navigate } from 'react-router-dom'
+import PantallaCarga from './PantallaCarga'
 
 // Este componente revisa si hay sesión activa.
 // Si hay sesión → muestra el contenido (children)
@@ -14,7 +15,7 @@ function PrivateRoute({ children }: PrivateRouteProps) {
 
   // isLoaded es false mientras Clerk verifica la sesión (evita parpadeos)
   if (!isLoaded) {
-    return <p>Cargando...</p>
+    return <PantallaCarga mensaje="Cargando…" />
   }
 
   if (!isSignedIn) {

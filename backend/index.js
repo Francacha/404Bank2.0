@@ -23,6 +23,7 @@ const divisasRoutes = require('./src/routes/divisasRoutes');
 const contactosRoutes = require('./src/routes/contactosRoutes');
 const comprobantesRoutes = require('./src/routes/comprobantesRoutes');
 const frascosRoutes = require('./src/routes/frascosRoutes');
+const { simularPrestamo } = require('./src/controllers/prestamosController');
 
 
 const app = express();
@@ -33,6 +34,10 @@ const authMiddleware = bypassClerkAuth
 
 app.use(cors());
 app.use(express.json());
+
+// Público: la landing simula un préstamo antes de que el visitante tenga cuenta.
+// Solo calcula con los parámetros de config/prestamos.js; no lee datos de nadie.
+app.get('/api/public/simular', simularPrestamo);
 
 app.use('/api/cuentas', authMiddleware, accountsRoutes);
 app.use('/api/personas', authMiddleware, personasRoutes);

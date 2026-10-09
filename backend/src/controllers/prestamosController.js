@@ -2,7 +2,7 @@ const { pool } = require('../config/db');
 const { obtenerSituacionCrediticia } = require('../services/centralBankService');
 const { obtenerMoraCliente, obtenerMoraTitularesCuenta, MENSAJE_MORA } = require('../services/moraService');
 const {
-  TNA, RECARGO_PUNITORIO, IVA_INTERESES, CUOTAS_INTERVALO, CUOTAS_PERMITIDAS, calcularPlanFrances
+  TNA, RECARGO_PUNITORIO, IVA_INTERESES, CUOTAS_INTERVALO, CUOTAS_PERMITIDAS, MONTO_MAXIMO, calcularPlanFrances
 } = require('../config/prestamos');
 
 // Agrega a cada préstamo la situación crediticia del cliente según el Banco Central.
@@ -27,7 +27,7 @@ const agregarSituacionCrediticia = async (prestamos) => {
 // CLIENTE: simular cuánto pagaría por un monto en cada plan de cuotas
 const simularPrestamo = (req, res) => {
   const monto = Number(req.query.monto);
-  const opciones = monto > 0
+  const opciones = monto > 0 && monto <= MONTO_MAXIMO
     ? CUOTAS_PERMITIDAS.map((cantCuotas) => {
         const { cuotas, ...resumen } = calcularPlanFrances(monto, cantCuotas, TNA);
         return { cant_cuotas: cantCuotas, ...resumen };
@@ -38,6 +38,7 @@ const simularPrestamo = (req, res) => {
     tna: TNA,
     iva_intereses: IVA_INTERESES,
     recargo_punitorio: RECARGO_PUNITORIO,
+    monto_maximo: MONTO_MAXIMO,
     cuotas_permitidas: CUOTAS_PERMITIDAS,
     opciones
   });
@@ -51,6 +52,13 @@ const solicitarPrestamo = async (req, res) => {
 
   if (!monto || monto <= 0) {
     return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
+  }
+
+  if (Number(monto) > MONTO_MAXIMO) {
+    return res.status(400).json({
+      error: `El monto máximo es $ ${MONTO_MAXIMO.toLocaleString('es-AR')}.`,
+      monto_maximo: MONTO_MAXIMO
+    });
   }
 
   if (!CUOTAS_PERMITIDAS.includes(cantCuotas)) {

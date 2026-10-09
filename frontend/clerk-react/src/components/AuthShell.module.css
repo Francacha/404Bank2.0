@@ -1,0 +1,272 @@
+/* Estas pantallas no usan AppLayout: repiten los tokens de DESIGN.md en su propio .page. */
+.page {
+  --ink: #1a1512;
+  --muted-text: #6f665e;
+  --paper: #f4f2ee;
+  --line: rgba(26, 21, 18, 0.08);
+  --line-strong: rgba(26, 21, 18, 0.16);
+  --card: #ffffff;
+  --wine: #7a1128;
+  --wine-hero: #4a0817;
+  --wine-dark: #2a0410;
+  --wine-darker: #150208;
+  --accent: #e8b84b;
+  --accent-hover: #f0c862;
+  --green: #1e8e5a;
+  --red: #a3312c;
+  --red-tint: rgba(163, 49, 44, 0.08);
+  --shadow: 0 2px 14px rgba(26, 21, 18, 0.05);
+  --focus-ring: 0 0 0 3px rgba(126, 8, 39, 0.14);
+
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
+  color-scheme: light;
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.page h1,
+.page h2,
+.page h3 {
+  font-family: inherit;
+  margin: 0;
+}
+
+.page ::selection {
+  background: rgba(232, 184, 75, 0.45);
+  color: var(--ink);
+}
+
+.page a:focus-visible,
+.page button:focus-visible,
+.page input:focus-visible,
+.page select:focus-visible {
+  outline: 2px solid var(--focus-color, var(--wine));
+  outline-offset: 2px;
+}
+
+.skipLink {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--wine-dark);
+  font-size: 13.5px;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform 0.15s ease;
+}
+
+.skipLink:focus-visible { transform: none; }
+
+/* ── Panel vino ── */
+.panel {
+  --focus-color: var(--accent);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 36px 0;
+  background: linear-gradient(160deg, var(--wine-hero) 0%, var(--wine-dark) 55%, var(--wine-darker) 100%);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.marca {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 26px;
+  letter-spacing: -0.5px;
+}
+
+.marca404 { font-weight: 700; }
+.marcaBank { font-weight: 500; }
+
+.pasos {
+  margin-top: 48px;
+}
+
+.pasoActual {
+  margin: 0 0 16px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.listaPasos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.paso {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.pasoNumero {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pasoHecho { color: rgba(255, 255, 255, 0.8); }
+.pasoHecho .pasoNumero { background: rgba(255, 255, 255, 0.12); border-color: transparent; }
+
+.pasoActivo { color: #ffffff; font-weight: 800; }
+.pasoActivo .pasoNumero { background: #ffffff; color: var(--wine-dark); border-color: #ffffff; }
+
+.ban {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.globo {
+  margin: 0 0 14px;
+  padding: 12px 16px;
+  border-radius: 18px 18px 18px 4px;
+  background: #ffffff;
+  color: var(--wine-dark);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+  max-width: 260px;
+}
+
+.banImg {
+  display: block;
+  width: 150px;
+  height: auto;
+  margin-left: 12px;
+}
+
+/* ── Tarjeta ── */
+.contenido {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(32px, 6vw, 72px) clamp(20px, 4vw, 48px);
+}
+
+.contenido:focus { outline: none; }
+
+.tarjeta {
+  width: 100%;
+  max-width: 480px;
+  padding: 32px;
+  border-radius: 22px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.tarjetaAncha {
+  max-width: 680px;
+}
+
+.pasoMovil {
+  display: none;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--wine);
+}
+
+.page .titulo {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.subtitulo {
+  margin: 8px 0 24px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted-text);
+}
+
+/* ── Responsive ── */
+@media (max-width: 980px) {
+  /* Filas al contenido: sin esto, la franja vino se estiraba hasta media pantalla. */
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+  }
+
+  /* El panel vino se vuelve una franja: marca y paso; Ban y el recorrido completo quedan para escritorio. */
+  .panel {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+  }
+
+  .pasos,
+  .ban {
+    display: none;
+  }
+
+  .pasoMovil {
+    display: block;
+  }
+
+  .contenido {
+    padding: 24px 16px 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tarjeta {
+    padding: 24px 20px;
+  }
+
+  .page .titulo {
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skipLink { transition: none; }
+}
