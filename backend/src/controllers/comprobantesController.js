@@ -50,10 +50,14 @@ const descargarComprobante = async (req, res) => {
         const transferencia = transferenciaResult.rows[0];
 
         // 3. Resolver nombres (si son cuentas del banco) y generar el PDF
-        const [nombreOrigen, nombreDestino] = await Promise.all([
+        const [origenLocal, destinoLocal] = await Promise.all([
             resolverNombrePorCbu(transferencia.cbu_origen),
             resolverNombrePorCbu(transferencia.cbu_destino),
         ]);
+        // Si la otra cuenta es de otro banco, se usa el nombre guardado al transferir.
+        const externo = transferencia.nombre_contraparte || null;
+        const nombreOrigen = origenLocal || (transferencia.tipo === 'entrante' ? externo : null);
+        const nombreDestino = destinoLocal || (transferencia.tipo !== 'entrante' ? externo : null);
 
         const pdfBuffer = await generarComprobanteTransferencia({
             transaccionId: transferencia.transaccion_central_id,

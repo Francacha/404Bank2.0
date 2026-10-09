@@ -1,6 +1,7 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
 const { obtenerMovimientos } = require('../services/movimientosService');
+const { asegurarColumnaContraparte, nombreDestinatario, completarContrapartes } = require('../services/contrapartesService');
 
 // Función helper local para resolver un Alias o CBU localmente primero
 const resolverCuentaLocal = async (identificador) => {
@@ -120,7 +121,11 @@ const realizarTransferencia = async (req, res) => {
         return res.status(502).json({ error: 'Error al comunicarse con el Banco Central' });
     }
 
-    // 6. Descontar saldo local y registrar la transferencia
+    // 6. Nombre del destinatario, para que el Historial lo muestre aunque sea de otro banco
+    await asegurarColumnaContraparte();
+    const nombreContraparte = await nombreDestinatario(cbuDestino, resultado.nombreDestino).catch(() => null);
+
+    // 7. Descontar saldo local y registrar la transferencia
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
@@ -133,9 +138,9 @@ const realizarTransferencia = async (req, res) => {
 
         // Registrar salida
         await client.query(`
-            INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda)
-            VALUES ($1, $2, $3, $4, 'aprobada', 'saliente', NOW(), $5)
-        `, [resultado.transaccionId || `LOCAL-${Date.now()}`, cbuOrigen, cbuDestino, Number(importe), monedaOp]);
+            INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda, nombre_contraparte)
+            VALUES ($1, $2, $3, $4, 'aprobada', 'saliente', NOW(), $5, $6)
+        `, [resultado.transaccionId || `LOCAL-${Date.now()}`, cbuOrigen, cbuDestino, Number(importe), monedaOp, nombreContraparte]);
 
         // Si es transferencia interna local, acreditar
         if (esTransferenciaInterna) {
@@ -167,7 +172,7 @@ const realizarTransferencia = async (req, res) => {
         moneda: monedaOp,
         cbuOrigen,
         cbuDestino,
-        nombreDestino: resultado.nombreDestino
+        nombreDestino: nombreContraparte || resultado.nombreDestino
     });
 };
 
@@ -190,6 +195,7 @@ const obtenerMisTransferencias = async (req, res) => {
         }
 
         const cbus = cuentaResult.rows.map(row => row.cbu);
+        await asegurarColumnaContraparte();
 
         // fecha_hora se guarda en UTC sin zona horaria: se marca como UTC para que el navegador la muestre en hora argentina.
         const result = await pool.query(`
@@ -201,30 +207,8 @@ const obtenerMisTransferencias = async (req, res) => {
             LIMIT 50
         `, [cbus]);
 
-        // Resuelve el nombre de la contraparte (el otro CBU de cada movimiento) cuando es una
-        // cuenta de 404Bank. Si es una cuenta externa, no hay nombre local y se sigue mostrando el CBU.
-        const cbusContraparte = [...new Set(result.rows.map(t =>
-            t.tipo === 'entrante' ? t.cbu_origen : t.cbu_destino
-        ))];
-
-        const nombresResult = cbusContraparte.length > 0
-            ? await pool.query(`
-                SELECT cb.cbu, p.nombre, p.apellido
-                FROM Cuentas_Bancarias cb
-                JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
-                JOIN Personas p ON tit.id_persona = p.id
-                WHERE cb.cbu = ANY($1)
-            `, [cbusContraparte])
-            : { rows: [] };
-
-        const nombrePorCbu = new Map(
-            nombresResult.rows.map(r => [r.cbu, `${r.nombre} ${r.apellido}`])
-        );
-
-        const transferencias = result.rows.map(t => ({
-            ...t,
-            nombre_contraparte: nombrePorCbu.get(t.tipo === 'entrante' ? t.cbu_origen : t.cbu_destino) || null
-        }));
+        // Nombre de la otra persona: cliente de 404Bank, guardado al transferir o consultado al Banco Central.
+        const transferencias = await completarContrapartes(result.rows);
 
         res.json({ transferencias });
     } catch (error) {
@@ -255,23 +239,12 @@ const obtenerMisMovimientos = async (req, res) => {
         const cbus = await obtenerCbusDelUsuario(clerkId);
         if (cbus.length === 0) return res.json({ movimientos: [], limite: 50 });
 
+        await asegurarColumnaContraparte();
         const movimientos = await obtenerMovimientos(cbus);
 
-        const cbusContraparte = [...new Set(movimientos
-            .filter(m => !m.categoria)
-            .map(m => (m.tipo === 'entrante' ? m.cbu_origen : m.cbu_destino))
-            .filter(Boolean))];
-
-        const nombresResult = cbusContraparte.length > 0
-            ? await pool.query(`
-                SELECT cb.cbu, p.nombre, p.apellido
-                FROM Cuentas_Bancarias cb
-                JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
-                JOIN Personas p ON tit.id_persona = p.id
-                WHERE cb.cbu = ANY($1)
-            `, [cbusContraparte])
-            : { rows: [] };
-        const nombrePorCbu = new Map(nombresResult.rows.map(r => [r.cbu, `${r.nombre} ${r.apellido}`]));
+        // A las transferencias se les completa el nombre de la otra persona (también si es de otro banco).
+        const transferencias = await completarContrapartes(movimientos.filter(m => !m.categoria));
+        const nombrePorId = new Map(transferencias.map(t => [t.id, t.nombre_contraparte]));
 
         res.json({
             limite: 50,
@@ -279,8 +252,7 @@ const obtenerMisMovimientos = async (req, res) => {
                 ...m,
                 categoria: m.categoria || 'transferencia',
                 concepto: m.concepto || null,
-                nombre_contraparte: m.categoria ? null
-                    : nombrePorCbu.get(m.tipo === 'entrante' ? m.cbu_origen : m.cbu_destino) || null
+                nombre_contraparte: m.categoria ? null : nombrePorId.get(m.id) || null
             }))
         });
     } catch (error) {
