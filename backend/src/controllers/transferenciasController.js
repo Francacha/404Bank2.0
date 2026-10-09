@@ -1,5 +1,6 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
+const { obtenerMovimientos } = require('../services/movimientosService');
 
 // Función helper local para resolver un Alias o CBU localmente primero
 const resolverCuentaLocal = async (identificador) => {
@@ -231,6 +232,62 @@ const obtenerMisTransferencias = async (req, res) => {
     }
 };
 
+// CBUs de las cuentas activas del usuario logueado.
+const obtenerCbusDelUsuario = async (clerkId) => {
+    const result = await pool.query(`
+        SELECT cb.cbu
+        FROM Cuentas_Bancarias cb
+        JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+        JOIN Personas p ON tit.id_persona = p.id
+        WHERE p.clerk_id = $1 AND cb.estado = 'Activa'
+    `, [clerkId]);
+    return result.rows.map(row => row.cbu);
+};
+
+// Historial completo: transferencias, dólares, préstamos y frascos en una sola lista (ver movimientosService).
+// Las transferencias suman el nombre de la contraparte cuando es una cuenta de 404Bank.
+const obtenerMisMovimientos = async (req, res) => {
+    const clerkId = req.auth?.userId;
+    if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
+
+    try {
+        const cbus = await obtenerCbusDelUsuario(clerkId);
+        if (cbus.length === 0) return res.json({ movimientos: [], limite: 50 });
+
+        const movimientos = await obtenerMovimientos(cbus);
+
+        const cbusContraparte = [...new Set(movimientos
+            .filter(m => !m.categoria)
+            .map(m => (m.tipo === 'entrante' ? m.cbu_origen : m.cbu_destino))
+            .filter(Boolean))];
+
+        const nombresResult = cbusContraparte.length > 0
+            ? await pool.query(`
+                SELECT cb.cbu, p.nombre, p.apellido
+                FROM Cuentas_Bancarias cb
+                JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+                JOIN Personas p ON tit.id_persona = p.id
+                WHERE cb.cbu = ANY($1)
+            `, [cbusContraparte])
+            : { rows: [] };
+        const nombrePorCbu = new Map(nombresResult.rows.map(r => [r.cbu, `${r.nombre} ${r.apellido}`]));
+
+        res.json({
+            limite: 50,
+            movimientos: movimientos.map(m => ({
+                ...m,
+                categoria: m.categoria || 'transferencia',
+                concepto: m.concepto || null,
+                nombre_contraparte: m.categoria ? null
+                    : nombrePorCbu.get(m.tipo === 'entrante' ? m.cbu_origen : m.cbu_destino) || null
+            }))
+        });
+    } catch (error) {
+        console.error('Error obteniendo movimientos:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
+};
+
 const buscarDestinatario = async (req, res) => {
     const clerkId = req.auth?.userId;
     if (!clerkId) return res.status(401).json({ error: 'No autenticado' });
@@ -266,4 +323,4 @@ const buscarDestinatario = async (req, res) => {
     }
 };
 
-module.exports = { realizarTransferencia, obtenerMisTransferencias, buscarDestinatario };
+module.exports = { realizarTransferencia, obtenerMisTransferencias, obtenerMisMovimientos, buscarDestinatario };

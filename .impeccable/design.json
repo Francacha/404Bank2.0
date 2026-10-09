@@ -262,7 +262,7 @@
       "refersTo": "card",
       "description": "Tarjeta blanca sobre papel con título y link vino.",
       "html": "<div class=\"ds-paper\"><div class=\"ds-card\"><div class=\"ds-card-h\"><span class=\"ds-card-t\">Últimos movimientos</span><a class=\"ds-card-l\">Ver todo</a></div><div class=\"ds-row\"><span>Transferencia recibida</span><b class=\"ds-in\">+$ 25.000</b></div><div class=\"ds-row\"><span>Cuota préstamo</span><b class=\"ds-out\">−$ 8.430</b></div></div></div>",
-      "css": ".ds-paper{background:#f4f2ee;padding:24px}.ds-card{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#fff;border-radius:22px;padding:24px;box-shadow:0 2px 14px rgba(26,21,18,.05);display:flex;flex-direction:column;gap:14px;color:#1a1512}.ds-card-h{display:flex;justify-content:space-between}.ds-card-t{font-size:14px;font-weight:800}.ds-card-l{font-size:12.5px;font-weight:700;color:#7a1128;cursor:pointer}.ds-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}.ds-row b{font-family:'Space Grotesk',sans-serif}.ds-in{color:#1e8e5a}.ds-out{color:#a3312c}"
+      "css": ".ds-paper{background:#f4f2ee;padding:24px}.ds-card{font-family:'Manrope','Segoe UI',Arial,sans-serif;background:#fff;border-radius:22px;padding:24px;box-shadow:0 2px 14px rgba(26,21,18,.05);display:flex;flex-direction:column;gap:14px;color:#1a1512}.ds-card-h{display:flex;justify-content:space-between}.ds-card-t{font-size:14px;font-weight:800}.ds-card-l{font-size:12.5px;font-weight:700;color:#7a1128;cursor:pointer}.ds-row{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600}.ds-row b{font-family:'Space Grotesk',sans-serif}.ds-in{color:#187a4c}.ds-out{color:#a3312c}"
     },
     {
       "name": "Balance Hero",

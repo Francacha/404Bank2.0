@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-10-09T03:27:21.833Z",
+        "reason": "DESIGN.md: Space Grotesk es la fuente de cifras y montos del sistema (El Libro Mayor Cálido); ya ignorada en frontend/clerk-react/.impeccable/config.json"
+      }
+    ]
+  }
+}

@@ -16,7 +16,7 @@ colors:
   accent: "#e8b84b"
   accent-hover: "#f0c862"
   wine-hero: "#4a0817"
-  green: "#1e8e5a"
+  green: "#187a4c"
   red: "#a3312c"
 typography:
   display:
@@ -142,7 +142,7 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 - **Oro Sello** (#e8b84b): botón primario sobre vino, avatar del usuario en la sidebar. Nunca como fondo de superficies grandes.
 
 ### Tertiary
-- **Verde Acreditado** (#1e8e5a): ingresos, éxito, estados activos.
+- **Verde Acreditado** (#187a4c): ingresos, éxito, estados activos. Oscurecido desde #1e8e5a para llegar a 5.3:1 sobre blanco (AA en texto chico).
 - **Rojo Débito** (#a3312c): egresos, mora, errores, cuentas bloqueadas.
 
 ### Neutral
