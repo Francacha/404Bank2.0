@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { pool } = require('../config/db');
+const { asegurarColumnasRechazo, armarMotivo, esSolicitudPropia, MENSAJE_PROPIA, idValido } = require('../services/solicitudesService');
 
 // Número de 16 dígitos con prefijo de red (4 = Visa para débito, 5 = Mastercard para crédito)
 // y dígito verificador de Luhn, como una tarjeta real.
@@ -22,7 +23,12 @@ const generarCVV = () => String(crypto.randomInt(1000)).padStart(3, '0');
 
 // Lo que el cliente ve de sus tarjetas en listados: nunca el número completo ni el CVV.
 const COLUMNAS_CLIENTE = `t.id, t.tipo, t.estado, t.fecha_solicitud, t.fecha_resolucion, t.fecha_vencimiento,
-       RIGHT(t.numero, 4) AS ultimos4`;
+       RIGHT(t.numero, 4) AS ultimos4, t.motivo_rechazo`;
+
+// Lo que ve el personal de una solicitud: sin número ni CVV, con quién la pre-aprobó.
+const COLUMNAS_PERSONAL = `t.id, t.id_cuenta, t.tipo, t.estado, t.fecha_solicitud,
+       p.nombre, p.apellido, p.dni, cb.cbu, cb.saldo AS saldo_cuenta,
+       CASE WHEN pe.id IS NULL THEN NULL ELSE pe.nombre || ' ' || pe.apellido END AS pre_aprobado_por`;
 
 const generarVencimiento = () => {
   const fecha = new Date();
@@ -89,6 +95,7 @@ const getMisTarjetas = async (req, res) => {
   const clerkId = req.auth.userId;
 
   try {
+    await asegurarColumnasRechazo();
     const result = await pool.query(
       `SELECT ${COLUMNAS_CLIENTE} FROM tarjetas t
        JOIN cuentas_bancarias cb ON t.id_cuenta = cb.id_cuenta
@@ -135,11 +142,12 @@ const getDatosTarjeta = async (req, res) => {
 const getPendientes = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT t.*, p.nombre, p.apellido, p.dni, cb.cbu
+      `SELECT ${COLUMNAS_PERSONAL}
        FROM tarjetas t
        JOIN cuentas_bancarias cb ON t.id_cuenta = cb.id_cuenta
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
+       LEFT JOIN personas pe ON pe.clerk_id = t.clerk_id_empleado
        WHERE t.estado = 'pendiente'
        ORDER BY t.fecha_solicitud ASC`
     );
@@ -154,11 +162,15 @@ const getPendientes = async (req, res) => {
 const preAprobar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
 
   try {
+    if (await esSolicitudPropia(pool, 'tarjetas', id, clerkId)) {
+      return res.status(403).json({ error: MENSAJE_PROPIA });
+    }
     const result = await pool.query(
       `UPDATE tarjetas SET estado = 'pre_aprobada', clerk_id_empleado = $1
-       WHERE id = $2 AND estado = 'pendiente' RETURNING *`,
+       WHERE id = $2 AND estado = 'pendiente' RETURNING id, tipo, estado`,
       [clerkId, id]
     );
 
@@ -173,19 +185,28 @@ const preAprobar = async (req, res) => {
   }
 };
 
-// EMPLEADO / GERENTE: rechazar una tarjeta
+// EMPLEADO / GERENTE: rechazar una tarjeta, con un motivo que ve el cliente.
 const rechazar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
+
+  const motivo = armarMotivo(req.body);
+  if (!motivo) return res.status(400).json({ error: 'Elegí un motivo de rechazo (si es "otro", contá cuál).' });
 
   try {
+    if (await esSolicitudPropia(pool, 'tarjetas', id, clerkId)) {
+      return res.status(403).json({ error: MENSAJE_PROPIA });
+    }
+    await asegurarColumnasRechazo();
+    const esGerente = req.userRole === 'gerente' || req.userRole === 'admin';
     const result = await pool.query(
       `UPDATE tarjetas
-       SET estado = 'rechazada', fecha_resolucion = NOW(),
-           clerk_id_empleado = COALESCE(clerk_id_empleado, $1),
-           clerk_id_gerente = $1
-       WHERE id = $2 AND estado IN ('pendiente','pre_aprobada') RETURNING *`,
-      [clerkId, id]
+       SET estado = 'rechazada', fecha_resolucion = NOW(), motivo_rechazo = $3,
+           clerk_id_empleado = CASE WHEN $4::boolean THEN clerk_id_empleado ELSE $1 END,
+           clerk_id_gerente = CASE WHEN $4::boolean THEN $1 ELSE clerk_id_gerente END
+       WHERE id = $2 AND estado IN ('pendiente','pre_aprobada') RETURNING id, tipo, estado`,
+      [clerkId, id, motivo, esGerente]
     );
 
     if (result.rows.length === 0) {
@@ -203,11 +224,12 @@ const rechazar = async (req, res) => {
 const getPreAprobadas = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT t.*, p.nombre, p.apellido, p.dni, cb.cbu
+      `SELECT ${COLUMNAS_PERSONAL}
        FROM tarjetas t
        JOIN cuentas_bancarias cb ON t.id_cuenta = cb.id_cuenta
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
+       LEFT JOIN personas pe ON pe.clerk_id = t.clerk_id_empleado
        WHERE t.estado = 'pre_aprobada'
        ORDER BY t.fecha_solicitud ASC`
     );
@@ -222,8 +244,12 @@ const getPreAprobadas = async (req, res) => {
 const aprobar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
 
   try {
+    if (await esSolicitudPropia(pool, 'tarjetas', id, clerkId)) {
+      return res.status(403).json({ error: MENSAJE_PROPIA });
+    }
     const tarjetaResult = await pool.query(
       `SELECT * FROM tarjetas WHERE id = $1 AND estado = 'pre_aprobada'`,
       [id]

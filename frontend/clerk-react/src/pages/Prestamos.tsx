@@ -30,6 +30,7 @@ interface Prestamo {
   cant_cuotas: number | null;
   tna: number;
   monto_total: number | null;
+  motivo_rechazo?: string | null;
   cuotas: Cuota[];
 }
 
@@ -479,6 +480,9 @@ function Prestamos() {
                             <span className={styles.prestamoFecha}>
                               Resuelto: {new Date(p.fecha_resolucion).toLocaleDateString('es-AR')}
                             </span>
+                          )}
+                          {p.estado === 'rechazado' && p.motivo_rechazo && (
+                            <span className={styles.prestamoMotivo}>Motivo: {p.motivo_rechazo}</span>
                           )}
                         </div>
                         <div className={styles.prestamoHeaderRight}>

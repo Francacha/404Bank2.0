@@ -18,6 +18,7 @@ interface Tarjeta {
   estado: EstadoTarjeta;
   fecha_solicitud: string;
   fecha_resolucion: string | null;
+  motivo_rechazo?: string | null;
 }
 
 interface DatosVisibles {
@@ -334,6 +335,7 @@ function Tarjetas() {
                         {t.fecha_resolucion && ` · resuelta el ${fechaCorta(t.fecha_resolucion)}`}.
                         {!bloqueo(t.tipo) && ' Podés volver a pedirla abajo.'}
                       </p>
+                      {t.motivo_rechazo && <p className={styles.motivo}>Motivo: {t.motivo_rechazo}</p>}
                     </li>
                   ))}
                 </ul>

@@ -1,8 +1,10 @@
-:root {
+.page {
   --ink: #1a1512;
   --muted: #8a8078;
+  --muted-text: #6f665e;
   --paper: #f4f2ee;
   --line: rgba(26, 21, 18, 0.08);
+  --line-strong: rgba(26, 21, 18, 0.16);
   --card: #ffffff;
   --shadow: 0 2px 14px rgba(26, 21, 18, 0.05);
   --wine: #7a1128;
@@ -10,12 +12,18 @@
   --wine-darker: #150208;
   --accent: #e8b84b;
   --green: #187a4c;
-  --red: #991b1b;
+  --green-tint: rgba(24, 122, 76, 0.12);
+  --red: #a3312c;
+  --red-tint: rgba(163, 49, 44, 0.08);
+  --focus-ring: 0 0 0 3px rgba(126, 8, 39, 0.14);
 }
 
-* {
+/* Antes estos tokens vivían en :root y pisaban los de toda la app; ahora quedan dentro del panel. */
+.page,
+.page * {
   box-sizing: border-box;
 }
+
 
 .page {
   min-height: 100vh;
@@ -88,7 +96,7 @@
 /* ── Contenido ── */
 .content { max-width: 860px; margin: 0 auto; padding: 36px 24px 60px; }
 .title { font-size: 24px; font-weight: 800; color: var(--ink); margin: 0 0 6px; }
-.subtitle { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+.subtitle { color: var(--muted-text); font-size: 14px; margin: 0 0 28px; }
 
 /* ── Formulario ── */
 .formCard {
@@ -144,8 +152,8 @@
 
 /* ── Lista ── */
 .listTitle { font-size: 15px; font-weight: 800; color: var(--ink); margin: 0 0 12px; }
-.loadingText { color: var(--muted); font-size: 14px; }
-.emptyText { color: var(--muted); font-style: italic; font-size: 14px; }
+.loadingText { color: var(--muted-text); font-size: 14px; }
+.emptyText { color: var(--muted-text); font-style: italic; font-size: 14px; }
 .errorBox {
   background: rgba(153, 27, 27, 0.08);
   color: var(--red);
@@ -169,7 +177,7 @@
   background: transparent;
   border: none;
   border-radius: 999px;
-  color: var(--muted);
+  color: var(--muted-text);
   font-size: 13.5px;
   font-weight: 700;
   font-family: inherit;
@@ -186,7 +194,7 @@
   text-align: left;
   padding: 12px 16px;
   background: var(--paper);
-  color: var(--muted);
+  color: var(--muted-text);
   font-weight: 700;
   font-size: 11.5px;
   text-transform: uppercase;
@@ -265,7 +273,7 @@
 .btnVerTodos:hover:not(:disabled) { background: var(--line); }
 .btnVerTodos:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.searchNote { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+.searchNote { color: var(--muted-text); font-size: 12.5px; margin: 0 0 12px; }
 .resultadosSection { margin-bottom: 20px; }
 
 /* ── Tabla resultados clientes ── */
@@ -282,7 +290,7 @@
   text-align: left;
   padding: 12px 16px;
   background: var(--paper);
-  color: var(--muted);
+  color: var(--muted-text);
   font-weight: 700;
   font-size: 11.5px;
   text-transform: uppercase;
@@ -306,9 +314,9 @@
   box-shadow: var(--shadow);
 }
 .clienteNombre { font-size: 17px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
-.clienteDetalle { color: var(--muted); font-size: 13px; margin: 0 0 4px; }
+.clienteDetalle { color: var(--muted-text); font-size: 13px; margin: 0 0 4px; }
 .cuentaRow { display: flex; gap: 32px; margin: 16px 0; flex-wrap: wrap; }
-.cuentaLabel { font-size: 11px; color: var(--muted); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+.cuentaLabel { font-size: 11px; color: var(--muted-text); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.4px; }
 .cuentaCbu { font-family: monospace; font-size: 13px; color: var(--ink); margin: 0; }
 .cuentaSaldo { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin: 0; }
 .estadoActiva,
@@ -356,8 +364,8 @@
 .importe { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
 .importeEntrante { color: var(--green); }
 .importeSaliente { color: var(--ink); }
-.fecha { font-size: 12px; color: var(--muted); }
-.cbuInfo { font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.fecha { font-size: 12px; color: var(--muted-text); }
+.cbuInfo { font-size: 12px; color: var(--muted-text); margin: 0 0 6px; }
 .badgeAprobada,
 .badgeRechazada {
   padding: 2px 9px;
@@ -380,7 +388,7 @@
 
 .situacionDesconocida {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-text);
   font-style: italic;
 }
 
@@ -389,3 +397,61 @@
 .situacion3 { background-color: rgba(200, 100, 0, 0.14); color: #9a4c00; }
 .situacion4 { background-color: rgba(153, 27, 27, 0.12); color: var(--red); }
 .situacion5 { background-color: rgba(20, 20, 20, 0.12); color: #1a1a1a; }
+
+/* Contador de pendientes en la pestaña Solicitudes */
+.tabContador {
+  margin-left: 8px;
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--wine);
+  color: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.confirmarFila {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.btnCancelar {
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Celular: la barra superior se acomoda y las pestañas se pueden deslizar. */
+@media (max-width: 640px) {
+  .navbar { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
+  .navRight { gap: 8px; flex-wrap: wrap; }
+  .navRight > span { display: none; }
+}
+
+@media (max-width: 640px) {
+  .tabsBar { overflow-x: auto; padding-left: 16px; padding-right: 16px; }
+  .content { padding-left: 16px; padding-right: 16px; }
+}

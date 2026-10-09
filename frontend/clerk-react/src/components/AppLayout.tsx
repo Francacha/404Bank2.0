@@ -94,8 +94,8 @@ function AppLayout({ title, subtitle, variant = 'default', children }: AppLayout
   const [masAbierto, setMasAbierto] = useState(false);
 
   const role = user?.publicMetadata?.role as string | undefined;
-  const esLaboral = role === 'empleado' || role === 'gerente';
-  const panelUrl = role === 'gerente' ? '/gerente' : '/empleado';
+  const esLaboral = role === 'empleado' || role === 'gerente' || role === 'admin';
+  const panelUrl = role === 'admin' ? '/admin' : role === 'gerente' ? '/gerente' : '/empleado';
   const initials = `${user?.firstName?.charAt(0) ?? ''}${user?.lastName?.charAt(0) ?? ''}`;
   const displayName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim() || 'Usuario';
 

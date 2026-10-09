@@ -587,3 +587,11 @@
     flex: 1 1 100%;
   }
 }
+
+/* Motivo de rechazo que dejó el banco: el cliente sabe por qué y qué puede hacer. */
+.prestamoMotivo {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--red);
+}

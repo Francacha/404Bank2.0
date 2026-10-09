@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Empleado.module.css';
+import BandejaSolicitudes, { type ResumenBandeja } from '../components/BandejaSolicitudes';
 
 const API_URL = 'http://localhost:3000';
 
-type Tab = 'clientes' | 'solicitudes';
+type Tab = 'solicitudes' | 'clientes';
 
 interface Cliente {
   id: number;
@@ -36,50 +37,15 @@ interface Movimiento {
   fecha_hora: string;
 }
 
-interface SituacionCrediticia {
-  dni: string;
-  situacion: number;
-  deudas: unknown[];
-}
-
-interface SolicitudPrestamo {
-  id: number;
-  monto: number;
-  estado: string;
-  fecha_solicitud: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  cbu: string;
-  situacion_crediticia: SituacionCrediticia | null;
-}
-
-const SITUACION_INFO: Record<number, { etiqueta: string; icono: string }> = {
-  1: { etiqueta: 'Normal', icono: '🟢' },
-  2: { etiqueta: 'Riesgo bajo', icono: '🟡' },
-  3: { etiqueta: 'Riesgo medio', icono: '🟠' },
-  4: { etiqueta: 'Riesgo alto', icono: '🔴' },
-  5: { etiqueta: 'Irrecuperable', icono: '⚫' },
-};
-
-interface SolicitudTarjeta {
-  id: number;
-  tipo: string;
-  estado: string;
-  fecha_solicitud: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  cbu: string;
-}
-
 function Empleado() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
 
-  const [tab, setTab] = useState<Tab>('clientes');
+  const [tab, setTab] = useState<Tab>('solicitudes');
+  const [pendientes, setPendientes] = useState<number | null>(null);
+  const actualizarResumen = useCallback((r: ResumenBandeja) => setPendientes(r.total), []);
 
   // --- Clientes ---
   const [busqueda, setBusqueda] = useState('');
@@ -95,81 +61,10 @@ function Empleado() {
   const [errorMovimientos, setErrorMovimientos] = useState('');
   const [errorAccion, setErrorAccion] = useState('');
 
-  // --- Solicitudes ---
-  const [prestamos, setPrestamos] = useState<SolicitudPrestamo[]>([]);
-  const [tarjetas, setTarjetas] = useState<SolicitudTarjeta[]>([]);
-  const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
-  const [mensajeSolicitud, setMensajeSolicitud] = useState('');
-
   const authHeader = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [getToken]);
-
-  const cargarSolicitudes = useCallback(async () => {
-    setLoadingSolicitudes(true);
-    try {
-      const headers = await authHeader();
-      const [resPrestamos, resTarjetas] = await Promise.all([
-        fetch(`${API_URL}/api/prestamos/pendientes`, { headers }),
-        fetch(`${API_URL}/api/tarjetas/pendientes`, { headers }),
-      ]);
-      const dataPrestamos = await resPrestamos.json();
-      const dataTarjetas = await resTarjetas.json();
-      setPrestamos(dataPrestamos.prestamos || []);
-      setTarjetas(dataTarjetas.tarjetas || []);
-    } catch {
-      // silencioso
-    } finally {
-      setLoadingSolicitudes(false);
-    }
-  }, [authHeader]);
-
-  useEffect(() => {
-    if (tab === 'solicitudes') cargarSolicitudes();
-  }, [tab, cargarSolicitudes]);
-
-  const situacionClass = (situacion: number) => {
-    if (situacion <= 1) return styles.situacion1;
-    if (situacion === 2) return styles.situacion2;
-    if (situacion === 3) return styles.situacion3;
-    if (situacion === 4) return styles.situacion4;
-    return styles.situacion5;
-  };
-
-  const accionPrestamo = async (id: number, accion: 'pre-aprobar' | 'rechazar') => {
-    setMensajeSolicitud('');
-    try {
-      const headers = await authHeader();
-      const res = await fetch(`${API_URL}/api/prestamos/${id}/${accion}`, {
-        method: 'PUT',
-        headers,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setMensajeSolicitud(accion === 'pre-aprobar' ? 'Préstamo pre-aprobado.' : 'Préstamo rechazado.');
-      cargarSolicitudes();
-    } catch (err: unknown) {
-      if (err instanceof Error) setMensajeSolicitud(err.message);
-    }
-  };
-
-  const accionTarjeta = async (id: number, accion: 'pre-aprobar' | 'rechazar') => {
-    setMensajeSolicitud('');
-    try {
-      const headers = await authHeader();
-      const res = await fetch(`${API_URL}/api/tarjetas/${id}/${accion}`, {
-        method: 'PUT',
-        headers,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setMensajeSolicitud(accion === 'pre-aprobar' ? 'Tarjeta pre-aprobada.' : 'Tarjeta rechazada.');
-      cargarSolicitudes();
-    } catch (err: unknown) {
-      if (err instanceof Error) setMensajeSolicitud(err.message);
-    }
-  };
 
   const buscar = async (q?: string) => {
     const termino = q !== undefined ? q : busqueda;
@@ -254,7 +149,7 @@ function Empleado() {
           <span className={styles.empleadoBadge}>Empleado</span>
         </div>
         <div className={styles.navRight}>
-          <span style={{ color: '#cbd5e1', fontSize: '14px' }}>
+          <span style={{ color: 'rgba(255, 255, 255, 0.82)', fontSize: '14px' }}>
             {user?.firstName} {user?.lastName}
           </span>
           <button className={styles.btnMiCuenta} onClick={() => { setViewMode('client'); navigate('/home'); }}>
@@ -266,27 +161,35 @@ function Empleado() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className={styles.tabsBar}>
-        <button
-          className={`${styles.tabBtn} ${tab === 'clientes' ? styles.tabBtnActive : ''}`}
-          onClick={() => setTab('clientes')}
-        >
-          Clientes
-        </button>
-        <button
-          className={`${styles.tabBtn} ${tab === 'solicitudes' ? styles.tabBtnActive : ''}`}
-          onClick={() => setTab('solicitudes')}
-        >
-          Solicitudes
-        </button>
+      {/* Tabs: lo que espera tu acción va primero */}
+      <div className={styles.tabsBar} role="tablist" aria-label="Secciones del panel">
+        {([
+          { id: 'solicitudes', etiqueta: 'Solicitudes' },
+          { id: 'clientes', etiqueta: 'Clientes' },
+        ] as const).map(t => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            id={`tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls={`panel-${t.id}`}
+            className={`${styles.tabBtn} ${tab === t.id ? styles.tabBtnActive : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.etiqueta}
+            {t.id === 'solicitudes' && pendientes !== null && pendientes > 0 && (
+              <span className={styles.tabContador}>{pendientes}<span className={styles.srOnly}> pendientes</span></span>
+            )}
+          </button>
+        ))}
       </div>
 
       <div className={styles.content}>
 
         {/* Tab: Clientes */}
         {tab === 'clientes' && (
-          <>
+          <div id="panel-clientes" role="tabpanel" aria-labelledby="tab-clientes">
             <h1 className={styles.title}>Panel de empleado</h1>
             <p className={styles.subtitle}>Buscá un cliente por nombre, apellido, DNI o CBU.</p>
 
@@ -415,99 +318,15 @@ function Empleado() {
                 )}
               </>
             )}
-          </>
+          </div>
         )}
 
-        {/* Tab: Solicitudes */}
-        {tab === 'solicitudes' && (
-          <>
-            <h1 className={styles.title}>Solicitudes pendientes</h1>
-            <p className={styles.subtitle}>Revisá y pre-aprobá las solicitudes de clientes.</p>
-
-            {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
-            {loadingSolicitudes && <p className={styles.loadingText}>Cargando...</p>}
-
-            {/* Préstamos */}
-            <h2 className={styles.listTitle}>Préstamos</h2>
-            {!loadingSolicitudes && prestamos.length === 0 && (
-              <p className={styles.emptyText}>No hay solicitudes de préstamos pendientes.</p>
-            )}
-            {prestamos.length > 0 && (
-              <div className={styles.tableWrapper}>
-                <table className={styles.tableResultados}>
-                  <thead>
-                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Situación BCRA</th><th>Acciones</th></tr>
-                  </thead>
-                  <tbody>
-                    {prestamos.map(p => (
-                      <tr key={p.id}>
-                        <td>{p.apellido}, {p.nombre}</td>
-                        <td>{p.dni}</td>
-                        <td>$ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                        <td>{new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}</td>
-                        <td>
-                          {p.situacion_crediticia ? (
-                            <span className={`${styles.situacionChip} ${situacionClass(p.situacion_crediticia.situacion)}`}>
-                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.icono ?? '⚪'}{' '}
-                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.etiqueta ?? 'Desconocida'}
-                            </span>
-                          ) : (
-                            <span className={styles.situacionDesconocida}>Sin datos</span>
-                          )}
-                        </td>
-                        <td>
-                          <div className={styles.accionesRow}>
-                            <button className={styles.btnActivar} onClick={() => accionPrestamo(p.id, 'pre-aprobar')}>
-                              Pre-aprobar
-                            </button>
-                            <button className={styles.btnBloquear} onClick={() => accionPrestamo(p.id, 'rechazar')}>
-                              Rechazar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Tarjetas */}
-            <h2 className={styles.listTitle} style={{ marginTop: '32px' }}>Tarjetas</h2>
-            {!loadingSolicitudes && tarjetas.length === 0 && (
-              <p className={styles.emptyText}>No hay solicitudes de tarjetas pendientes.</p>
-            )}
-            {tarjetas.length > 0 && (
-              <div className={styles.tableWrapper}>
-                <table className={styles.tableResultados}>
-                  <thead>
-                    <tr><th>Cliente</th><th>DNI</th><th>Tipo</th><th>Fecha</th><th>Acciones</th></tr>
-                  </thead>
-                  <tbody>
-                    {tarjetas.map(t => (
-                      <tr key={t.id}>
-                        <td>{t.apellido}, {t.nombre}</td>
-                        <td>{t.dni}</td>
-                        <td style={{ textTransform: 'capitalize' }}>{t.tipo}</td>
-                        <td>{new Date(t.fecha_solicitud).toLocaleDateString('es-AR')}</td>
-                        <td>
-                          <div className={styles.accionesRow}>
-                            <button className={styles.btnActivar} onClick={() => accionTarjeta(t.id, 'pre-aprobar')}>
-                              Pre-aprobar
-                            </button>
-                            <button className={styles.btnBloquear} onClick={() => accionTarjeta(t.id, 'rechazar')}>
-                              Rechazar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
+        {/* Tab: Solicitudes (siempre montada para que el contador esté al día) */}
+        <div id="panel-solicitudes" role="tabpanel" aria-labelledby="tab-solicitudes" hidden={tab !== 'solicitudes'}>
+          <h1 className={styles.title}>Solicitudes para revisar</h1>
+          <p className={styles.subtitle}>Pre-aprobá o rechazá lo que pidieron los clientes. Después lo resuelve un gerente.</p>
+          <BandejaSolicitudes rol="empleado" onResumen={actualizarResumen} />
+        </div>
       </div>
     </div>
   );

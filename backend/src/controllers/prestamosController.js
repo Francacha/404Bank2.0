@@ -1,6 +1,7 @@
 const { pool } = require('../config/db');
 const { obtenerSituacionCrediticia } = require('../services/centralBankService');
 const { obtenerMoraCliente, obtenerMoraTitularesCuenta, MENSAJE_MORA } = require('../services/moraService');
+const { asegurarColumnasRechazo, armarMotivo, esSolicitudPropia, MENSAJE_PROPIA, idValido } = require('../services/solicitudesService');
 const {
   TNA, RECARGO_PUNITORIO, IVA_INTERESES, CUOTAS_INTERVALO, CUOTAS_PERMITIDAS, MONTO_MAXIMO, calcularPlanFrances
 } = require('../config/prestamos');
@@ -165,19 +166,31 @@ const getMiSituacionCrediticia = async (req, res) => {
   }
 };
 
-// EMPLEADO: ver solicitudes pendientes
-const getPendientes = async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT pr.*, p.nombre, p.apellido, p.dni, cb.cbu
+// Lo que el personal necesita para decidir: la cuota y el total estimados, el saldo de la cuenta,
+// si el cliente está en mora y quién lo pre-aprobó.
+const agregarContextoDecision = async (prestamos) => Promise.all(prestamos.map(async (pr) => {
+  const plan = calcularPlanFrances(pr.monto, Math.max(1, Number(pr.cant_cuotas) || 1), pr.tna);
+  const mora = await obtenerMoraTitularesCuenta(pool, pr.id_cuenta).catch(() => null);
+  return { ...pr, cuota_estimada: plan.monto_cuota, total_estimado: plan.monto_total, mora };
+}));
+
+const SELECT_SOLICITUDES = `SELECT pr.*, p.nombre, p.apellido, p.dni, cb.cbu, cb.saldo AS saldo_cuenta,
+         CASE WHEN pe.id IS NULL THEN NULL ELSE pe.nombre || ' ' || pe.apellido END AS pre_aprobado_por
        FROM prestamos pr
        JOIN cuentas_bancarias cb ON pr.id_cuenta = cb.id_cuenta
        JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
        JOIN personas p ON tc.id_persona = p.id
+       LEFT JOIN personas pe ON pe.clerk_id = pr.clerk_id_empleado`;
+
+// EMPLEADO: ver solicitudes pendientes
+const getPendientes = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `${SELECT_SOLICITUDES}
        WHERE pr.estado = 'pendiente'
        ORDER BY pr.fecha_solicitud ASC`
     );
-    res.json({ prestamos: await agregarSituacionCrediticia(result.rows) });
+    res.json({ prestamos: await agregarContextoDecision(await agregarSituacionCrediticia(result.rows)) });
   } catch (error) {
     console.error('Error obteniendo pendientes:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -188,8 +201,12 @@ const getPendientes = async (req, res) => {
 const preAprobar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
 
   try {
+    if (await esSolicitudPropia(pool, 'prestamos', id, clerkId)) {
+      return res.status(403).json({ error: MENSAJE_PROPIA });
+    }
     const result = await pool.query(
       `UPDATE prestamos SET estado = 'pre_aprobado', clerk_id_empleado = $1
        WHERE id = $2 AND estado = 'pendiente' RETURNING *`,
@@ -207,19 +224,29 @@ const preAprobar = async (req, res) => {
   }
 };
 
-// EMPLEADO / GERENTE: rechazar un préstamo
+// EMPLEADO / GERENTE: rechazar un préstamo, con un motivo que ve el cliente.
+// Queda registrado quién lo rechazó según su rol.
 const rechazar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
+
+  const motivo = armarMotivo(req.body);
+  if (!motivo) return res.status(400).json({ error: 'Elegí un motivo de rechazo (si es "otro", contá cuál).' });
 
   try {
+    if (await esSolicitudPropia(pool, 'prestamos', id, clerkId)) {
+      return res.status(403).json({ error: MENSAJE_PROPIA });
+    }
+    await asegurarColumnasRechazo();
+    const esGerente = req.userRole === 'gerente' || req.userRole === 'admin';
     const result = await pool.query(
       `UPDATE prestamos
-       SET estado = 'rechazado', fecha_resolucion = NOW(),
-           clerk_id_empleado = COALESCE(clerk_id_empleado, $1),
-           clerk_id_gerente = $1
+       SET estado = 'rechazado', fecha_resolucion = NOW(), motivo_rechazo = $3,
+           clerk_id_empleado = CASE WHEN $4::boolean THEN clerk_id_empleado ELSE $1 END,
+           clerk_id_gerente = CASE WHEN $4::boolean THEN $1 ELSE clerk_id_gerente END
        WHERE id = $2 AND estado IN ('pendiente','pre_aprobado') RETURNING *`,
-      [clerkId, id]
+      [clerkId, id, motivo, esGerente]
     );
 
     if (result.rows.length === 0) {
@@ -237,15 +264,11 @@ const rechazar = async (req, res) => {
 const getPreAprobados = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT pr.*, p.nombre, p.apellido, p.dni, cb.cbu
-       FROM prestamos pr
-       JOIN cuentas_bancarias cb ON pr.id_cuenta = cb.id_cuenta
-       JOIN titulares_cuenta tc ON cb.id_cuenta = tc.id_cuenta
-       JOIN personas p ON tc.id_persona = p.id
+      `${SELECT_SOLICITUDES}
        WHERE pr.estado = 'pre_aprobado'
        ORDER BY pr.fecha_solicitud ASC`
     );
-    res.json({ prestamos: await agregarSituacionCrediticia(result.rows) });
+    res.json({ prestamos: await agregarContextoDecision(await agregarSituacionCrediticia(result.rows)) });
   } catch (error) {
     console.error('Error obteniendo pre-aprobados:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -256,6 +279,10 @@ const getPreAprobados = async (req, res) => {
 const aprobar = async (req, res) => {
   const { id } = req.params;
   const clerkId = req.auth.userId;
+  if (!idValido(id)) return res.status(400).json({ error: 'Solicitud no válida' });
+  if (await esSolicitudPropia(pool, 'prestamos', id, clerkId).catch(() => false)) {
+    return res.status(403).json({ error: MENSAJE_PROPIA });
+  }
 
   const client = await pool.connect();
   try {

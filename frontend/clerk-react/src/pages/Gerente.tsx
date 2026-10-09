@@ -3,10 +3,11 @@ import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Gerente.module.css';
+import BandejaSolicitudes, { type ResumenBandeja } from '../components/BandejaSolicitudes';
 
 const API_URL = 'http://localhost:3000';
 
-type Tab = 'empleados' | 'clientes' | 'solicitudes';
+type Tab = 'solicitudes' | 'clientes' | 'empleados';
 
 interface Empleado {
   clerkId: string;
@@ -40,56 +41,25 @@ interface Movimiento {
   fecha_hora: string;
 }
 
-interface SituacionCrediticia {
-  dni: string;
-  situacion: number;
-  deudas: unknown[];
-}
-
-interface SolicitudPrestamo {
-  id: number;
-  monto: number;
-  estado: string;
-  fecha_solicitud: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  cbu: string;
-  situacion_crediticia: SituacionCrediticia | null;
-}
-
-const SITUACION_INFO: Record<number, { etiqueta: string; icono: string }> = {
-  1: { etiqueta: 'Normal', icono: '🟢' },
-  2: { etiqueta: 'Riesgo bajo', icono: '🟡' },
-  3: { etiqueta: 'Riesgo medio', icono: '🟠' },
-  4: { etiqueta: 'Riesgo alto', icono: '🔴' },
-  5: { etiqueta: 'Irrecuperable', icono: '⚫' },
-};
-
-interface SolicitudTarjeta {
-  id: number;
-  tipo: string;
-  estado: string;
-  fecha_solicitud: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  cbu: string;
-}
-
 function Gerente() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
   const { setViewMode } = useViewMode();
 
-  const [tab, setTab] = useState<Tab>('empleados');
+  const [tab, setTab] = useState<Tab>('solicitudes');
+  const [pendientes, setPendientes] = useState<number | null>(null);
+  const actualizarResumen = useCallback((r: ResumenBandeja) => setPendientes(r.total), []);
 
   // --- Empleados ---
   const [empleados, setEmpleados] = useState<Empleado[]>([]);
   const [loadingEmpleados, setLoadingEmpleados] = useState(true);
   const [errorEmpleados, setErrorEmpleados] = useState('');
-  const [mensajeRevocar, setMensajeRevocar] = useState('');
+  const [avisoEmpleados, setAvisoEmpleados] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
+  const [confirmarRevocar, setConfirmarRevocar] = useState<string | null>(null);
+  const [revocando, setRevocando] = useState(false);
+  const [emailAsignar, setEmailAsignar] = useState('');
+  const [asignando, setAsignando] = useState(false);
 
   // --- Clientes ---
   const [busquedaCliente, setBusquedaCliente] = useState('');
@@ -104,12 +74,6 @@ function Gerente() {
   const [cargandoMovimientos, setCargandoMovimientos] = useState(false);
   const [errorMovimientos, setErrorMovimientos] = useState('');
   const [errorAccion, setErrorAccion] = useState('');
-
-  // --- Solicitudes ---
-  const [prestamos, setPrestamos] = useState<SolicitudPrestamo[]>([]);
-  const [tarjetas, setTarjetas] = useState<SolicitudTarjeta[]>([]);
-  const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
-  const [mensajeSolicitud, setMensajeSolicitud] = useState('');
 
   const authHeader = useCallback(async (): Promise<Record<string, string>> => {
     const token = await getToken();
@@ -138,90 +102,50 @@ function Gerente() {
     }
   }, [fetchConToken]);
 
-  const cargarSolicitudes = useCallback(async () => {
-    setLoadingSolicitudes(true);
-    try {
-      const headers = await authHeader();
-      const [resPrestamos, resTarjetas] = await Promise.all([
-        fetch(`${API_URL}/api/prestamos/pre-aprobados`, { headers }),
-        fetch(`${API_URL}/api/tarjetas/pre-aprobadas`, { headers }),
-      ]);
-      const dataPrestamos = await resPrestamos.json();
-      const dataTarjetas = await resTarjetas.json();
-      setPrestamos(dataPrestamos.prestamos || []);
-      setTarjetas(dataTarjetas.tarjetas || []);
-    } catch {
-      // silencioso
-    } finally {
-      setLoadingSolicitudes(false);
-    }
-  }, [authHeader]);
-
   useEffect(() => {
     cargarEmpleados();
   }, [cargarEmpleados]);
 
-  useEffect(() => {
-    if (tab === 'solicitudes') cargarSolicitudes();
-  }, [tab, cargarSolicitudes]);
-
-  const handleRevocarEmpleado = async (clerkId: string) => {
-    setMensajeRevocar('');
+  const handleRevocarEmpleado = async (e: Empleado) => {
+    setAvisoEmpleados(null);
+    setRevocando(true);
     try {
       const headers = await authHeader();
-      const res = await fetch(`${API_URL}/api/gerente/empleados/${clerkId}/revocar`, {
-        method: 'DELETE',
-        headers,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al revocar empleado');
-      setMensajeRevocar(data.mensaje);
-      setEmpleados(prev => prev.filter(e => e.clerkId !== clerkId));
-    } catch (err: unknown) {
-      if (err instanceof Error) setMensajeRevocar(err.message);
-      else setMensajeRevocar('Error inesperado');
+      const res = await fetch(`${API_URL}/api/gerente/empleados/${e.clerkId}/revocar`, { method: 'DELETE', headers });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || 'No pudimos revocar el rol. Probá de nuevo.');
+      setEmpleados(prev => prev.filter(x => x.clerkId !== e.clerkId));
+      setAvisoEmpleados({ tipo: 'ok', texto: `${e.nombre || e.email} ya no es empleado: vuelve a ser cliente.` });
+      setConfirmarRevocar(null);
+    } catch (err) {
+      setAvisoEmpleados({ tipo: 'error', texto: err instanceof Error ? err.message : 'No pudimos revocar el rol.' });
+    } finally {
+      setRevocando(false);
     }
   };
 
-  const situacionClass = (situacion: number) => {
-    if (situacion <= 1) return styles.situacion1;
-    if (situacion === 2) return styles.situacion2;
-    if (situacion === 3) return styles.situacion3;
-    if (situacion === 4) return styles.situacion4;
-    return styles.situacion5;
-  };
-
-  const accionPrestamo = async (id: number, accion: 'aprobar' | 'rechazar') => {
-    setMensajeSolicitud('');
+  const handleAsignarEmpleado = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    const email = emailAsignar.trim();
+    if (!email) return;
+    setAvisoEmpleados(null);
+    setAsignando(true);
     try {
       const headers = await authHeader();
-      const res = await fetch(`${API_URL}/api/prestamos/${id}/${accion}`, {
-        method: 'PUT',
-        headers,
+      const res = await fetch(`${API_URL}/api/gerente/empleados/asignar`, {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setMensajeSolicitud(accion === 'aprobar' ? 'Préstamo aprobado. El saldo fue acreditado.' : 'Préstamo rechazado.');
-      cargarSolicitudes();
-    } catch (err: unknown) {
-      if (err instanceof Error) setMensajeSolicitud(err.message);
-    }
-  };
-
-  const accionTarjeta = async (id: number, accion: 'aprobar' | 'rechazar') => {
-    setMensajeSolicitud('');
-    try {
-      const headers = await authHeader();
-      const res = await fetch(`${API_URL}/api/tarjetas/${id}/${accion}`, {
-        method: 'PUT',
-        headers,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setMensajeSolicitud(accion === 'aprobar' ? 'Tarjeta aprobada y activada.' : 'Tarjeta rechazada.');
-      cargarSolicitudes();
-    } catch (err: unknown) {
-      if (err instanceof Error) setMensajeSolicitud(err.message);
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || 'No pudimos asignar el rol. Probá de nuevo.');
+      setAvisoEmpleados({ tipo: 'ok', texto: `Listo: ${email} ahora es empleado.` });
+      setEmailAsignar('');
+      cargarEmpleados();
+    } catch (err) {
+      setAvisoEmpleados({ tipo: 'error', texto: err instanceof Error ? err.message : 'No pudimos asignar el rol.' });
+    } finally {
+      setAsignando(false);
     }
   };
 
@@ -318,30 +242,70 @@ function Gerente() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className={styles.tabsBar}>
-        <button className={`${styles.tabBtn} ${tab === 'empleados' ? styles.tabBtnActive : ''}`} onClick={() => setTab('empleados')}>
-          Empleados
-        </button>
-        <button className={`${styles.tabBtn} ${tab === 'clientes' ? styles.tabBtnActive : ''}`} onClick={() => setTab('clientes')}>
-          Clientes
-        </button>
-        <button className={`${styles.tabBtn} ${tab === 'solicitudes' ? styles.tabBtnActive : ''}`} onClick={() => setTab('solicitudes')}>
-          Solicitudes
-        </button>
+      {/* Tabs: lo que espera tu aprobación va primero */}
+      <div className={styles.tabsBar} role="tablist" aria-label="Secciones del panel">
+        {([
+          { id: 'solicitudes', etiqueta: 'Solicitudes' },
+          { id: 'clientes', etiqueta: 'Clientes' },
+          { id: 'empleados', etiqueta: 'Empleados' },
+        ] as const).map(t => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            id={`tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls={`panel-${t.id}`}
+            className={`${styles.tabBtn} ${tab === t.id ? styles.tabBtnActive : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.etiqueta}
+            {t.id === 'solicitudes' && pendientes !== null && pendientes > 0 && (
+              <span className={styles.tabContador}>{pendientes}<span className={styles.srOnly}> pendientes</span></span>
+            )}
+          </button>
+        ))}
       </div>
 
       <div className={styles.content}>
 
         {/* Tab: Empleados */}
         {tab === 'empleados' && (
-          <>
-            <h1 className={styles.title}>Gestión de empleados</h1>
-            <p className={styles.subtitle}>Asignación y revocación de empleados del sistema.</p>
+          <div id="panel-empleados" role="tabpanel" aria-labelledby="tab-empleados">
+            <h1 className={styles.title}>Empleados</h1>
+            <p className={styles.subtitle}>Asigná el rol de empleado a un usuario registrado o revocáselo.</p>
+
+            <form className={styles.formCard} onSubmit={handleAsignarEmpleado}>
+              <label htmlFor="email-empleado" className={styles.formTitle}>Asignar empleado por email</label>
+              <div className={styles.formRow}>
+                <input
+                  id="email-empleado"
+                  type="email"
+                  className={styles.formInput}
+                  placeholder="nombre@mail.com"
+                  value={emailAsignar}
+                  onChange={e => setEmailAsignar(e.target.value)}
+                  autoComplete="off"
+                />
+                <button type="submit" className={styles.btnAsignar} disabled={asignando || !emailAsignar.trim()}>
+                  {asignando ? 'Asignando…' : 'Asignar rol de empleado'}
+                </button>
+              </div>
+            </form>
+
+            {avisoEmpleados && (
+              <p className={avisoEmpleados.tipo === 'ok' ? styles.successMsg : styles.errorBox} role={avisoEmpleados.tipo === 'ok' ? 'status' : 'alert'}>
+                {avisoEmpleados.texto}
+              </p>
+            )}
+
             <h2 className={styles.listTitle}>Empleados activos</h2>
-            {mensajeRevocar && <p className={styles.successMsg}>{mensajeRevocar}</p>}
-            {loadingEmpleados && <p className={styles.loadingText}>Cargando empleados...</p>}
-            {errorEmpleados && <div className={styles.errorBox}>{errorEmpleados}</div>}
+            {loadingEmpleados && <p className={styles.loadingText} role="status">Cargando empleados…</p>}
+            {errorEmpleados && (
+              <div className={styles.errorBox} role="alert">
+                {errorEmpleados} <button type="button" className={styles.btnRevocar} onClick={cargarEmpleados}>Reintentar</button>
+              </div>
+            )}
             {!loadingEmpleados && !errorEmpleados && empleados.length === 0 && (
               <p className={styles.emptyText}>No hay empleados asignados todavía.</p>
             )}
@@ -349,30 +313,45 @@ function Gerente() {
               <div className={styles.tableWrapper}>
                 <table className={styles.table}>
                   <thead>
-                    <tr><th>Nombre</th><th>Email</th><th>Acción</th></tr>
+                    <tr><th scope="col">Nombre</th><th scope="col">Email</th><th scope="col">Acción</th></tr>
                   </thead>
                   <tbody>
-                    {empleados.map(e => (
-                      <tr key={e.clerkId}>
-                        <td>{e.apellido ? `${e.apellido}, ${e.nombre}` : e.nombre || '—'}</td>
-                        <td>{e.email}</td>
-                        <td>
-                          <button className={styles.btnRevocar} onClick={() => handleRevocarEmpleado(e.clerkId)}>
-                            Revocar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {empleados.map(e => {
+                      const nombre = e.apellido ? `${e.apellido}, ${e.nombre}` : e.nombre || e.email;
+                      return (
+                        <tr key={e.clerkId}>
+                          <td>{nombre}</td>
+                          <td>{e.email}</td>
+                          <td>
+                            {confirmarRevocar === e.clerkId ? (
+                              <span className={styles.confirmarFila}>
+                                <span>¿Revocar a {e.nombre || e.email}?</span>
+                                <button type="button" className={styles.btnRevocar} onClick={() => handleRevocarEmpleado(e)} disabled={revocando}>
+                                  {revocando ? 'Revocando…' : 'Sí, revocar'}
+                                </button>
+                                <button type="button" className={styles.btnCancelar} onClick={() => setConfirmarRevocar(null)} disabled={revocando}>
+                                  Cancelar
+                                </button>
+                              </span>
+                            ) : (
+                              <button type="button" className={styles.btnRevocar} onClick={() => setConfirmarRevocar(e.clerkId)} aria-label={`Revocar el rol de empleado a ${nombre}`}>
+                                Revocar
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* Tab: Clientes */}
         {tab === 'clientes' && (
-          <>
+          <div id="panel-clientes" role="tabpanel" aria-labelledby="tab-clientes">
             <h1 className={styles.title}>Gestión de clientes</h1>
             <p className={styles.subtitle}>Buscá un cliente por nombre, apellido, DNI o CBU.</p>
             <div className={styles.searchBox}>
@@ -497,99 +476,15 @@ function Gerente() {
                 )}
               </>
             )}
-          </>
+          </div>
         )}
 
-        {/* Tab: Solicitudes */}
-        {tab === 'solicitudes' && (
-          <>
-            <h1 className={styles.title}>Solicitudes pre-aprobadas</h1>
-            <p className={styles.subtitle}>Aprobación final de préstamos y tarjetas.</p>
-
-            {mensajeSolicitud && <p className={styles.successMsg}>{mensajeSolicitud}</p>}
-            {loadingSolicitudes && <p className={styles.loadingText}>Cargando...</p>}
-
-            {/* Préstamos */}
-            <h2 className={styles.listTitle}>Préstamos</h2>
-            {!loadingSolicitudes && prestamos.length === 0 && (
-              <p className={styles.emptyText}>No hay préstamos pre-aprobados pendientes.</p>
-            )}
-            {prestamos.length > 0 && (
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr><th>Cliente</th><th>DNI</th><th>Monto</th><th>Fecha</th><th>Situación BCRA</th><th>Acciones</th></tr>
-                  </thead>
-                  <tbody>
-                    {prestamos.map(p => (
-                      <tr key={p.id}>
-                        <td>{p.apellido}, {p.nombre}</td>
-                        <td>{p.dni}</td>
-                        <td>$ {Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                        <td>{new Date(p.fecha_solicitud).toLocaleDateString('es-AR')}</td>
-                        <td>
-                          {p.situacion_crediticia ? (
-                            <span className={`${styles.situacionChip} ${situacionClass(p.situacion_crediticia.situacion)}`}>
-                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.icono ?? '⚪'}{' '}
-                              {SITUACION_INFO[p.situacion_crediticia.situacion]?.etiqueta ?? 'Desconocida'}
-                            </span>
-                          ) : (
-                            <span className={styles.situacionDesconocida}>Sin datos</span>
-                          )}
-                        </td>
-                        <td>
-                          <div className={styles.accionesRow}>
-                            <button className={styles.btnActivar} onClick={() => accionPrestamo(p.id, 'aprobar')}>
-                              Aprobar
-                            </button>
-                            <button className={styles.btnRevocar} onClick={() => accionPrestamo(p.id, 'rechazar')}>
-                              Rechazar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Tarjetas */}
-            <h2 className={styles.listTitle} style={{ marginTop: '32px' }}>Tarjetas</h2>
-            {!loadingSolicitudes && tarjetas.length === 0 && (
-              <p className={styles.emptyText}>No hay tarjetas pre-aprobadas pendientes.</p>
-            )}
-            {tarjetas.length > 0 && (
-              <div className={styles.tableWrapper}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr><th>Cliente</th><th>DNI</th><th>Tipo</th><th>Fecha</th><th>Acciones</th></tr>
-                  </thead>
-                  <tbody>
-                    {tarjetas.map(t => (
-                      <tr key={t.id}>
-                        <td>{t.apellido}, {t.nombre}</td>
-                        <td>{t.dni}</td>
-                        <td style={{ textTransform: 'capitalize' }}>{t.tipo}</td>
-                        <td>{new Date(t.fecha_solicitud).toLocaleDateString('es-AR')}</td>
-                        <td>
-                          <div className={styles.accionesRow}>
-                            <button className={styles.btnActivar} onClick={() => accionTarjeta(t.id, 'aprobar')}>
-                              Aprobar
-                            </button>
-                            <button className={styles.btnRevocar} onClick={() => accionTarjeta(t.id, 'rechazar')}>
-                              Rechazar
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        )}
+        {/* Tab: Solicitudes (siempre montada para que el contador esté al día) */}
+        <div id="panel-solicitudes" role="tabpanel" aria-labelledby="tab-solicitudes" hidden={tab !== 'solicitudes'}>
+          <h1 className={styles.title}>Solicitudes para aprobar</h1>
+          <p className={styles.subtitle}>Ya las pre-aprobó un empleado. Aprobar un préstamo acredita la plata en la cuenta del cliente.</p>
+          <BandejaSolicitudes rol="gerente" onResumen={actualizarResumen} />
+        </div>
       </div>
     </div>
   );

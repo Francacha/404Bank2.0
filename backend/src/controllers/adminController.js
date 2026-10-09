@@ -134,7 +134,17 @@ const asignarRol = async (req, res) => {
     return res.status(400).json({ error: 'clerkId y rol válido son requeridos (empleado o gerente)' });
   }
 
+  if (clerkId === req.auth?.userId) {
+    return res.status(400).json({ error: 'No podés cambiar tu propio rol.' });
+  }
+
   try {
+    const usuario = await clerkClient.users.getUser(clerkId).catch(() => null);
+    if (!usuario) return res.status(404).json({ error: 'No encontramos a ese usuario.' });
+    if (usuario.publicMetadata?.role === 'admin') {
+      return res.status(400).json({ error: 'No podés cambiarle el rol a otro administrador.' });
+    }
+
     await clerkClient.users.updateUser(clerkId, {
       publicMetadata: { role },
     });
@@ -150,7 +160,17 @@ const asignarRol = async (req, res) => {
 const revocarRol = async (req, res) => {
   const { clerkId } = req.params;
 
+  if (clerkId === req.auth?.userId) {
+    return res.status(400).json({ error: 'No podés quitarte tu propio rol.' });
+  }
+
   try {
+    const usuario = await clerkClient.users.getUser(clerkId).catch(() => null);
+    if (!usuario) return res.status(404).json({ error: 'No encontramos a ese usuario.' });
+    if (usuario.publicMetadata?.role === 'admin') {
+      return res.status(400).json({ error: 'No podés quitarle el rol a otro administrador.' });
+    }
+
     await clerkClient.users.updateUser(clerkId, {
       publicMetadata: { role: null },
     });

@@ -1,8 +1,10 @@
-:root {
+.page {
   --ink: #1a1512;
   --muted: #8a8078;
+  --muted-text: #6f665e;
   --paper: #f4f2ee;
   --line: rgba(26, 21, 18, 0.08);
+  --line-strong: rgba(26, 21, 18, 0.16);
   --card: #ffffff;
   --shadow: 0 2px 14px rgba(26, 21, 18, 0.05);
   --wine: #7a1128;
@@ -10,12 +12,18 @@
   --wine-darker: #150208;
   --accent: #e8b84b;
   --green: #187a4c;
-  --red: #991b1b;
+  --green-tint: rgba(24, 122, 76, 0.12);
+  --red: #a3312c;
+  --red-tint: rgba(163, 49, 44, 0.08);
+  --focus-ring: 0 0 0 3px rgba(126, 8, 39, 0.14);
 }
 
-* {
+/* Antes estos tokens vivían en :root y pisaban los de toda la app; ahora quedan dentro del panel. */
+.page,
+.page * {
   box-sizing: border-box;
 }
+
 
 .page {
   min-height: 100vh;
@@ -86,7 +94,7 @@
 }
 
 .subtitle {
-  color: var(--muted);
+  color: var(--muted-text);
   font-size: 14px;
   margin-bottom: 28px;
 }
@@ -109,7 +117,7 @@
   border-radius: 999px;
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--muted-text);
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s ease, color 0.15s ease;
@@ -123,7 +131,7 @@
 }
 
 .loadingText {
-  color: var(--muted);
+  color: var(--muted-text);
   font-size: 14px;
 }
 
@@ -156,7 +164,7 @@
   outline: none;
   transition: border-color 0.15s ease;
 }
-.searchInput::placeholder { color: var(--muted); }
+.searchInput::placeholder { color: var(--muted-text); }
 .searchInput:focus { border-color: var(--wine); }
 
 .btnLimpiar {
@@ -176,7 +184,7 @@
 
 .searchNote {
   font-size: 12.5px;
-  color: var(--muted);
+  color: var(--muted-text);
   margin-bottom: 10px;
 }
 
@@ -197,7 +205,7 @@
 
 .table th {
   background: var(--paper);
-  color: var(--muted);
+  color: var(--muted-text);
   padding: 12px 16px;
   text-align: left;
   font-weight: 700;
@@ -325,19 +333,26 @@
   background: var(--paper);
 }
 .pickerItem {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 10px 14px;
   cursor: pointer;
+  border: 0;
   border-bottom: 1px solid var(--line);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
   transition: background 0.12s;
 }
 .pickerItem:last-child { border-bottom: none; }
-.pickerItem:hover { background: var(--line); }
+.pickerItem:hover,
+.pickerItem:focus-visible { background: var(--line); }
 .pickerItemNombre { font-size: 13.5px; color: var(--ink); font-weight: 600; }
-.pickerItemEmail { font-size: 12px; color: var(--muted); }
-.pickerEmpty { color: var(--muted); font-size: 13px; padding: 12px 14px; margin: 0; }
+.pickerItemEmail { font-size: 12px; color: var(--muted-text); }
+.pickerEmpty { color: var(--muted-text); font-size: 13px; padding: 12px 14px; margin: 0; }
 
 .pickerSelected {
   display: flex;
@@ -349,12 +364,12 @@
   flex-wrap: wrap;
 }
 .pickerSelectedNombre { font-size: 13.5px; color: var(--ink); font-weight: 700; flex: 1; }
-.pickerSelectedEmail { font-size: 12px; color: var(--muted); }
+.pickerSelectedEmail { font-size: 12px; color: var(--muted-text); }
 .btnLimpiarPicker {
   padding: 4px 14px;
   background: var(--card);
   border: 1px solid var(--line);
-  color: var(--muted);
+  color: var(--muted-text);
   border-radius: 999px;
   font-size: 12px;
   font-family: inherit;
@@ -362,3 +377,50 @@
   white-space: nowrap;
 }
 .btnLimpiarPicker:hover { background: var(--paper); color: var(--ink); }
+
+.errorFila {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.confirmarFila {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.btnCancelar {
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Celular: la barra superior se acomoda y las pestañas se pueden deslizar. */
+@media (max-width: 640px) {
+  .navbar { padding: 12px 16px; min-height: 0; flex-wrap: wrap; gap: 10px; }
+  .navRight { gap: 8px; flex-wrap: wrap; }
+  .navRight > span { display: none; }
+}

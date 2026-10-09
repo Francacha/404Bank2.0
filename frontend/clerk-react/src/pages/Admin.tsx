@@ -53,6 +53,9 @@ function Admin() {
   const [transferencias, setTransferencias] = useState<Transferencia[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errorCuenta, setErrorCuenta] = useState<{ id: number; texto: string } | null>(null);
+  const [cuentaEnCurso, setCuentaEnCurso] = useState<number | null>(null);
+  const [confirmarRevocarRol, setConfirmarRevocarRol] = useState<string | null>(null);
   // Estados para la pestaña de Roles
 const [usuariosConRol, setUsuariosConRol] = useState<UsuarioConRol[]>([]);
 const [personasParaRol, setPersonasParaRol] = useState<Usuario[]>([]);
@@ -102,17 +105,19 @@ if (tab === 'usuarios') {
     cargar();
   }, [tab, fetchConToken]);
 
+  // Los errores de bloquear/activar se muestran en la fila: la tabla no desaparece.
   const cambiarEstadoCuenta = async (id_cuenta: number, accion: 'bloquear' | 'activar') => {
+    setErrorCuenta(null);
+    setCuentaEnCurso(id_cuenta);
     try {
       const token = await getToken();
       const res = await fetch(`${API_URL}/api/admin/cuentas/${id_cuenta}/${accion}`, {
         method: 'PATCH',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error al actualizar cuenta');
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || `No pudimos ${accion} la cuenta.`);
 
-      // Actualizar el estado local sin recargar todo
       setUsuarios(prev =>
         prev.map(u =>
           u.id_cuenta === id_cuenta
@@ -121,7 +126,9 @@ if (tab === 'usuarios') {
         )
       );
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
+      setErrorCuenta({ id: id_cuenta, texto: err instanceof Error ? err.message : `No pudimos ${accion} la cuenta.` });
+    } finally {
+      setCuentaEnCurso(null);
     }
   };
   const handleAsignarRol = async () => {
@@ -181,7 +188,7 @@ const handleRevocarRol = async (clerkId: string) => {
           <span className={styles.adminBadge}>Admin</span>
         </div>
         <div className={styles.navRight}>
-          <span style={{ color: '#cbd5e1', fontSize: '14px' }}>
+          <span style={{ color: 'rgba(255, 255, 255, 0.82)', fontSize: '14px' }}>
             {user?.firstName} {user?.lastName}
           </span>
           <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
@@ -196,20 +203,29 @@ const handleRevocarRol = async (clerkId: string) => {
         <p className={styles.subtitle}>Gestión de clientes, cuentas y transferencias del sistema.</p>
 
         {/* Tabs */}
-        <div className={styles.tabs}>
+        <div className={styles.tabs} role="tablist" aria-label="Secciones del panel">
           <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'usuarios'}
             className={`${styles.tab} ${tab === 'usuarios' ? styles.tabActive : ''}`}
             onClick={() => setTab('usuarios')}
           >
             Clientes y cuentas
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'transferencias'}
             className={`${styles.tab} ${tab === 'transferencias' ? styles.tabActive : ''}`}
             onClick={() => setTab('transferencias')}
           >
             Transferencias
           </button>
           <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'roles'}
             className={`${styles.tab} ${tab === 'roles' ? styles.tabActive : ''}`}
             onClick={() => setTab('roles')}
           >
@@ -217,8 +233,8 @@ const handleRevocarRol = async (clerkId: string) => {
           </button>
         </div>
 
-        {loading && <p className={styles.loadingText}>Cargando...</p>}
-        {error && <div className={styles.errorBox}>{error}</div>}
+        {loading && <p className={styles.loadingText} role="status">Cargando…</p>}
+        {error && <div className={styles.errorBox} role="alert">{error}</div>}
 
         {/* Tab: Usuarios */}
         {!loading && !error && tab === 'usuarios' && (
@@ -288,18 +304,27 @@ const handleRevocarRol = async (clerkId: string) => {
                     <td>
                       {u.estado === 'Activa' ? (
                         <button
+                          type="button"
                           className={styles.btnBloquear}
+                          disabled={cuentaEnCurso === u.id_cuenta}
                           onClick={() => cambiarEstadoCuenta(u.id_cuenta, 'bloquear')}
+                          aria-label={`Bloquear la cuenta de ${u.nombre} ${u.apellido}`}
                         >
-                          Bloquear
+                          {cuentaEnCurso === u.id_cuenta ? 'Bloqueando…' : 'Bloquear'}
                         </button>
                       ) : (
                         <button
+                          type="button"
                           className={styles.btnActivar}
+                          disabled={cuentaEnCurso === u.id_cuenta}
                           onClick={() => cambiarEstadoCuenta(u.id_cuenta, 'activar')}
+                          aria-label={`Activar la cuenta de ${u.nombre} ${u.apellido}`}
                         >
-                          Activar
+                          {cuentaEnCurso === u.id_cuenta ? 'Activando…' : 'Activar'}
                         </button>
+                      )}
+                      {errorCuenta?.id === u.id_cuenta && (
+                        <p className={styles.errorFila} role="alert">{errorCuenta.texto}</p>
                       )}
                     </td>
                   </tr>
@@ -394,14 +419,15 @@ const handleRevocarRol = async (clerkId: string) => {
                         <p className={styles.pickerEmpty}>Sin resultados.</p>
                       );
                       return filtrados.map(p => (
-                        <div
+                        <button
+                          type="button"
                           key={p.id}
                           className={styles.pickerItem}
                           onClick={() => { setPersonaRolSeleccionada(p); setBusquedaPersona(''); }}
                         >
                           <span className={styles.pickerItemNombre}>{p.apellido}, {p.nombre}</span>
                           <span className={styles.pickerItemEmail}>{p.email}</span>
-                        </div>
+                        </button>
                       ));
                     })()}
                   </div>
@@ -409,7 +435,9 @@ const handleRevocarRol = async (clerkId: string) => {
               )}
 
               <div className={styles.rolesInputRow}>
+                <label htmlFor="rol-nuevo" className={styles.srOnly}>Rol a asignar</label>
                 <select
+                  id="rol-nuevo"
                   value={rolNuevo}
                   onChange={e => setRolNuevo(e.target.value as 'empleado' | 'gerente')}
                   className={styles.rolesSelect}
@@ -425,8 +453,8 @@ const handleRevocarRol = async (clerkId: string) => {
                   Asignar
                 </button>
               </div>
-              {mensajeRol && <p className={styles.rolesSuccess}>{mensajeRol}</p>}
-              {errorRol && <p className={styles.rolesError}>{errorRol}</p>}
+              {mensajeRol && <p className={styles.rolesSuccess} role="status">{mensajeRol}</p>}
+              {errorRol && <p className={styles.rolesError} role="alert">{errorRol}</p>}
             </div>
 
             {/* Lista de usuarios con rol */}
@@ -451,16 +479,30 @@ const handleRevocarRol = async (clerkId: string) => {
                         <td>{u.email}</td>
                         <td>
                           <span className={u.role === 'gerente' ? styles.badgeGerente : styles.badgeEmpleado}>
-                            {u.role}
+                            {u.role === 'gerente' ? 'Gerente' : 'Empleado'}
                           </span>
                         </td>
                         <td>
-                          <button
-                            className={styles.btnBloquear}
-                            onClick={() => handleRevocarRol(u.clerkId)}
-                          >
-                            Revocar
-                          </button>
+                          {confirmarRevocarRol === u.clerkId ? (
+                            <span className={styles.confirmarFila}>
+                              <span>¿Quitarle el rol a {u.nombre || u.email}?</span>
+                              <button type="button" className={styles.btnBloquear} onClick={() => { handleRevocarRol(u.clerkId); setConfirmarRevocarRol(null); }}>
+                                Sí, quitar
+                              </button>
+                              <button type="button" className={styles.btnCancelar} onClick={() => setConfirmarRevocarRol(null)}>
+                                Cancelar
+                              </button>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.btnBloquear}
+                              onClick={() => setConfirmarRevocarRol(u.clerkId)}
+                              aria-label={`Quitarle el rol de ${u.role} a ${u.nombre || u.email}`}
+                            >
+                              Revocar
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

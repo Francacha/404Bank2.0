@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const requireRole = require('../middleware/requireRole');
 const {
   simularPrestamo,
   solicitarPrestamo,
@@ -18,13 +19,13 @@ router.post('/solicitar', solicitarPrestamo);
 router.get('/mis-prestamos', getMisPrestamos);
 router.get('/mi-situacion-crediticia', getMiSituacionCrediticia);
 
-// Empleado
-router.get('/pendientes', getPendientes);
-router.put('/:id/pre-aprobar', preAprobar);
-router.put('/:id/rechazar', rechazar);
+// Empleado (el admin también puede)
+router.get('/pendientes', requireRole(['empleado', 'admin']), getPendientes);
+router.put('/:id/pre-aprobar', requireRole(['empleado', 'admin']), preAprobar);
+router.put('/:id/rechazar', requireRole(['empleado', 'gerente', 'admin']), rechazar);
 
-// Gerente
-router.get('/pre-aprobados', getPreAprobados);
-router.put('/:id/aprobar', aprobar);
+// Gerente (el admin también puede)
+router.get('/pre-aprobados', requireRole(['gerente', 'admin']), getPreAprobados);
+router.put('/:id/aprobar', requireRole(['gerente', 'admin']), aprobar);
 
 module.exports = router;
