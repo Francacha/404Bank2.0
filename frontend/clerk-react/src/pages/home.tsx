@@ -436,12 +436,15 @@ function Home() {
             </div>
           )}
 
-          {/* Una sola acción: tarjetas e historial ya están en la navegación y en sus paneles. */}
+          {/* Transferir es la acción principal; frascos, la secundaria (no tienen panel propio en Inicio). */}
           {/* Sin cuentas cargadas no hay desde dónde transferir: el botón aparece solo cuando hay saldo para mover. */}
           {!loading && !error && cuentaMostrada && (
             <div className={styles.heroActions}>
               <button className={styles.heroActionPrimary} onClick={() => navigate('/transferir')}>
                 <IconSend /> Transferir
+              </button>
+              <button className={styles.heroActionSecundaria} onClick={() => navigate('/inversiones?tab=frascos')}>
+                Frascos de ahorro
               </button>
             </div>
           )}

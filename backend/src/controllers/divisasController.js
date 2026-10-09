@@ -7,124 +7,120 @@ const crypto = require('crypto');
 /**
  * Realiza la conversión de divisas (Compra o Venta de USD).
  */
+const redondear = (valor) => Math.round(valor * 100) / 100;
+const pesos = (valor) => Number(valor).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
 const operarDivisas = async (req, res) => {
-    const { tipoOperacion, montoUSD } = req.body;
+    const { tipoOperacion, montoUSD, cotizacionAceptada } = req.body;
     const { cuentaARS, cuentaUSD } = req.cuentasUsuario; // Proviene de divisasMiddleware
 
     if (!['COMPRA', 'VENTA'].includes(tipoOperacion)) {
         return res.status(400).json({ error: 'Tipo de operación no válido. Use COMPRA o VENTA.' });
     }
 
-    const montoNumUSD = parseFloat(montoUSD);
-    if (isNaN(montoNumUSD) || montoNumUSD <= 0) {
-        return res.status(400).json({ error: 'El monto en USD debe ser mayor a 0.' });
+    // Dólares con centavos: 10.005 se redondea a 10.01.
+    const montoNumUSD = redondear(parseFloat(montoUSD));
+    if (isNaN(montoNumUSD) || montoNumUSD < 1) {
+        return res.status(400).json({ error: 'El monto mínimo es US$ 1.' });
     }
 
+    let cotizacion;
     try {
-        // 1. Obtener la cotización actual
-        const cotizacion = await dolarApiService.obtenerCotizacionOficial();
-        const tasaCambio = tipoOperacion === 'COMPRA' ? cotizacion.venta : cotizacion.compra;
-        const montoARS = montoNumUSD * tasaCambio;
-
-        // 2. Validar saldos según la operación
-        if (tipoOperacion === 'COMPRA') {
-            if (parseFloat(cuentaARS.saldo) < montoARS) {
-                return res.status(400).json({
-                    error: `Saldo insuficiente en pesos. Necesitas $${montoARS.toFixed(2)} ARS a una cotización de $${tasaCambio}.`
-                });
-            }
-        } else if (tipoOperacion === 'VENTA') {
-            if (parseFloat(cuentaUSD.saldo) < montoNumUSD) {
-                return res.status(400).json({
-                    error: `Saldo insuficiente en dólares. Intentas vender US$${montoNumUSD} pero tienes US$${cuentaUSD.saldo}.`
-                });
-            }
-        }
-
-        // 3. Ejecutar actualización en la base de datos local bajo transacción SQL
-        const client = await pool.connect();
-        try {
-            await client.query('BEGIN');
-
-            let nuevoSaldoARS, nuevoSaldoUSD;
-
-            if (tipoOperacion === 'COMPRA') {
-                nuevoSaldoARS = parseFloat(cuentaARS.saldo) - montoARS;
-                nuevoSaldoUSD = parseFloat(cuentaUSD.saldo) + montoNumUSD;
-            } else {
-                nuevoSaldoARS = parseFloat(cuentaARS.saldo) + montoARS;
-                nuevoSaldoUSD = parseFloat(cuentaUSD.saldo) - montoNumUSD;
-            }
-
-            // Descontar/acreditar en cuenta ARS
-            await client.query(
-                'UPDATE cuentas_bancarias SET saldo = $1 WHERE id_cuenta = $2',
-                [nuevoSaldoARS, cuentaARS.id_cuenta]
-            );
-
-            // Descontar/acreditar en cuenta USD
-            await client.query(
-                'UPDATE cuentas_bancarias SET saldo = $1 WHERE id_cuenta = $2',
-                [nuevoSaldoUSD, cuentaUSD.id_cuenta]
-            );
-
-            // Registrar en la tabla transferencias_central usando tus columnas reales:
-            // cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda
-            // Generar un ID único local para el cambio de divisa
-            const transaccionIdLocal = `INT-${crypto.randomUUID()}`;
-
-// Actualizamos la consulta para incluir transaccion_central_id en el INSERT
-            const insertQuery = `
-                INSERT INTO transferencias_central (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda)
-                VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)
-                RETURNING *;
-            `;
-
-            const origenCbu = tipoOperacion === 'COMPRA' ? cuentaARS.cbu : cuentaUSD.cbu;
-            const destinoCbu = tipoOperacion === 'COMPRA' ? cuentaUSD.cbu : cuentaARS.cbu;
-            const montoOperacion = tipoOperacion === 'COMPRA' ? montoNumUSD : montoARS;
-            const monedaOp = tipoOperacion === 'COMPRA' ? 'USD' : 'ARS';
-            const tipoTransaccion = tipoOperacion === 'COMPRA' ? 'COMPRA_USD' : 'VENTA_USD';
-
-            const resultadoTransaccion = await client.query(insertQuery, [
-                transaccionIdLocal, // $1: El ID generado localmente
-                origenCbu,          // $2
-                destinoCbu,         // $3
-                montoOperacion,     // $4
-                'OK',               // $5
-                tipoTransaccion,    // $6
-                monedaOp            // $7
-            ]);
-
-            await client.query('COMMIT');
-
-            return res.status(200).json({
-                mensaje: `Operación de ${tipoOperacion} realizada con éxito.`,
-                operacion: {
-                    tipo: tipoOperacion,
-                    montoUSD: montoNumUSD,
-                    montoARS: montoARS.toFixed(2),
-                    tasaCambio,
-                    saldoUSDActual: nuevoSaldoUSD,
-                    saldoARSActual: nuevoSaldoARS
-                },
-                transaccion: resultadoTransaccion.rows[0]
-            });
-
-        } catch (dbError) {
-            await client.query('ROLLBACK');
-            console.error('Error en transacción de compra/venta divisas:', dbError);
-            return res.status(500).json({ 
-                error: 'Ocurrió un error al procesar el cambio de divisas.',
-                detalle: dbError.message 
-            });
-        } finally {
-            client.release();
-        }
-
+        cotizacion = await dolarApiService.obtenerCotizacionOficial();
     } catch (error) {
-        console.error('Error en operarDivisas:', error.message);
-        return res.status(502).json({ error: error.message || 'Error al comunicarse con la API de cotización.' });
+        return res.status(502).json({ error: 'No pudimos consultar la cotización del dólar. Probá de nuevo en un momento.' });
+    }
+
+    const tasaCambio = Number(tipoOperacion === 'COMPRA' ? cotizacion.venta : cotizacion.compra);
+
+    // El cliente acepta una cotización en la revisión. Si cambió desde entonces, no se opera a otro precio:
+    // se devuelve la nueva para que la revise de nuevo.
+    if (cotizacionAceptada !== undefined && Number(cotizacionAceptada) !== tasaCambio) {
+        return res.status(409).json({
+            error: `La cotización cambió a $ ${pesos(tasaCambio)}. Revisá el nuevo total antes de confirmar.`,
+            cotizacion
+        });
+    }
+
+    const montoARS = redondear(montoNumUSD * tasaCambio);
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Saldos leídos dentro de la transacción y bloqueados: otra operación sobre estas cuentas
+        // espera a que esta termine, así ningún movimiento pisa a otro.
+        const saldosResult = await client.query(
+            'SELECT id_cuenta, saldo FROM cuentas_bancarias WHERE id_cuenta = ANY($1) FOR UPDATE',
+            [[cuentaARS.id_cuenta, cuentaUSD.id_cuenta]]
+        );
+        const saldo = (id) => Number(saldosResult.rows.find(r => r.id_cuenta === id)?.saldo ?? 0);
+        const saldoARS = saldo(cuentaARS.id_cuenta);
+        const saldoUSD = saldo(cuentaUSD.id_cuenta);
+
+        if (tipoOperacion === 'COMPRA' && saldoARS < montoARS) {
+            await client.query('ROLLBACK');
+            return res.status(422).json({
+                error: `No te alcanza: necesitás $ ${pesos(montoARS)} y tenés $ ${pesos(saldoARS)} en tu cuenta en pesos.`
+            });
+        }
+        if (tipoOperacion === 'VENTA' && saldoUSD < montoNumUSD) {
+            await client.query('ROLLBACK');
+            return res.status(422).json({
+                error: `No te alcanza: querés vender US$ ${pesos(montoNumUSD)} y tenés US$ ${pesos(saldoUSD)}.`
+            });
+        }
+
+        const signoARS = tipoOperacion === 'COMPRA' ? -1 : 1;
+        const nuevos = await client.query(
+            `UPDATE cuentas_bancarias
+             SET saldo = saldo + CASE WHEN id_cuenta = $1 THEN $3::numeric ELSE $4::numeric END
+             WHERE id_cuenta IN ($1, $2)
+             RETURNING id_cuenta, saldo`,
+            [cuentaARS.id_cuenta, cuentaUSD.id_cuenta, signoARS * montoARS, -signoARS * montoNumUSD]
+        );
+        const nuevoSaldo = (id) => Number(nuevos.rows.find(r => r.id_cuenta === id).saldo);
+
+        // Registro en transferencias_central con la cotización aplicada (el Historial la usa para
+        // mostrar los dos lados de la operación).
+        const transaccionIdLocal = `INT-${crypto.randomUUID()}`;
+        const esCompra = tipoOperacion === 'COMPRA';
+        const resultadoTransaccion = await client.query(
+            `INSERT INTO transferencias_central
+               (transaccion_central_id, cbu_origen, cbu_destino, importe, estado, tipo, fecha_hora, moneda, cotizacion)
+             VALUES ($1, $2, $3, $4, 'OK', $5, NOW(), $6, $7)
+             RETURNING transaccion_central_id, fecha_hora AT TIME ZONE 'UTC' AS fecha_hora`,
+            [
+                transaccionIdLocal,
+                esCompra ? cuentaARS.cbu : cuentaUSD.cbu,
+                esCompra ? cuentaUSD.cbu : cuentaARS.cbu,
+                esCompra ? montoNumUSD : montoARS,
+                esCompra ? 'COMPRA_USD' : 'VENTA_USD',
+                esCompra ? 'USD' : 'ARS',
+                tasaCambio
+            ]
+        );
+
+        await client.query('COMMIT');
+
+        return res.status(200).json({
+            operacion: {
+                tipo: tipoOperacion,
+                montoUSD: montoNumUSD,
+                montoARS,
+                tasaCambio,
+                saldoUSDActual: nuevoSaldo(cuentaUSD.id_cuenta),
+                saldoARSActual: nuevoSaldo(cuentaARS.id_cuenta),
+                transaccionId: resultadoTransaccion.rows[0].transaccion_central_id,
+                fechaHora: resultadoTransaccion.rows[0].fecha_hora
+            }
+        });
+    } catch (dbError) {
+        await client.query('ROLLBACK').catch(() => {});
+        console.error('Error en transacción de compra/venta divisas:', dbError);
+        return res.status(500).json({ error: 'No pudimos completar la operación. No se movió plata; probá de nuevo.' });
+    } finally {
+        client.release();
     }
 };
 
@@ -164,7 +160,7 @@ const getCotizacionDolar = async (req, res) => {
         const cotizacion = await dolarApiService.obtenerCotizacionOficial();
         res.json({ cotizacion });
     } catch (error) {
-        res.status(502).json({ error: error.message });
+        res.status(502).json({ error: 'No pudimos consultar la cotización del dólar. Probá de nuevo en un momento.' });
     }
 };
 

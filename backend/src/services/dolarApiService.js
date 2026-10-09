@@ -9,7 +9,7 @@ const DOLAR_API_URL = 'https://dolarapi.com/v1/dolares/oficial';
  */
 const obtenerCotizacionOficial = async () => {
     try {
-        const response = await axios.get(DOLAR_API_URL);
+        const response = await axios.get(DOLAR_API_URL, { timeout: 8000 });
         return {
             compra: response.data.compra, // Cotización para cuando el cliente vende USD -> recibe ARS
             venta: response.data.venta,   // Cotización para cuando el cliente compra USD -> entrega ARS

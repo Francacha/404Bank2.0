@@ -29,13 +29,13 @@ const validarCuentasDivisas = async (req, res, next) => {
 
         if (!cuentaUSD) {
             return res.status(400).json({
-                error: 'Para operar con divisas primero debes solicitar la apertura de una Caja de Ahorro en Dólares.'
+                error: 'Para operar con dólares primero abrí tu cuenta en dólares.'
             });
         }
 
         if (!cuentaARS) {
             return res.status(400).json({
-                error: 'No se encontró una cuenta activa en pesos (ARS) para realizar la operación.'
+                error: 'No encontramos tu cuenta en pesos activa.'
             });
         }
 

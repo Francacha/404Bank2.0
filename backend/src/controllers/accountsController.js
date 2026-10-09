@@ -104,6 +104,18 @@ const abrirCajaAhorro = async (req, res) => {
         const persona = personaResult.rows[0];
         const dni = persona.dni;
 
+        // Una caja de ahorro activa por moneda: si ya la tiene, no se abre otra.
+        const yaTiene = await pool.query(
+            `SELECT 1 FROM Cuentas_Bancarias cb
+             JOIN Titulares_Cuenta tit ON cb.id_cuenta = tit.id_cuenta
+             WHERE tit.id_persona = $1 AND cb.moneda = $2 AND cb.estado = 'Activa'
+             LIMIT 1`,
+            [persona.id, moneda]
+        );
+        if (yaTiene.rows.length > 0) {
+            return res.status(409).json({ error: moneda === 'USD' ? 'Ya tenés una cuenta en dólares.' : 'Ya tenés una cuenta en pesos.' });
+        }
+
         const resultado = await centralBank.abrirCajaAhorro(String(dni), moneda);
         const respuestaBancoCentral = resultado.data || {};
         const cuenta = respuestaBancoCentral.cuenta || respuestaBancoCentral;

@@ -274,6 +274,24 @@
   flex-wrap: wrap;
 }
 
+.heroActionSecundaria {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.heroActionSecundaria:hover { background: rgba(255, 255, 255, 0.18); }
+
 .heroActionPrimary {
   display: flex;
   align-items: center;
