@@ -301,6 +301,12 @@ const aprobar = async (req, res) => {
 
     const prestamo = prestamoResult.rows[0];
 
+    // Dos personas distintas: quien pre-aprobó no puede dar también la aprobación final.
+    if (prestamo.clerk_id_empleado === clerkId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'La aprobación final la tiene que dar otra persona que quien lo pre-aprobó.' });
+    }
+
     // Si el cliente cayó en mora después de pedirlo, no se le puede otorgar
     const mora = await obtenerMoraTitularesCuenta(client, prestamo.id_cuenta);
     if (mora.en_mora) {

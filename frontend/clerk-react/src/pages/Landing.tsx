@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/react"
 import { Navigate, Link } from "react-router-dom"
 import styles from "./Landing.module.css"
 import logo404Bank from "../assets/logo404bank.png"
+import logoClaro from "../assets/logo404bank-claro.png"
 import banImg from "../assets/banLanding.png"
 
 const API_URL = "http://localhost:3000"
@@ -150,8 +151,7 @@ function Landing() {
       <header className={styles.hero}>
         <nav className={styles.nav} aria-label="Principal">
           <Link to="/" className={styles.marca} aria-label="404Bank, inicio">
-            <span className={styles.marca404}>404</span>
-            <span className={styles.marcaBank}>Bank</span>
+            <img src={logoClaro} alt="" width={160} height={32} className={styles.logo} />
           </Link>
           <div className={styles.navLinks}>
             <a href="#servicios">Qué podés hacer</a>

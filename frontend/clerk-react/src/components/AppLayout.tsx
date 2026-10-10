@@ -4,6 +4,7 @@ import { useUser, SignOutButton } from '@clerk/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './AppLayout.module.css';
+import logoClaro from '../assets/logo404bank-claro.png';
 
 // Shell de todas las páginas del cliente: barra lateral (escritorio y tablet),
 // barra inferior con "Más" (celular) y topbar con el usuario.
@@ -58,7 +59,7 @@ const NAV_ITEMS: NavItem[] = [
 const NAV_ITEMS_2: NavItem[] = [
   { label: 'Transferir', path: '/transferir', icon: <IconSend /> },
   { label: 'Recargas', path: null, icon: <IconRefresh /> },
-  { label: 'Cambio de Contraseña', path: '/perfil#seguridad', icon: <IconLock /> },
+  { label: 'Contraseña', path: '/perfil#seguridad', icon: <IconLock /> },
   { label: 'Chat', path: '/chat', icon: <IconChat /> },
   { label: 'Historial', path: '/historial', icon: <IconHistory /> },
 ];
@@ -83,10 +84,13 @@ interface AppLayoutProps {
   subtitle?: ReactNode;
   // 'fill': la página ocupa exactamente el alto de la pantalla y maneja su propio scroll (Chat).
   variant?: 'default' | 'fill';
+  // Ancho de la columna centrada: 'completo' para Inicio (aprovecha monitores grandes),
+  // 'amplio' para paneles como Transferir y 'lectura' para listas y formularios.
+  ancho?: 'completo' | 'amplio' | 'lectura';
   children: ReactNode;
 }
 
-function AppLayout({ title, subtitle, variant = 'default', children }: AppLayoutProps) {
+function AppLayout({ title, subtitle, variant = 'default', ancho = 'amplio', children }: AppLayoutProps) {
   const { user } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -134,13 +138,14 @@ function AppLayout({ title, subtitle, variant = 'default', children }: AppLayout
   };
 
   return (
-    <div className={`${styles.page} ${variant === 'fill' ? styles.pageFill : ''}`}>
+    <div className={`${styles.page} ${variant === 'fill' ? styles.pageFill : ''} ${ancho === 'lectura' ? styles.anchoLectura : ancho === 'completo' ? styles.anchoCompleto : ''}`}>
       <a href="#contenido" className={styles.skipLink}>Saltar al contenido</a>
 
       <aside className={styles.sidebar}>
         <div className={styles.sidebarBrand} aria-label="404Bank">
-          <span className={styles.brand404}>404</span>
-          <span className={styles.brandBank}>Bank</span>
+          <img src={logoClaro} alt="404Bank" width={150} height={30} className={styles.brandLogo} />
+          {/* Con la barra angosta (solo íconos) el logo completo no entra: queda el 404. */}
+          <span className={styles.brand404} aria-hidden="true">404</span>
         </div>
 
         <nav className={styles.nav} aria-label="Secciones">

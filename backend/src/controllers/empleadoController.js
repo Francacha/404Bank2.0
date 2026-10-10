@@ -1,10 +1,13 @@
 const { pool } = require('../config/db');
+const { asegurarColumnaPausa } = require('./tarjetasController');
 
 const QUERY_CLIENTES = `
   SELECT
     p.id, p.nombre, p.apellido, p.dni, p.email, p.telefono,
     p.ciudad, p.provincia,
-    cb.id_cuenta, cb.cbu, cb.alias, cb.saldo, cb.estado, cb.fecha_apertura
+    cb.id_cuenta, cb.cbu, cb.alias, cb.saldo, cb.estado, cb.fecha_apertura,
+    (SELECT COALESCE(json_agg(json_build_object('tipo', t.tipo, 'ultimos4', RIGHT(t.numero, 4), 'pausada', COALESCE(t.pausada, false)) ORDER BY t.id), '[]')
+       FROM tarjetas t WHERE t.id_cuenta = cb.id_cuenta AND t.estado = 'activa') AS tarjetas
   FROM Personas p
   LEFT JOIN Titulares_Cuenta tit ON p.id = tit.id_persona
   LEFT JOIN Cuentas_Bancarias cb ON tit.id_cuenta = cb.id_cuenta
@@ -15,6 +18,7 @@ const buscarUsuarios = async (req, res) => {
   const { q } = req.query;
 
   try {
+    await asegurarColumnaPausa();
     if (q && q.trim()) {
       const term = q.trim();
       const result = await pool.query(

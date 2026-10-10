@@ -19,6 +19,7 @@ interface Tarjeta {
   ultimos4: string | null;
   fecha_vencimiento: string | null;
   estado: string;
+  pausada?: boolean;
 }
 
 interface SituacionCrediticia {
@@ -322,7 +323,7 @@ function Home() {
     new Intl.NumberFormat('es-AR', { style: 'currency', currency: moneda, minimumFractionDigits: 2 }).format(monto);
 
   return (
-    <AppLayout title={user?.firstName ? `Hola, ${user.firstName}` : 'Hola'} subtitle="Tu plata, de un vistazo.">
+    <AppLayout ancho="completo" title={user?.firstName ? `Hola, ${user.firstName}` : 'Hola'} subtitle="Tu plata, de un vistazo.">
         <div className={styles.homeBody}>
 
         <section className={styles.hero}>
@@ -561,6 +562,7 @@ function Home() {
                       ultimos4={tarjetas[tarjetaIdx].ultimos4}
                       titular={displayName}
                       vencimiento={tarjetas[tarjetaIdx].fecha_vencimiento}
+                      pausada={!!tarjetas[tarjetaIdx].pausada}
                     />
                   </div>
 

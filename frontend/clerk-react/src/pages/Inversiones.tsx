@@ -226,7 +226,7 @@ function Inversiones() {
   const horaCotizacion = hora(cotizacion?.fechaActualizacion);
 
   return (
-    <AppLayout title="Inversiones" subtitle="Comprá dólares al oficial y hacé crecer tus pesos en frascos.">
+    <AppLayout ancho="lectura" title="Inversiones" subtitle="Comprá dólares al oficial y hacé crecer tus pesos en frascos.">
       <div className={styles.wrapper}>
         <section className={styles.resumen} aria-label="Tus saldos">
           <div className={styles.saldo}>

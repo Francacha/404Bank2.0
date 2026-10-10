@@ -46,7 +46,7 @@
 
 .brand {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   letter-spacing: -0.3px;
   color: #ffffff;
@@ -55,7 +55,7 @@
 .gerenteBadge {
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 800;
   padding: 3px 11px;
   border-radius: 999px;
@@ -63,7 +63,7 @@
   letter-spacing: 0.05em;
 }
 
-.userName { color: rgba(255, 255, 255, 0.75); font-size: 13.5px; }
+.userName { color: rgba(255, 255, 255, 0.75); font-size: 15px; }
 
 .btnSignOut {
   padding: 9px 18px;
@@ -71,7 +71,7 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -85,7 +85,7 @@
   border-radius: 999px;
   color: #fff;
   background: rgba(255, 255, 255, 0.1);
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -96,7 +96,7 @@
 /* ── Contenido ── */
 .content { max-width: 860px; margin: 0 auto; padding: 36px 24px 60px; }
 .title { font-size: 24px; font-weight: 800; color: var(--ink); margin: 0 0 6px; }
-.subtitle { color: var(--muted-text); font-size: 14px; margin: 0 0 28px; }
+.subtitle { color: var(--muted-text); font-size: 15.5px; margin: 0 0 28px; }
 
 /* ── Formulario ── */
 .formCard {
@@ -109,7 +109,7 @@
   flex-direction: column;
   gap: 14px;
 }
-.formTitle { font-size: 15px; font-weight: 800; color: var(--ink); margin: 0; }
+.formTitle { font-size: 16.5px; font-weight: 800; color: var(--ink); margin: 0; }
 .formRow { display: flex; gap: 10px; flex-wrap: wrap; }
 .formInput {
   flex: 1;
@@ -119,7 +119,7 @@
   border: 1.5px solid var(--line);
   background: var(--paper);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15.5px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s ease;
@@ -132,7 +132,7 @@
   border-radius: 14px;
   color: #fff;
   background: var(--wine);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
@@ -144,16 +144,16 @@
   background: rgba(24, 122, 76, 0.1);
   padding: 10px 16px;
   border-radius: 12px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 600;
   margin: 0;
 }
-.errorMsg { color: var(--red); font-size: 13.5px; margin: 0; }
+.errorMsg { color: var(--red); font-size: 15px; margin: 0; }
 
 /* ── Lista ── */
-.listTitle { font-size: 15px; font-weight: 800; color: var(--ink); margin: 0 0 12px; }
-.loadingText { color: var(--muted-text); font-size: 14px; }
-.emptyText { color: var(--muted-text); font-style: italic; font-size: 14px; }
+.listTitle { font-size: 16.5px; font-weight: 800; color: var(--ink); margin: 0 0 12px; }
+.loadingText { color: var(--muted-text); font-size: 15.5px; }
+.emptyText { color: var(--muted-text); font-style: italic; font-size: 15.5px; }
 .errorBox {
   background: rgba(153, 27, 27, 0.08);
   color: var(--red);
@@ -161,7 +161,7 @@
   border-radius: 12px;
   margin-bottom: 16px;
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 /* ── Tabs ── */
@@ -178,7 +178,7 @@
   border: none;
   border-radius: 999px;
   color: var(--muted-text);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -189,14 +189,14 @@
 
 /* ── Tabla empleados ── */
 .tableWrapper { overflow-x: auto; }
-.table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.table { width: 100%; border-collapse: collapse; font-size: 15px; }
 .table th {
   text-align: left;
   padding: 12px 16px;
   background: var(--paper);
   color: var(--muted-text);
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -213,7 +213,7 @@
   border: none;
   color: var(--red);
   border-radius: 999px;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -236,7 +236,7 @@
   border: 1.5px solid var(--line);
   background: var(--paper);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 15.5px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s ease;
@@ -249,7 +249,7 @@
   border-radius: 14px;
   color: #fff;
   background: var(--wine);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
@@ -264,7 +264,7 @@
   border: none;
   color: var(--ink);
   border-radius: 14px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -273,14 +273,14 @@
 .btnVerTodos:hover:not(:disabled) { background: var(--line); }
 .btnVerTodos:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.searchNote { color: var(--muted-text); font-size: 12.5px; margin: 0 0 12px; }
+.searchNote { color: var(--muted-text); font-size: 14px; margin: 0 0 12px; }
 .resultadosSection { margin-bottom: 20px; }
 
 /* ── Tabla resultados clientes ── */
 .tableResultados {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: 15px;
   background: var(--card);
   border-radius: 18px;
   overflow: hidden;
@@ -292,7 +292,7 @@
   background: var(--paper);
   color: var(--muted-text);
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -313,17 +313,17 @@
   margin-bottom: 20px;
   box-shadow: var(--shadow);
 }
-.clienteNombre { font-size: 17px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
-.clienteDetalle { color: var(--muted-text); font-size: 13px; margin: 0 0 4px; }
+.clienteNombre { font-size: 18.5px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+.clienteDetalle { color: var(--muted-text); font-size: 14.5px; margin: 0 0 4px; }
 .cuentaRow { display: flex; gap: 32px; margin: 16px 0; flex-wrap: wrap; }
-.cuentaLabel { font-size: 11px; color: var(--muted-text); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.4px; }
-.cuentaCbu { font-family: monospace; font-size: 13px; color: var(--ink); margin: 0; }
-.cuentaSaldo { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); margin: 0; }
+.cuentaLabel { font-size: 12.5px; color: var(--muted-text); margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+.cuentaCbu { font-family: monospace; font-size: 14.5px; color: var(--ink); margin: 0; }
+.cuentaSaldo { font-family: 'Space Grotesk', sans-serif; font-size: 19.5px; font-weight: 700; color: var(--ink); margin: 0; }
 .estadoActiva,
 .estadoBloqueada {
   padding: 3px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 .estadoActiva { background: rgba(24, 122, 76, 0.1); color: var(--green); }
@@ -335,7 +335,7 @@
   padding: 9px 18px;
   border: none;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -349,7 +349,7 @@
 
 /* ── Movimientos ── */
 .movimientosSection { margin-top: 20px; }
-.movimientosTitle { font-size: 16px; font-weight: 800; color: var(--ink); margin: 0 0 14px; }
+.movimientosTitle { font-size: 17.5px; font-weight: 800; color: var(--ink); margin: 0 0 14px; }
 .movimientosList { display: flex; flex-direction: column; gap: 10px; }
 .movimientoCard {
   background: var(--card);
@@ -361,16 +361,16 @@
 .cardEntrante { border-left-color: var(--green); }
 .cardSaliente { border-left-color: var(--ink); }
 .movimientoTop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.importe { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; }
+.importe { font-family: 'Space Grotesk', sans-serif; font-size: 16.5px; font-weight: 700; }
 .importeEntrante { color: var(--green); }
 .importeSaliente { color: var(--ink); }
-.fecha { font-size: 12px; color: var(--muted-text); }
-.cbuInfo { font-size: 12px; color: var(--muted-text); margin: 0 0 6px; }
+.fecha { font-size: 13.5px; color: var(--muted-text); }
+.cbuInfo { font-size: 13.5px; color: var(--muted-text); margin: 0 0 6px; }
 .badgeAprobada,
 .badgeRechazada {
   padding: 2px 9px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
 }
 .badgeAprobada { background: rgba(24, 122, 76, 0.1); color: var(--green); }
@@ -379,7 +379,7 @@
 /* ── Situación crediticia (BCRA) ── */
 .situacionChip {
   display: inline-block;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
   padding: 3px 10px;
   border-radius: 999px;
@@ -387,7 +387,7 @@
 }
 
 .situacionDesconocida {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--muted-text);
   font-style: italic;
 }
@@ -407,7 +407,7 @@
   background: var(--wine);
   color: #ffffff;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 700;
 }
 
@@ -428,7 +428,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -439,7 +439,7 @@
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -454,4 +454,32 @@
 @media (max-width: 640px) {
   .tabsBar { overflow-x: auto; padding-left: 16px; padding-right: 16px; }
   .content { padding-left: 16px; padding-right: 16px; }
+}
+
+/* Logo 404Bank en versión clara (404B blanco, ank plateado) para fondos vino. */
+.logo {
+  display: block;
+  width: auto;
+  height: 28px;
+}
+
+/* Tarjetas activas del cliente; la pausada la marca el propio cliente desde Tarjetas. */
+.tarjetaCliente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.estadoPausada {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(26, 21, 18, 0.07);
+  color: var(--muted-text);
+  font-family: 'Manrope', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
 }

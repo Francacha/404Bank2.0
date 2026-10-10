@@ -220,6 +220,8 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 
 **Character:** Manrope en pesos altos da una voz amable y firme; Space Grotesk aporta el carácter técnico del "404" y hace que las cifras se lean como protagonistas.
 
+**Escala ampliada (oct 2026):** a pedido del equipo, todo el texto de la app subió un escalón para leerse mejor: los tamaños de hasta 18px suman 1,5px y los de 19–22px suman 1px; las cifras grandes y los títulos principales quedan igual. Los valores en px de las secciones de abajo son los previos a este ajuste; el código es la referencia.
+
 ### Hierarchy
 - **Display** (700, 46px, -1px): saldo principal en el hero.
 - **Headline** (800, 25px, -0.4px): título de página en la topbar.
@@ -237,6 +239,10 @@ Una paleta cálida y contenida: tintas marrón-negras, papel, vino en tres profu
 **The Persuade Display Rule.** Extensión sancionada: en la landing (superficie Persuade), los títulos de display — el titular del hero y los títulos de sección — van en Space Grotesk 700 con tracking negativo ajustado (-0.03em / -0.02em). En la app los títulos siguen en Manrope 800; esta extensión no se traslada a vistas autenticadas. Los títulos de tarjeta dentro de la landing ("Simulá un préstamo", "Dólar hoy") siguen en Manrope 800.
 
 ## Layout
+
+**Columna centrada:** el shell (`AppLayout`) define `--ancho-contenido` (1120px; 1480px con `ancho="completo"`; 860px con `ancho="lectura"`) y `--margen-lateral: max(44px, (100% − ancho) / 2)`. El título de la página y su contenido usan ese mismo margen, así quedan centrados y alineados en cualquier pantalla, con el fondo a todo el ancho. Inicio y Tarjetas usan el ancho completo (el saldo de Inicio crece hasta 62px; Tarjetas pasa a dos columnas desde 1280px, con la tarjeta física de hasta 660px escalando su contenido), Transferir el amplio; Historial, Inversiones, Préstamos, Perfil y Chat, el de lectura.
+
+**Logo:** la marca es el logo `logo404bank.png` (404B vino, ank plateado) sobre fondos claros y su variante `logo404bank-claro.png` (404B blanco) sobre vino: sidebar, barra de celular, panel del alta, paneles del personal, nav de la landing y la tarjeta física. Con la sidebar angosta (solo íconos) queda el "404" en Space Grotesk.
 
 Shell de dos columnas: sidebar fija de 264px (sticky, alto completo) y main fluido con padding 36px 44px 60px y gap vertical de 28px entre bloques. El contenido se organiza en un hero de saldo a ancho completo seguido de grillas de paneles (p. ej. `1.1fr 1.3fr 1fr`, gap 20px). Espaciado interno típico: 24px en tarjetas, 12px entre acciones, 6px en controles segmentados.
 
@@ -284,8 +290,8 @@ Tres formas propias del mundo bajan de 10px a propósito y no son superficies: l
 ### Chips / Segmented controls
 - **Style:** contenedor píldora translúcido (blanco 10% sobre vino, Papel sobre blanco), padding 4px.
 - **State:** opción activa en blanco con texto Vino Bodega 800; inactivas en blanco 70%.
-- **Sobre papel:** pista en tinta 6% (rgba(26, 21, 18, 0.06)), padding 4px; opciones de 32–40px en Piedra Legible 700 (13–14px); la activa es chip blanco con texto Vino Bodega 800 y sombra Chip activo. Filtros con `aria-pressed` (Historial, Tarjetas); pestañas con `role="tab"` y `aria-selected` (Inversiones: Dólares | Frascos). En celular la pista de filtros scrollea horizontal sin barra.
-- **Chips de estado:** píldora 12.5px 800 sobre tinte: verde (sano), oro 22% con texto vino (aviso), rojo (riesgo), tinta 7% con Piedra Legible (sin datos).
+- **Sobre papel:** pista en tinta 6% (rgba(26, 21, 18, 0.06)), padding 4px; opciones de 32–40px en Piedra Legible 700 (13–14px); la activa es chip blanco con texto Vino Bodega 800 y sombra Chip activo. Filtros con `aria-pressed` (Historial); pestañas con `role="tab"` y `aria-selected` (Inversiones: Dólares | Frascos). En celular la pista de filtros scrollea horizontal sin barra.
+- **Chips de estado:** píldora 14px 800 (tamaño base +1.5px de la escala) sobre tinte: verde (sano, "Activa"), vino 8% con texto vino (en trámite, "En revisión"; no se usa oro para no competir con la acción principal), rojo (riesgo, "No aprobada"), tinta 7% con Piedra Legible (sin datos o "Pausada"). En Tarjetas no se repite "Activa" debajo de cada tarjeta: la pausa ya se ve en la tarjeta (apagada, con chip "Pausada") y bloquea "Ver datos"; los paneles del personal la muestran pausada en la ficha del cliente. Los paneles internos todavía usan oro 22% para avisos.
 
 ### Cards / Containers
 - **Corner Style:** 22px (paneles), 26px (hero).
@@ -316,7 +322,7 @@ Tres formas propias del mundo bajan de 10px a propósito y no son superficies: l
 Bloque vino a ancho completo: etiqueta en mayúsculas blanco 60%, saldo en Display, CBU en píldora mono, tabs ARS/USD segmentados y fila de acciones (una oro primaria + una secundaria translúcida).
 
 ### Tarjeta física (signature, `TarjetaVisual`)
-La misma tarjeta en Inicio y en Tarjetas. Proporción 1.586:1, radio 18px, padding 7% 7.5%, sombra Tarjeta física y un brillo radial blanco 10% desde la esquina superior derecha. Débito en negro cálido (gradiente 135° de #2b231d por Tinta a #0f0c0a); crédito en el gradiente del hero (#4a0817 → Vino Bodega → Vino Noche). Marca "404" blanca + "Bank" oro, tipo en píldora con borde blanco 28%, chip en gradiente oro, número enmascarado "•••• •••• ••••" + últimos 4 en Space Grotesk 500 tabular (0.06em), titular en mayúsculas 800 y vencimiento en Space Grotesk. Todo escala con container queries (`cqi`), así que sirve a cualquier ancho; el texto para lector de pantalla va en una sola frase oculta.
+La misma tarjeta en Inicio y en Tarjetas. Proporción 1.586:1, radio 18px, padding 7% 7.5%, sombra Tarjeta física y un brillo radial blanco 10% desde la esquina superior derecha. Débito en negro cálido (gradiente 135° de #2b231d por Tinta a #0f0c0a); crédito en el gradiente del hero (#4a0817 → Vino Bodega → Vino Noche). Logo 404Bank en su versión clara (logo404bank-claro.png), tipo en píldora con borde blanco 28%, chip en gradiente oro, número enmascarado "•••• •••• ••••" + últimos 4 en Space Grotesk 500 tabular (0.06em), titular en mayúsculas 800 y vencimiento en Space Grotesk. Todo escala con container queries (`cqi`), así que sirve a cualquier ancho; el texto para lector de pantalla va en una sola frase oculta.
 
 ### Libro mayor por día (Historial; la misma fila en Inicio)
 Un grupo por día: título del día (13px 800 Piedra Legible) y debajo una tarjeta blanca de radio 22px con filas divididas por Línea. Cada fila es un botón expandible (radio 14px, padding 13px 8px; hover y abierta en Papel): ícono circular de 40px (ingreso en tinte verde, egreso en tinta 6% con Piedra Legible), título 14.5px 700 (máximo dos líneas), meta 12.5px Piedra Legible ("detalle · hora"), monto Space Grotesk 15px 700 (verde si entra, Tinta si sale) y chevron que gira 0.2s. El detalle abre un `dl` de dos columnas (dt 12px 700 Piedra Legible, CBU y n.º de operación en Space Grotesk tabular) y la descarga del comprobante. Los filtros viven arriba como control segmentado sobre papel. Comprobantes no tiene página propia: se descargan desde el movimiento.

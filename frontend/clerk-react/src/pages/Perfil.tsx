@@ -162,7 +162,7 @@ function Perfil() {
   useEffect(() => { cargarPersona(); cargarCuentas(); }, [cargarPersona, cargarCuentas]);
   useEffect(() => { cargarSesiones(); }, [cargarSesiones]);
 
-  // Llegar con #seguridad (desde "Cambio de Contraseña" del menú) lleva directo a esa sección.
+  // Llegar con #seguridad (desde "Contraseña" del menú) lleva directo a esa sección.
   useEffect(() => {
     if (location.hash === '#seguridad') {
       requestAnimationFrame(() => document.getElementById('seguridad')?.scrollIntoView({ block: 'start' }));
@@ -303,7 +303,7 @@ function Perfil() {
   const emailVerificado = email?.verification?.status === 'verified';
 
   return (
-    <AppLayout title="Mi perfil" subtitle="Tus datos, tus cuentas y la seguridad de tu acceso.">
+    <AppLayout ancho="lectura" title="Mi perfil" subtitle="Tus datos, tus cuentas y la seguridad de tu acceso.">
       <div className={styles.wrapper}>
         {/* ── Encabezado con la foto ── */}
         <section className={styles.cabecera} aria-label="Tu foto de perfil">

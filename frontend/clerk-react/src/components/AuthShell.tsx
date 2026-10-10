@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './AuthShell.module.css';
 import banImg from '../assets/banLanding.png';
+import logoClaro from '../assets/logo404bank-claro.png';
 
 // Shell de las pantallas sin sesión o previas a la cuenta (Login, Registro, Onboarding):
 // el mismo mundo que la Landing — panel vino con la marca y Ban, tarjeta blanca sobre papel.
@@ -27,8 +28,7 @@ function AuthShell({ title, subtitle, paso, mensajeBan, ancho = false, children 
 
       <aside className={styles.panel}>
         <Link to="/" className={styles.marca} aria-label="404Bank, volver al inicio">
-          <span className={styles.marca404}>404</span>
-          <span className={styles.marcaBank}>Bank</span>
+          <img src={logoClaro} alt="" width={160} height={32} className={styles.logo} />
         </Link>
 
         {paso && (

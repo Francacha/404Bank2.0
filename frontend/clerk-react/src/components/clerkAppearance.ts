@@ -11,7 +11,7 @@ export const clerkAppearance = {
     colorDanger: '#a3312c',
     borderRadius: '12px',
     fontFamily: "'Manrope', 'Segoe UI', Arial, sans-serif",
-    fontSize: '15px',
+    fontSize: '16px',
   },
   elements: {
     rootBox: { width: '100%' },
@@ -28,7 +28,7 @@ export const clerkAppearance = {
       overflow: 'visible',
     },
     header: { display: 'none' },
-    formFieldLabel: { color: '#1a1512', fontWeight: '700', fontSize: '13px' },
+    formFieldLabel: { color: '#1a1512', fontWeight: '700', fontSize: '14.5px' },
     formFieldInput: {
       minHeight: '46px',
       backgroundColor: '#f4f2ee',
@@ -44,7 +44,7 @@ export const clerkAppearance = {
       backgroundImage: 'none',
       color: '#2a0410',
       borderRadius: '16px',
-      fontSize: '15px',
+      fontSize: '16px',
       fontWeight: '800',
       textTransform: 'none',
       border: '0 !important',

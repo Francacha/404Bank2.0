@@ -251,6 +251,7 @@ function Chat() {
       title="Chat con Ban"
       subtitle="Te explico cómo usar 404Bank. No veo tu saldo ni hago operaciones por vos."
       variant="fill"
+      ancho="lectura"
     >
       <div className={styles.chat}>
         <div

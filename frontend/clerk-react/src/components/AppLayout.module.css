@@ -21,6 +21,11 @@
   --green-tint: rgba(24, 122, 76, 0.12);
   --shadow-lift: 0 12px 32px rgba(79, 9, 25, 0.13);
 
+  /* Columna centrada: el título y el contenido de cada página comparten el mismo margen lateral,
+     que crece en pantallas anchas para que todo quede centrado (el fondo sigue a todo el ancho). */
+  --ancho-contenido: 1120px;
+  --margen-lateral: max(44px, calc((100% - var(--ancho-contenido)) / 2));
+
   min-height: 100vh;
   display: flex;
   background: var(--paper);
@@ -72,7 +77,7 @@
   border-radius: 14px;
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
   text-decoration: none;
   transform: translateY(-160%);
@@ -107,6 +112,14 @@
   align-items: baseline;
   gap: 2px;
 }
+
+.brandLogo {
+  display: block;
+  width: auto;
+  height: 32px;
+}
+
+.brand404 { display: none; }
 
 .brand404,
 .brandBank {
@@ -150,7 +163,7 @@
   background: transparent;
   color: rgba(255, 255, 255, 0.68);
   font-family: inherit;
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 600;
   text-align: left;
   cursor: pointer;
@@ -180,7 +193,7 @@
   padding: 2px 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.85);
 }
@@ -194,7 +207,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
 }
 
@@ -249,7 +262,7 @@
   height: 34px;
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .userAvatarImg {
@@ -261,7 +274,7 @@
 }
 
 .userNameSidebar {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
@@ -286,8 +299,11 @@
   height: 100vh;
 }
 
+.anchoLectura { --ancho-contenido: 860px; }
+.anchoCompleto { --ancho-contenido: 1480px; }
+
 .topbar {
-  padding: 36px 44px 0;
+  padding: 36px var(--margen-lateral) 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -296,7 +312,7 @@
 }
 
 .pageFill .topbar {
-  padding: 28px 44px;
+  padding: 28px var(--margen-lateral);
   flex-shrink: 0;
   border-bottom: 1px solid var(--line);
 }
@@ -311,7 +327,7 @@
 
 .topbarSubtitle {
   margin: 4px 0 0;
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--muted-text);
 }
 
@@ -343,11 +359,11 @@
   height: 32px;
   background: var(--wine-dark);
   color: #ffffff;
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .userChip span {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--ink);
 }
@@ -360,7 +376,7 @@
   background: var(--card);
   color: var(--ink);
   font-family: inherit;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: border-color 0.15s ease;
@@ -379,7 +395,8 @@
 @media (max-width: 980px) {
   .sidebar { width: 84px; }
   .sidebarBrand { padding: 24px 0 16px; justify-content: center; }
-  .brandBank { display: none; }
+  .brandLogo { display: none; }
+  .brand404 { display: inline; }
   .navItem,
   .btnVolverPanel { justify-content: center; padding: 11px; }
   .userSection { justify-content: center; }
@@ -415,7 +432,8 @@
 
   .pageFill .sidebar { height: auto; }
   .sidebarBrand { padding: 14px 16px; }
-  .brandBank { display: inline; }
+  .brandLogo { display: block; height: 26px; }
+  .brand404 { display: none; }
   .nav,
   .sidebarFooter { display: none; }
 
@@ -456,7 +474,7 @@
     background: transparent;
     color: rgba(255, 255, 255, 0.68);
     font-family: inherit;
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
@@ -512,7 +530,7 @@
     background: var(--paper);
     color: var(--ink);
     font-family: inherit;
-    font-size: 13.5px;
+    font-size: 15px;
     font-weight: 700;
     text-align: left;
     cursor: pointer;

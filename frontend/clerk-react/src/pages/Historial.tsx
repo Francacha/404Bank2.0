@@ -205,7 +205,7 @@ function Historial() {
   };
 
   return (
-    <AppLayout title="Historial" subtitle="Todo lo que entró y salió de tus cuentas: transferencias, dólares, préstamos y frascos.">
+    <AppLayout ancho="lectura" title="Historial" subtitle="Todo lo que entró y salió de tus cuentas: transferencias, dólares, préstamos y frascos.">
       <div className={styles.wrapper}>
         {estado === 'cargando' && (
           <div className={styles.libro} aria-busy="true">

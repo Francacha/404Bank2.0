@@ -58,7 +58,7 @@
   border-radius: 14px;
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
   text-decoration: none;
   transform: translateY(-160%);
@@ -108,7 +108,7 @@
 
 .navLinks a {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 14.5px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -129,7 +129,7 @@
   align-items: center;
   padding: 0 18px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   text-decoration: none;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -178,7 +178,7 @@
 .bajada {
   margin: 22px 0 30px;
   max-width: 46ch;
-  font-size: 17px;
+  font-size: 18.5px;
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -191,7 +191,7 @@
   border-radius: 16px;
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 800;
   text-decoration: none;
   transition: background 0.15s ease;
@@ -201,7 +201,7 @@
 
 .notaSimulado {
   margin: 16px 0 0;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -227,7 +227,7 @@
 }
 
 .page .simTitulo {
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 800;
   color: var(--ink);
   margin-bottom: 18px;
@@ -236,7 +236,7 @@
 .simLabel {
   display: block;
   margin-bottom: 8px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -253,7 +253,7 @@
   position: absolute;
   left: 16px;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--muted-text);
   pointer-events: none;
@@ -269,7 +269,7 @@
   color: var(--ink);
   caret-color: var(--wine);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 22px;
+  font-size: 23px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   outline: none;
@@ -282,7 +282,7 @@
 .simAyuda,
 .simError {
   margin: 8px 0 18px;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.45;
 }
 
@@ -305,7 +305,7 @@
   background: transparent;
   color: var(--muted-text);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
@@ -334,7 +334,7 @@
 }
 
 .simEtiqueta {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -354,7 +354,7 @@
 }
 
 .simCuotaTexto {
-  font-size: 15px;
+  font-size: 16.5px;
   color: var(--ink);
 }
 
@@ -393,7 +393,7 @@
 }
 
 .simTasas dt {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--muted-text);
 }
@@ -401,7 +401,7 @@
 .simTasas dd {
   margin: 2px 0 0;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 17px;
+  font-size: 18.5px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -411,7 +411,7 @@
 
 .simNota {
   margin: 16px 0 0;
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.5;
   color: var(--muted-text);
 }
@@ -440,14 +440,14 @@
 }
 
 .dolarTitulo {
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 800;
   color: #ffffff;
 }
 
 .dolarHora {
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13.5px;
   color: rgba(255, 255, 255, 0.6);
 }
 
@@ -466,7 +466,7 @@
 }
 
 .dolarCasa {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -478,7 +478,7 @@
   flex-wrap: wrap;
   gap: 2px 14px;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 17px;
+  font-size: 18.5px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -486,7 +486,7 @@
 .dolarValores small {
   margin-right: 4px;
   font-family: 'Manrope', 'Segoe UI', Arial, sans-serif;
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.62);
 }
@@ -494,7 +494,7 @@
 .dolarEstado {
   grid-column: 1 / -1;
   margin: 0;
-  font-size: 14px;
+  font-size: 15.5px;
   color: rgba(255, 255, 255, 0.75);
 }
 
@@ -506,7 +506,7 @@
   background: transparent;
   color: #ffffff;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -535,7 +535,7 @@
 
 .seccionBajada {
   margin: 10px 0 0;
-  font-size: 16px;
+  font-size: 17.5px;
   color: var(--muted-text);
 }
 
@@ -562,13 +562,13 @@
 .servicio:last-child { border-bottom: 0; }
 
 .servicioNombre {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 800;
   color: var(--ink);
 }
 
 .servicioDetalle {
-  font-size: 14.5px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--muted-text);
 }
@@ -579,7 +579,7 @@
   border-radius: 999px;
   background: var(--paper);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
   color: var(--wine);
@@ -621,13 +621,13 @@
 }
 
 .pasoTitulo {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 800;
   color: var(--ink);
 }
 
 .pasoTexto {
-  font-size: 14.5px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--muted-text);
 }
@@ -640,7 +640,7 @@
 }
 
 .aliasEtiqueta {
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -652,7 +652,7 @@
   border-radius: 999px;
   background: var(--paper);
   font-family: monospace;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--ink);
 }
@@ -683,7 +683,7 @@
 .nosotrosTexto p {
   max-width: 60ch;
   margin: 0 0 14px;
-  font-size: 16px;
+  font-size: 17.5px;
   line-height: 1.6;
   color: var(--ink);
 }
@@ -706,7 +706,7 @@
   border-radius: 18px 18px 18px 4px;
   background: var(--wine-dark);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   line-height: 1.4;
   max-width: 240px;
@@ -737,7 +737,7 @@
 
 .footerTexto {
   margin: 0 auto 0 0;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--muted-text);
 }
 
@@ -747,7 +747,7 @@
 }
 
 .footerLinks a {
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   color: var(--wine);
   text-decoration: none;
@@ -810,7 +810,7 @@
   .btnIngresar,
   .btnAbrirNav {
     white-space: nowrap;
-    font-size: 13.5px;
+    font-size: 15px;
   }
 
   .btnIngresar {
@@ -822,7 +822,7 @@
   }
 
   .marca {
-    font-size: 22px;
+    font-size: 23px;
   }
 
   .navAcciones {
@@ -852,7 +852,7 @@
 
   .bajada {
     margin: 14px 0 20px;
-    font-size: 15.5px;
+    font-size: 17px;
   }
 
   .btnPrincipal {
@@ -867,7 +867,7 @@
 
   .simCuota {
     min-height: 38px;
-    font-size: 13.5px;
+    font-size: 15px;
   }
 
   .simTasas {
@@ -879,7 +879,7 @@
   }
 
   .simTasas dd {
-    font-size: 15px;
+    font-size: 16.5px;
   }
 
   .servicio {
@@ -920,4 +920,11 @@
   .simDesactualizado .simCuotaTexto,
   .simDesactualizado .simTasas dd { transition: none; }
   .skipLink { transition: none; }
+}
+
+/* Logo 404Bank en versión clara (404B blanco, ank plateado) para fondos vino. */
+.logo {
+  display: block;
+  width: auto;
+  height: 34px;
 }

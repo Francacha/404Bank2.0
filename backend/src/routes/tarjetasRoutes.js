@@ -5,6 +5,8 @@ const {
   solicitarTarjeta,
   getMisTarjetas,
   getDatosTarjeta,
+  pausarTarjeta,
+  cancelarSolicitud,
   getPendientes,
   preAprobar,
   rechazar,
@@ -27,5 +29,7 @@ router.put('/:id/aprobar', requireRole(['gerente', 'admin']), aprobar);
 
 // Cliente: número completo y CVV de una tarjeta propia y activa, solo cuando los pide ("Ver datos")
 router.get('/:id/datos', getDatosTarjeta);
+router.put('/:id/pausa', pausarTarjeta);
+router.delete('/:id', cancelarSolicitud);
 
 module.exports = router;

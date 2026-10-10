@@ -255,7 +255,7 @@ function Prestamos() {
   };
 
   return (
-    <AppLayout title="Solicitá un préstamo" subtitle="Completá el formulario y seguí el estado de tus solicitudes.">
+    <AppLayout ancho="lectura" title="Solicitá un préstamo" subtitle="Completá el formulario y seguí el estado de tus solicitudes.">
 
         <div className={styles.pageContent}>
           <div className={styles.pageWrapper}>

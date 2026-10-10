@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import styles from './Admin.module.css';
+import logoClaro from '../assets/logo404bank-claro.png';
 
 const API_URL = 'http://localhost:3000';
 
@@ -184,7 +185,7 @@ const handleRevocarRol = async (clerkId: string) => {
       {/* Navbar */}
       <div className={styles.navbar}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span className={styles.brand}>404Bank</span>
+          <img src={logoClaro} alt="404Bank" width={140} height={28} className={styles.logo} />
           <span className={styles.adminBadge}>Admin</span>
         </div>
         <div className={styles.navRight}>

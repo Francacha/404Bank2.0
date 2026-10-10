@@ -1,4 +1,5 @@
 import styles from './TarjetaVisual.module.css';
+import logoClaro from '../assets/logo404bank-claro.png';
 
 // La tarjeta física de 404Bank: la misma en Inicio y en Tarjetas.
 // Débito en negro cálido, crédito en el gradiente vino del hero. El número va enmascarado
@@ -11,6 +12,8 @@ interface TarjetaVisualProps {
   // 'YYYY-MM-DD' del backend
   vencimiento: string | null;
   datos?: { numero: string; cvv: string } | null;
+  // Pausada por el cliente: se ve apagada y lo dice en la tarjeta.
+  pausada?: boolean;
 }
 
 // MM/AA sin pasar por Date: un 'YYYY-MM-DD' se interpreta en UTC y en Argentina puede correrse un día.
@@ -22,23 +25,23 @@ export const vencimientoCorto = (fecha: string | null) => {
 
 const agrupar = (numero: string) => numero.replace(/(.{4})/g, '$1 ').trim();
 
-function TarjetaVisual({ tipo, ultimos4, titular, vencimiento, datos }: TarjetaVisualProps) {
+function TarjetaVisual({ tipo, ultimos4, titular, vencimiento, datos, pausada = false }: TarjetaVisualProps) {
   const esCredito = tipo === 'credito';
   const nombreTipo = esCredito ? 'Crédito' : 'Débito';
   const fin = ultimos4 ?? '····';
 
   return (
-    <div className={`${styles.tarjeta} ${esCredito ? styles.credito : styles.debito}`}>
+    <div className={`${styles.tarjeta} ${esCredito ? styles.credito : styles.debito} ${pausada ? styles.pausada : ''}`}>
       <p className={styles.srOnly}>
-        Tarjeta de {nombreTipo.toLowerCase()} terminada en {fin}, a nombre de {titular}, vence {vencimientoCorto(vencimiento)}.
+        Tarjeta de {nombreTipo.toLowerCase()} terminada en {fin}, a nombre de {titular}, vence {vencimientoCorto(vencimiento)}{pausada ? ', pausada' : ''}.
       </p>
 
       <div className={styles.arriba} aria-hidden="true">
-        <span className={styles.marca}>
-          <span className={styles.marca404}>404</span>
-          <span className={styles.marcaBank}>Bank</span>
+        <img src={logoClaro} alt="" width={140} height={28} className={styles.logo} />
+        <span className={styles.chips}>
+          {pausada && <span className={`${styles.tipo} ${styles.tipoPausada}`}>Pausada</span>}
+          <span className={styles.tipo}>{nombreTipo}</span>
         </span>
-        <span className={styles.tipo}>{nombreTipo}</span>
       </div>
 
       <span className={styles.chip} aria-hidden="true" />

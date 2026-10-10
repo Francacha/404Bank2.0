@@ -62,7 +62,7 @@
   border-radius: 14px;
   background: var(--accent);
   color: var(--wine-dark);
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 800;
   text-decoration: none;
   transform: translateY(-160%);
@@ -106,7 +106,7 @@
 
 .pasoActual {
   margin: 0 0 16px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -126,7 +126,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.55);
 }
@@ -140,7 +140,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.25);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
 }
 
@@ -163,7 +163,7 @@
   border-radius: 18px 18px 18px 4px;
   background: #ffffff;
   color: var(--wine-dark);
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   line-height: 1.4;
   max-width: 260px;
@@ -202,7 +202,7 @@
 .pasoMovil {
   display: none;
   margin: 6px 0 0;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--wine);
 }
@@ -217,7 +217,7 @@
 
 .subtitulo {
   margin: 8px 0 24px;
-  font-size: 15px;
+  font-size: 16.5px;
   line-height: 1.55;
   color: var(--muted-text);
 }
@@ -267,4 +267,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .skipLink { transition: none; }
+}
+
+/* Logo 404Bank en versión clara (404B blanco, ank plateado) para fondos vino. */
+.logo {
+  display: block;
+  width: auto;
+  height: 34px;
 }

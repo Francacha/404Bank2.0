@@ -3,6 +3,7 @@ import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import { useNavigate } from 'react-router-dom';
 import { useViewMode } from '../context/ViewModeContext';
 import styles from './Empleado.module.css';
+import logoClaro from '../assets/logo404bank-claro.png';
 import BandejaSolicitudes, { type ResumenBandeja } from '../components/BandejaSolicitudes';
 
 const API_URL = 'http://localhost:3000';
@@ -23,6 +24,8 @@ interface Cliente {
   alias: string;
   saldo: number;
   estado: string;
+  // Tarjetas activas de la cuenta; pausada = la congeló el cliente.
+  tarjetas?: { tipo: string; ultimos4: string | null; pausada: boolean }[];
   fecha_apertura: string;
 }
 
@@ -145,7 +148,7 @@ function Empleado() {
     <div className={styles.page}>
       <div className={styles.navbar}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span className={styles.brand}>404Bank</span>
+          <img src={logoClaro} alt="404Bank" width={140} height={28} className={styles.logo} />
           <span className={styles.empleadoBadge}>Empleado</span>
         </div>
         <div className={styles.navRight}>
@@ -258,6 +261,17 @@ function Empleado() {
                   <p className={styles.clienteNombre}>{clienteSeleccionado.apellido}, {clienteSeleccionado.nombre}</p>
                   <p className={styles.clienteDetalle}>DNI: {clienteSeleccionado.dni} · {clienteSeleccionado.email}</p>
                   <p className={styles.clienteDetalle}>{clienteSeleccionado.ciudad}, {clienteSeleccionado.provincia}</p>
+                  <p className={styles.clienteDetalle}>
+                    Tarjetas:{' '}
+                    {clienteSeleccionado.tarjetas?.length
+                      ? clienteSeleccionado.tarjetas.map((t, i) => (
+                          <span key={i} className={styles.tarjetaCliente}>
+                            {t.tipo === 'credito' ? 'Crédito' : 'Débito'} ···{t.ultimos4 ?? '····'}
+                            {t.pausada && <span className={styles.estadoPausada}>Pausada</span>}
+                          </span>
+                        ))
+                      : 'ninguna activa'}
+                  </p>
                   <div className={styles.cuentaRow}>
                     <div>
                       <p className={styles.cuentaLabel}>CBU</p>
