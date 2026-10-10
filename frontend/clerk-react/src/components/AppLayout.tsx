@@ -170,7 +170,7 @@ function AppLayout({ title, subtitle, variant = 'default', ancho = 'amplio', chi
 
       <main className={styles.main} id="contenido" tabIndex={-1}>
         <header className={styles.topbar}>
-          <div>
+          <div className={styles.topbarTexto}>
             <h1 className={styles.topbarTitle}>{title}</h1>
             {subtitle && <p className={styles.topbarSubtitle}>{subtitle}</p>}
           </div>
@@ -210,6 +210,15 @@ function AppLayout({ title, subtitle, variant = 'default', ancho = 'amplio', chi
                   Volver al panel
                 </button>
               )}
+              {/* En celular la topbar no lleva "Cerrar sesión": vive acá, al final del menú. */}
+              <SignOutButton signOutOptions={{ redirectUrl: '/login' }}>
+                <button className={styles.masItem}>
+                  <span className={styles.masIcon}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" /><path d="M10 17l-5-5 5-5" /><path d="M5 12h11" /></svg>
+                  </span>
+                  Cerrar sesión
+                </button>
+              </SignOutButton>
             </div>
           </>
         )}

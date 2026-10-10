@@ -1,6 +1,6 @@
 const { pool } = require('../config/db');
 const centralBank = require('../services/centralBankService');
-const { obtenerMovimientos } = require('../services/movimientosService');
+const { obtenerMovimientos, LIMITE } = require('../services/movimientosService');
 const { asegurarColumnaContraparte, nombreDestinatario, completarContrapartes } = require('../services/contrapartesService');
 
 // Función helper local para resolver un Alias o CBU localmente primero
@@ -237,17 +237,22 @@ const obtenerMisMovimientos = async (req, res) => {
 
     try {
         const cbus = await obtenerCbusDelUsuario(clerkId);
-        if (cbus.length === 0) return res.json({ movimientos: [], limite: 50 });
+        if (cbus.length === 0) return res.json({ movimientos: [], limite: LIMITE, hayMas: false });
+
+        // ?antes=<fecha ISO del último movimiento que ya se mostró> pide la página siguiente.
+        const antes = req.query.antes ? new Date(String(req.query.antes)) : null;
+        if (antes && Number.isNaN(antes.getTime())) return res.status(400).json({ error: 'Fecha inválida' });
 
         await asegurarColumnaContraparte();
-        const movimientos = await obtenerMovimientos(cbus);
+        const { movimientos, hayMas } = await obtenerMovimientos(cbus, antes ? antes.toISOString() : null);
 
         // A las transferencias se les completa el nombre de la otra persona (también si es de otro banco).
         const transferencias = await completarContrapartes(movimientos.filter(m => !m.categoria));
         const nombrePorId = new Map(transferencias.map(t => [t.id, t.nombre_contraparte]));
 
         res.json({
-            limite: 50,
+            limite: LIMITE,
+            hayMas,
             movimientos: movimientos.map(m => ({
                 ...m,
                 categoria: m.categoria || 'transferencia',

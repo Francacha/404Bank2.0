@@ -15,6 +15,33 @@
   gap: 10px;
 }
 
+.filaChips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* "Filtros" solo aparece en celular, donde moneda y período van plegados. */
+.btnMasFiltros {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnMasFiltros[aria-expanded='true'] { border-color: var(--wine); color: var(--wine); }
+
 .filtrosSecundarios {
   display: flex;
   flex-wrap: wrap;
@@ -84,6 +111,87 @@
   cursor: pointer;
 }
 
+/* ── Resumen del período: una línea de libro mayor, no una tarjeta de métricas ── */
+.resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 4px 16px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.resumenTitulo {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--muted-text);
+}
+
+.resumenFilas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resumenFila {
+  display: grid;
+  grid-template-columns: 1fr minmax(170px, auto) minmax(170px, auto);
+  align-items: baseline;
+  gap: 4px 36px;
+}
+
+.resumenMoneda {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.resumenCifra {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.resumenCero { color: var(--muted); }
+
+.resumenEtiqueta {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted-text);
+}
+
+.resumenNota {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--muted-text);
+}
+
+.btnTexto {
+  min-height: 36px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--wine);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* ── Días ── */
 .dia {
   display: flex;
@@ -146,6 +254,13 @@
 .iconoEntrante { background: var(--green-tint); color: var(--green); }
 .iconoSaliente { background: rgba(26, 21, 18, 0.06); color: var(--muted-text); }
 
+.montos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
 .info {
   flex: 1;
   min-width: 0;
@@ -184,6 +299,16 @@
 
 .montoEntrante { color: var(--green); }
 
+/* El otro lado de una compra/venta de dólares: lo que pagaste, más chico y en tinta suave. */
+.montoSecundario {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-text);
+  white-space: nowrap;
+}
+
 .chevron {
   display: flex;
   color: var(--muted);
@@ -208,6 +333,7 @@
 }
 
 .datos div { min-width: 0; }
+.datos .datoAncho { grid-column: 1 / -1; }
 
 .datos dt {
   font-size: 13.5px;
@@ -223,10 +349,64 @@
   overflow-wrap: anywhere;
 }
 
-.mono {
+.cifra {
   font-family: 'Space Grotesk', sans-serif;
   font-variant-numeric: tabular-nums;
+}
+
+/* CBU en píldora, como en Perfil, con su botón de copiar. */
+.cbu {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--paper);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.btnCopiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--wine);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnCopiar:hover { border-color: var(--wine); }
+
+.notaDetalle {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--muted-text);
+}
+
+.cargarMas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .acciones {
@@ -302,7 +482,7 @@
 
 .esqueletoIcono,
 .esqueletoLinea {
-  background: rgba(26, 21, 18, 0.07);
+  background: rgba(26, 21, 18, 0.06);
   animation: pulso 1.4s ease-in-out infinite;
 }
 
@@ -342,9 +522,29 @@
   .wrapper { padding: 20px 20px 40px; }
   .libro { padding: 4px 6px; }
   .fila { gap: 12px; padding: 12px 6px; }
-  .chevron { display: none; }
+  .chevron svg { width: 14px; height: 14px; }
   .detalle { padding: 2px 6px 16px; }
   .datos { grid-template-columns: 1fr; }
   .segmento { flex: 1 1 auto; }
   .segmentoBoton { flex: 1; padding: 0 10px; }
+
+  /* Categorías deslizables: el borde derecho se desvanece para avisar que hay más. */
+  .filaChips .chips {
+    flex: 1 1 auto;
+    min-width: 0;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    padding-right: 24px;
+  }
+  .btnMasFiltros { display: inline-flex; }
+  .secundariosPlegados { display: none; }
+
+  .resumenFila { grid-template-columns: 1fr 1fr; gap: 2px 16px; }
+  .resumenMoneda { grid-column: 1 / -1; margin-top: 4px; }
+  .resumenCifra { flex-direction: column; align-items: flex-start; gap: 0; font-size: 16.5px; }
+
+  /* Filas más compactas: la meta en una línea (el detalle tiene todo completo). */
+  .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .monto { font-size: 15.5px; }
+  .montoSecundario { font-size: 13.5px; }
 }

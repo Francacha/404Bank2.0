@@ -305,11 +305,13 @@
 .topbar {
   padding: 36px var(--margen-lateral) 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  flex-wrap: wrap;
 }
+
+/* El título cede ancho (el subtítulo pasa a dos líneas) y las acciones quedan siempre a la derecha. */
+.topbarTexto { flex: 1 1 auto; min-width: 0; }
 
 .pageFill .topbar {
   padding: 28px var(--margen-lateral);
@@ -332,6 +334,7 @@
 }
 
 .topbarActions {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -445,7 +448,7 @@
 
   .topbar,
   .pageFill .topbar { padding: 24px 20px 0; border-bottom: 0; }
-  .topbarActions .userChip { display: none; }
+  .topbarActions { display: none; }
 
   .tabBar {
     position: fixed;
