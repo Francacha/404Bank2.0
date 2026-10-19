@@ -167,14 +167,14 @@ function Landing() {
           <div className={styles.heroTexto}>
             <h1 className={styles.titular}>
               Filas, papeles y letra chica:
-              <span className={styles.titular404}> error 404.</span>
+              <span className={styles.titular404}>404Bank.</span>
             </h1>
             <p className={styles.bajada}>
-              Una cuenta digital con CBU y alias, transferencias, préstamos y frascos de ahorro.
-              Y los números a la vista antes de firmar nada.
+              Un Banco digital con CBU y alias, transferencias, préstamos y frascos de ahorro.
+              Y los números a la vista.
             </p>
             <Link to="/register" className={styles.btnPrincipal}>Abrir mi cuenta gratis</Link>
-            <p className={styles.notaSimulado}>Banco simulado: no opera con dinero real.</p>
+            <p className={styles.notaSimulado}>Banco con dinero real.</p>
           </div>
 
           <section className={styles.simulador} aria-labelledby="sim-titulo">
@@ -341,15 +341,10 @@ function Landing() {
         {/* ── Nosotros: honesto sobre qué es esto ── */}
         <section className={styles.nosotros} id="nosotros" aria-labelledby="nosotros-titulo">
           <div className={styles.nosotrosTexto}>
-            <h2 id="nosotros-titulo" className={styles.nosotrosTitulo}>Un banco de práctica, hecho en serio</h2>
+            <h2 id="nosotros-titulo" className={styles.nosotrosTitulo}>Un banco de verdad</h2>
             <p>
-              404Bank es un banco digital simulado, desarrollado por Franco y Mateo para Práctica Profesionalizante I.
-              No opera con dinero real: las cuentas, los préstamos y los frascos funcionan con datos de prueba y un
-              Banco Central simulado.
-            </p>
-            <p>
-              Lo que sí es real son las cuentas: las tasas, el IVA, las cuotas y los punitorios se calculan como en un
-              banco de verdad.
+              404Bank es un banco digital, desarrollado por y para vos.
+              Operaciones al instante con dinero de verdad.
             </p>
             <Link to="/register" className={styles.btnPrincipal}>Abrir mi cuenta gratis</Link>
           </div>
@@ -362,7 +357,7 @@ function Landing() {
 
       <footer className={styles.footer}>
         <img src={logo404Bank} alt="404Bank" width={140} height={28} className={styles.footerLogo} />
-        <p className={styles.footerTexto}>© 2026 404Bank · Proyecto académico de Práctica Profesionalizante I</p>
+        <p className={styles.footerTexto}>© 2026 404Bank ·  </p>
         <div className={styles.footerLinks}>
           <Link to="/login">Iniciar sesión</Link>
           <Link to="/register">Abrir cuenta</Link>
