@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { parsearMonto } from '../components/parsearMonto';
 import styles from './Inversiones.module.css';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 interface Frasco {
   id: number;

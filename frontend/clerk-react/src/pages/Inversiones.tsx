@@ -5,8 +5,8 @@ import AppLayout from '../components/AppLayout';
 import { parsearMonto } from '../components/parsearMonto';
 import styles from './Inversiones.module.css';
 import SeccionFrascos, { type ResumenFrascos } from './Frascos';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 const REFRESCO_COTIZACION_MS = 60_000;
 const MINIMO_USD = 1;
 

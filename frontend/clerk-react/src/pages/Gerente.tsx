@@ -5,8 +5,8 @@ import { useViewMode } from '../context/ViewModeContext';
 import styles from './Gerente.module.css';
 import logoClaro from '../assets/logo404bank-claro.png';
 import BandejaSolicitudes, { type ResumenBandeja } from '../components/BandejaSolicitudes';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 type Tab = 'solicitudes' | 'clientes' | 'empleados';
 

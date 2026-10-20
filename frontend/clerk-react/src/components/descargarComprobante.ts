@@ -1,6 +1,6 @@
 // Descarga el PDF del comprobante de una transferencia. Lo usan Historial y el recibo de Transferir.
 // Tira un error si el backend no lo pudo generar; cada pantalla decide cómo mostrarlo.
-const API_URL = 'http://localhost:3000';
+import { API_URL } from '../config';
 
 export async function descargarComprobante(transaccionId: string, token: string | null) {
   const res = await fetch(`${API_URL}/api/comprobantes/${encodeURIComponent(transaccionId)}`, {

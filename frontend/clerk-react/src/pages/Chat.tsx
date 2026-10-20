@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import banImg from '../assets/banListo.png';
 import styles from './Chat.module.css';
+import { API_URL } from '../config';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 const LARGO_MAXIMO = 2000;
 
 interface Mensaje {

@@ -5,6 +5,7 @@ import AppLayout from '../components/AppLayout';
 import TarjetaVisual from '../components/TarjetaVisual';
 import styles from './home.module.css';
 import banListo from '../assets/banListo.png';
+import { API_URL } from '../config';
 
 interface Cuenta {
   cbu: string;
@@ -62,7 +63,6 @@ interface Movimiento {
   nombre_contraparte: string | null;
 }
 
-const API_URL = 'http://localhost:3000';
 
 // Situaciones de la Central de Deudores: qué significa cada una, en palabras del usuario.
 const SITUACION_INFO: Record<number, { etiqueta: string; claseColor: string; significado: string }> = {

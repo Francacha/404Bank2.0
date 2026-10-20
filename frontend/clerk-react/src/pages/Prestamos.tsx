@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@clerk/react';
 import AppLayout from '../components/AppLayout';
 import styles from './Prestamos.module.css';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 const CUOTAS_POR_DEFECTO = [1, 3, 6, 12, 24, 36];
 const MONTO_MAXIMO_POR_DEFECTO = 5000000;

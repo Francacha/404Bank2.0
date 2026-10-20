@@ -5,8 +5,8 @@ import { descargarComprobante } from '../components/descargarComprobante';
 import AppLayout from '../components/AppLayout';
 import styles from './Transferir.module.css';
 import banListo from '../assets/banListo.png';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 type Moneda = 'ARS' | 'USD';
 

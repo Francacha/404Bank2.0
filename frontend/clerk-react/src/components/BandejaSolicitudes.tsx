@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@clerk/react';
 import styles from './BandejaSolicitudes.module.css';
+import { API_URL } from '../config';
 
 // Bandeja de solicitudes de préstamos y tarjetas para el personal.
 // Empleado: pre-aprueba o rechaza lo pendiente. Gerente: aprueba (acredita / emite) o rechaza lo pre-aprobado.
 
-const API_URL = 'http://localhost:3000';
 
 type Rol = 'empleado' | 'gerente';
 type Tipo = 'prestamo' | 'tarjeta';

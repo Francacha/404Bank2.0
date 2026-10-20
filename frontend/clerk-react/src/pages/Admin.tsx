@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth, useUser, SignOutButton } from '@clerk/react';
 import styles from './Admin.module.css';
 import logoClaro from '../assets/logo404bank-claro.png';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 interface Usuario {
   id: number;

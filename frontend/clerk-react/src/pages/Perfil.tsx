@@ -4,8 +4,8 @@ import { useLocation } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { PROVINCIAS } from '../components/provincias';
 import styles from './Perfil.module.css';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 const FOTO_MAXIMA_MB = 10;
 const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp'];
 

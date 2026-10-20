@@ -27,16 +27,31 @@ const { simularPrestamo } = require('./src/controllers/prestamosController');
 
 const app = express();
 const bypassClerkAuth = process.env.BYPASS_CLERK_AUTH === 'true';
+
+// El bypass es solo para pruebas locales: publicado, dejaría entrar a cualquiera sin login.
+if (bypassClerkAuth && process.env.NODE_ENV === 'production') {
+  console.error('BYPASS_CLERK_AUTH no se puede usar con NODE_ENV=production. Sacalo de las variables del servidor.');
+  process.exit(1);
+}
 const authMiddleware = bypassClerkAuth
   ? (req, res, next) => { req.auth = { userId: 'dev_bypass_user' }; next(); }
   : ClerkExpressRequireAuth({ strict: true });
 
-app.use(cors());
+// Solo el frontend puede llamar a la API desde el navegador. FRONTEND_URL acepta varias direcciones
+// separadas por coma (por ejemplo la de Vercel y la de una vista previa). En local, el Vite de siempre.
+const origenesPermitidos = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
+app.use(cors({ origin: origenesPermitidos }));
 app.use(express.json());
 
 // Público: la landing simula un préstamo antes de que el visitante tenga cuenta.
 // Solo calcula con los parámetros de config/prestamos.js; no lee datos de nadie.
 app.get('/api/public/simular', simularPrestamo);
+
+// Para que AWS sepa que el servidor está vivo (health check). No toca la base.
+app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 app.use('/api/cuentas', authMiddleware, accountsRoutes);
 app.use('/api/onboarding', authMiddleware, onboardingRoutes);
@@ -73,6 +88,13 @@ const startServer = async () => {
       console.log(`Servidor 404Bank corriendo en el puerto ${PORT}`);
       if (bypassClerkAuth) {
         console.log('BYPASS_CLERK_AUTH=true: autenticacion desactivada para pruebas locales.');
+      }
+      // Las tareas automáticas (polling del Banco Central, cuotas, frascos) tienen que correr en un solo
+      // servidor: si corren en AWS y en local a la vez contra la misma base, se ejecutan dos veces.
+      // En local poné CRONS_ACTIVOS=false mientras el backend publicado esté prendido.
+      if (process.env.CRONS_ACTIVOS === 'false') {
+        console.log('CRONS_ACTIVOS=false: polling y crons apagados en este servidor.');
+        return;
       }
       iniciarPolling();
       iniciarCronCobros();

@@ -5,8 +5,8 @@ import styles from "./Landing.module.css"
 import logo404Bank from "../assets/logo404bank.png"
 import logoClaro from "../assets/logo404bank-claro.png"
 import banImg from "../assets/banLanding.png"
+import { API_URL } from '../config';
 
-const API_URL = "http://localhost:3000"
 
 interface Cotizacion {
   casa: string

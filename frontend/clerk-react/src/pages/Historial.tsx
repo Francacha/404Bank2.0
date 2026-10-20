@@ -4,8 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import AppLayout from '../components/AppLayout';
 import { descargarComprobante as bajarPdf } from '../components/descargarComprobante';
 import styles from './Historial.module.css';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 type Categoria = 'transferencia' | 'divisas' | 'prestamo' | 'frasco';
 type Moneda = 'ARS' | 'USD';

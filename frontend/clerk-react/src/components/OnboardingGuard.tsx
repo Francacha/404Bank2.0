@@ -4,8 +4,8 @@ import { Navigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useViewMode } from '../context/ViewModeContext';
 import PantallaCarga from './PantallaCarga';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 type Props = {
   children: ReactNode;

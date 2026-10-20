@@ -4,8 +4,8 @@ import AppLayout from '../components/AppLayout';
 import TarjetaVisual from '../components/TarjetaVisual';
 import styles from './Tarjetas.module.css';
 import logo404Bank from '../assets/logo404bank.png';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 type Tipo = 'debito' | 'credito';
 type EstadoTarjeta = 'pendiente' | 'pre_aprobada' | 'activa' | 'rechazada';

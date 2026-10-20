@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
 import { PROVINCIAS } from '../components/provincias';
 import styles from './Onboarding.module.css';
+import { API_URL } from '../config';
 
-const API_URL = 'http://localhost:3000';
 
 // Lista local: el alta no depende de ninguna API externa para conocer las provincias.
 
