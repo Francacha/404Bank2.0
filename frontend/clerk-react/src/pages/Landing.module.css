@@ -821,9 +821,6 @@
     padding: 0 14px;
   }
 
-  .marca {
-    font-size: 23px;
-  }
 
   .navAcciones {
     margin-left: auto;
@@ -927,4 +924,27 @@
   display: block;
   width: auto;
   height: 34px;
+}
+
+/* El logo es una imagen: en celular baja a 26px de alto (~130px de ancho) para que la barra entre.
+   Va acá, después de la regla base de .logo, para que no la pise. */
+@media (max-width: 640px) {
+  .logo {
+    height: 26px;
+  }
+}
+
+/* Celulares angostos: "Abrir cuenta" sale de la barra (el botón dorado del titular hace lo mismo)
+   y "Iniciar sesión" queda como botón con borde. */
+@media (max-width: 440px) {
+  .btnAbrirNav {
+    display: none;
+  }
+
+  .btnIngresar {
+    padding: 0 16px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+  }
 }
