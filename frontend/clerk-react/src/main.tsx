@@ -15,3 +15,12 @@ createRoot(document.getElementById('root')!).render(
     </ClerkProvider>
   </StrictMode>,
 )
+
+// PWA: el service worker solo en producción (en desarrollo guardaría archivos viejos de Vite).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Si no se puede registrar, la página funciona igual; solo no se puede instalar.
+    });
+  });
+}

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#150208" />
+  <title>Sin conexión · 404Bank</title>
+  <style>
+    :root { --paper: #f4f2ee; --ink: #1a1512; --muted: #6f665e; --wine: #7a1128; --wine-darker: #150208; --accent: #e8b84b; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      display: flex; flex-direction: column; background: var(--paper); color: var(--ink);
+      font-family: Manrope, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+    header { padding: 16px 20px; background: var(--wine-darker); }
+    header strong { color: #fff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    main { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 20px 64px; max-width: 520px; width: 100%; margin: 0 auto; }
+    img { width: 72px; height: 72px; }
+    h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; }
+    p { margin: 0; font-size: 17px; line-height: 1.5; color: var(--muted); }
+    button {
+      align-self: flex-start; margin-top: 8px; min-height: 50px; padding: 0 26px; border: 0; border-radius: 16px;
+      background: var(--accent); color: #2a0410; font: inherit; font-size: 17px; font-weight: 800; cursor: pointer;
+    }
+    button:focus-visible { outline: 3px solid var(--wine); outline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <header><strong>404Bank</strong></header>
+  <main>
+    <img src="/web-app-manifest-192x192.png" alt="" width="72" height="72" />
+    <h1>Sin conexión</h1>
+    <p>Para ver tu saldo y tus movimientos, 404Bank necesita internet. Revisá el wifi o los datos y volvé a intentar.</p>
+    <button type="button" onclick="location.reload()">Reintentar</button>
+  </main>
+</body>
+</html>
